@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <script src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
-    <link href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" rel="stylesheet" />
     <style>
         * {
             margin: 0;
@@ -206,7 +204,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 5px 15px rgba(46, 213, 115, 0.3);
-            margin: 0 10px;
         }
 
         .import-button:hover {
@@ -226,13 +223,14 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-            margin: 0 10px;
         }
 
         .export-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
+
+
 
         #actions {
             display: flex;
@@ -452,134 +450,6 @@
             overflow-y: auto;
         }
 
-        /* Graph Editor Styles */
-        .graph-editor-container {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            margin: 2rem 0;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .graph-editor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 2rem;
-            background: linear-gradient(135deg, rgba(102, 232, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .graph-editor-header:hover {
-            background: linear-gradient(135deg, rgba(102, 232, 234, 0.15), rgba(118, 75, 162, 0.15));
-        }
-
-        .graph-editor-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .graph-editor-toggle {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        .graph-editor-toggle:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .graph-editor-content {
-            display: none;
-            padding: 2rem;
-        }
-
-        .graph-editor-content.expanded {
-            display: block;
-        }
-
-        .graph-controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .graph-import-button {
-            background: linear-gradient(45deg, #2ed573, #1e824c);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 14px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(46, 213, 115, 0.3);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .graph-import-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(46, 213, 115, 0.4);
-        }
-
-        .graph-export-button {
-            background: linear-gradient(45deg, rgb(234, 122, 102), rgb(143, 75, 162));
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 14px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .graph-export-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        #network {
-            width: 100%;
-            height: 500px;
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            background: #fafbfc;
-        }
-
         @media (max-width: 768px) {
             .parameters-container {
                 grid-template-columns: 1fr;
@@ -591,16 +461,6 @@
             
             .selector-container {
                 padding: 2rem;
-            }
-
-            .graph-controls {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .graph-import-button,
-            .graph-export-button {
-                width: 200px;
             }
         }
     </style>
@@ -617,7 +477,7 @@
     <div class="main-container">
         <main class="content-area">
             <div class="selector-container">
-                <h1 class="selector-title">Task Framework</h1>
+                <h1 class="selector-title">API Environment</h1>
                 <div class="form-group">
                     <label for="environment" class="form-label">Environment</label>
                     <div class="input-container">
@@ -661,6 +521,12 @@
                     <!-- Dynamic API actions will be added here -->
                 </div>
 
+                <div>
+                    <button class="save-button" onclick="saveFilteredHTML()">
+                        Save Page
+                    </button>
+                </div>
+
                 <div class="import-export-container" style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 20px 0px; flex: 1.1;">
                     <div>
                         <input type="file" id="fileInput" accept=".json" style="display: none;">
@@ -676,42 +542,9 @@
                     </div>
                 </div>
             </div>
-
-                        <!-- Graph Editor Section -->
-            <div class="graph-editor-container">
-                <div class="graph-editor-header" onclick="toggleGraphEditor()">
-                    <div class="graph-editor-title">
-                        <span>📊</span>
-                        Graph Editor Playground
-                    </div>
-                    <button class="graph-editor-toggle" id="graph-toggle">
-                        ▼
-                    </button>
-                </div>
-                <div class="graph-editor-content" id="graph-editor-content">
-                    <div class="graph-controls">
-                        <button class="graph-import-button" onclick="importGraphJSON()">
-                            📥 Import Graph
-                        </button>
-                        <button class="graph-export-button" onclick="exportGraphJSON()">
-                            📤 Export Graph
-                        </button>
-                        <button class="graph-import-button" onclick="populateNodesFromActions()">
-                            📝 Populate Nodes from Actions
-                        </button>
-                    </div>
-                    <div id="network"></div>
-                    <input type="file" id="graphFileInput" accept=".json" style="display: none;">
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
-                <button class="save-button" onclick="saveFilteredHTML()">
-                    Save Page
-                </button>
-            </div>
         </main>
     </div>
+
     <script>
         /* function testClick() {
             alert("Test button clicked!");
@@ -1105,8 +938,8 @@
             const logo = clonedDoc.getElementById('image-logo');
             if (logo) logo.remove();
 
-            // const elementsToExclude = clonedDoc.querySelectorAll('.save-button');
-            // elementsToExclude.forEach(el => el.remove());
+            const elementsToExclude = clonedDoc.querySelectorAll('.save-button');
+            elementsToExclude.forEach(el => el.remove());
 
             const formTitle = clonedDoc.querySelector('main.content-area .form-title');
             if (formTitle) formTitle.remove();
@@ -1238,247 +1071,7 @@
             URL.revokeObjectURL(url);
         }
 
-        // Graph Editor Variables
-        const nodes = new vis.DataSet([]);
-        const edges = new vis.DataSet([]);
-        let network = null;
-        let graphExpanded = false;
 
-        const defaultOptions = {
-            manipulation: {
-                enabled: true,
-                initiallyActive: true,
-                addNode: function (data, callback) {
-                    const label = prompt("Enter node label:", data.id);
-                    if (label !== null) {
-                        data.label = label;
-                        data.id = label;
-                        callback(data);
-                    }
-                },
-                addEdge: function (data, callback) {
-                    if (data.from === data.to) {
-                        alert("Self-loops not allowed.");
-                        return;
-                    }
-                    const label = prompt("Enter edge connection (input->output):", "");
-                    if (label !== null && label !== '') {
-                        data.label = label;
-                    }
-                    callback(data);
-                },
-                editNode: function (data, callback) {
-                    const label = prompt("Edit node label:", data.label);
-                    if (label !== null) {
-                        data.label = label;
-                        nodes.update({ id: data.id, label: label });
-                        callback(data);
-                    }
-                },
-                editEdge: function (data, callback) {
-                    const label = prompt("Edit edge connection (input->output):", data.label);
-                    if (label !== null) {
-                        data.label = label;
-                        callback(data);
-                    }
-                },
-                deleteNode: true,
-                deleteEdge: true
-            },
-            nodes: {
-                shape: 'circle'
-            },
-            edges: { arrows: 'to' },
-            physics: false,
-            layout: { improvedLayout: false }
-        };
-
-        function createNetwork(options = defaultOptions) {
-            if (network) network.destroy();
-            const container = document.getElementById('network');
-            network = new vis.Network(container, { nodes, edges }, options);
-        }
-
-        function toggleGraphEditor() {
-            const content = document.getElementById('graph-editor-content');
-            const toggle = document.getElementById('graph-toggle');
-            
-            graphExpanded = !graphExpanded;
-            
-            if (graphExpanded) {
-                content.classList.add('expanded');
-                toggle.textContent = '▲';
-                // Initialize network when expanded for the first time
-                if (!network) {
-                    createNetwork();
-                }
-            } else {
-                content.classList.remove('expanded');
-                toggle.textContent = '▼';
-            }
-        }
-
-        function exportGraphJSON() {
-            const edgeList = [];
-            const edgeMap = new Map();
-
-            edges.get().forEach(edge => {
-                const fromLabel = nodes.get(edge.from)?.label || edge.from;
-                const toLabel = nodes.get(edge.to)?.label || edge.to;
-                const key = `${fromLabel}->${toLabel}`;
-                const conn = edge.label?.split(',').map(pair => pair.trim().split('->')) || [];
-                if (!edgeMap.has(key)) {
-                    edgeMap.set(key, []);
-                }
-                edgeMap.get(key).push(...conn);
-            });
-
-            for (let [key, connections] of edgeMap.entries()) {
-                const [from, to] = key.split('->');
-                const inputs = connections.map(c => c[0]).join(', ');
-                const outputs = connections.map(c => c[1]).join(', ');
-                edgeList.push({
-                    from,
-                    to,
-                    connection: { input: inputs, output: outputs }
-                });
-            }
-
-            const exportData = { edges: edgeList };
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'graph.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showCorrectMessage('Graph exported successfully!');
-        }
-
-        function importGraphJSON() {
-            const input = document.getElementById('graphFileInput');
-            input.value = '';
-            input.click();
-            input.onchange = () => {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.onload = e => {
-                    try {
-                        const obj = JSON.parse(e.target.result);
-                        nodes.clear();
-                        edges.clear();
-                        const added = new Set();
-                        const uniqueNodes = new Set();
-                        let imported_edges = obj.edges
-                        if (!obj.edges || !Array.isArray(obj.edges)) {
-                            imported_edges = obj.task.edges
-                        }
-
-                        imported_edges.forEach(e => {
-                            uniqueNodes.add(e.from);
-                            uniqueNodes.add(e.to);
-                        });
-
-                        let angle = 0;
-                        const radius = 200;
-                        const step = (2 * Math.PI) / uniqueNodes.size;
-
-                        [...uniqueNodes].forEach(node => {
-                            const x = radius * Math.cos(angle);
-                            const y = radius * Math.sin(angle);
-                            angle += step;
-                            nodes.add({ id: node, label: node, x, y, fixed: false });
-                        });
-
-                        imported_edges.forEach(e => {
-                            const inputFields = e.connection.input.split(',').map(s => s.trim());
-                            const outputFields = e.connection.output.split(',').map(s => s.trim());
-                            const pairs = inputFields.map((input, i) => `${input}->${outputFields[i]}`);
-                            const edgeId = `${e.from}-${e.to}`;
-                            
-                            if (!added.has(edgeId)) {
-                                edges.add({
-                                    from: e.from,
-                                    to: e.to,
-                                    label: pairs.join(', '),
-                                    arrows: 'to'
-                                });
-                                added.add(edgeId);
-                            }
-                        });
-
-                        if (network) {
-                            network.setData({ nodes, edges });
-                        }
-                        showCorrectMessage('Graph imported successfully!');
-                    } catch (error) {
-                        console.error('Error importing graph:', error);
-                        showWrongMessage('Error importing graph: ' + error.message);
-                    }
-                };
-                reader.readAsText(file);
-            };
-        }
-
-        function populateNodesFromActions() {
-            // Initialize nodeList as an empty array
-            let nodeList = [];
-            
-            // Get the actions container
-            const actions = document.querySelector('#actions');
-            
-            // Extract values from all select elements
-            actions.querySelectorAll('select').forEach(select => {
-                if (select.value && select.value.trim() !== '') {
-                    nodeList.push(select.value);
-                }
-            });
-            
-            // Check if we have any nodes to work with
-            if (nodeList.length === 0) {
-                showWrongMessage('There are no actions to populate nodes from.');
-                return;
-            }
-            
-            try {
-                // Remove duplicates (optional - in case same node appears multiple times)
-                const uniqueNodeNames = [...new Set(nodeList)];
-                
-                // Clear existing nodes and edges
-                nodes.clear();
-                edges.clear();
-                
-                // Calculate positions for nodes in a circle
-                const radius = 200;
-                const angleStep = (2 * Math.PI) / uniqueNodeNames.length;
-                
-                uniqueNodeNames.forEach((nodeName, index) => {
-                    const angle = index * angleStep;
-                    const x = radius * Math.cos(angle);
-                    const y = radius * Math.sin(angle);
-                    
-                    nodes.add({
-                        id: nodeName,
-                        label: nodeName,
-                        x: x,
-                        y: y,
-                        fixed: false
-                    });
-                });
-                
-                // Update the network if it exists
-                if (network) {
-                    network.setData({ nodes, edges });
-                }
-                
-                showCorrectMessage(`Successfully populated ${uniqueNodeNames.length} nodes!`);
-                
-            } catch (error) {
-                showWrongMessage('Error creating nodes: ' + error.message);
-            }
-        }
     </script>
 </body>
 
