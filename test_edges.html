@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Graph Editor</title>
+  <script src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
+  <link href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+    }
+    #network {
+      width: 100vw;
+      height: 90vh;
+    }
+    #controls {
+      padding: 10px;
+    }
+    button {
+      padding: 8px 12px;
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div id="network"></div>
+<div id="controls">
+  <button onclick="importJSON()">Import JSON</button>
+  <button onclick="exportJSON()">Export JSON</button>
+  <input type="file" id="fileInput" accept=".json">
+</div>
+
+<script>
+  const nodes = new vis.DataSet([]);
+  const edges = new vis.DataSet([]);
+
+  const container = document.getElementById('network');
+  let network;
+
+  const defaultOptions = {
+    manipulation: {
+      enabled: true,
+      initiallyActive: true,
+      addNode: function (data, callback) {
+        const label = prompt("Enter node label:", data.id);
+        if (label !== null) {
+          data.label = label;
+          data.id = label;
+          callback(data);
+        }
+      },
+      addEdge: function (data, callback) {
+        if (data.from === data.to) {
+          alert("Self-loops not allowed.");
+          return;
+        }
+        const label = prompt("Enter edge connection (input->output):", "");
+        if (label !== null && label !== '') {
+          data.label = label;
+        }
+        callback(data);
+      },
+      editNode: function (data, callback) {
+        const label = prompt("Edit node label:", data.label);
+        if (label !== null) {
+          data.label = label;
+          nodes.update({ id: data.id, label: label });
+          callback(data);
+        }
+      },
+      editEdge: function (data, callback) {
+        const label = prompt("Edit edge connection (input->output):", data.label);
+        if (label !== null) {
+          data.label = label;
+          callback(data);
+        }
+      },
+      deleteNode: true,
+      deleteEdge: true
+    },
+    nodes: {
+      shape: 'circle'
+    },
+    edges: { arrows: 'to' },
+    physics: false,
+    layout: { improvedLayout: false }
+  };
+
+  function createNetwork(options = defaultOptions) {
+    if (network) network.destroy();
+    network = new vis.Network(container, { nodes, edges }, options);
+  }
+
+  createNetwork();
+
+  function exportJSON() {
+    const edgeList = [];
+    const edgeMap = new Map();
+
+    edges.get().forEach(edge => {
+      const fromLabel = nodes.get(edge.from)?.label || edge.from;
+      const toLabel = nodes.get(edge.to)?.label || edge.to;
+      const key = `${fromLabel}->${toLabel}`;
+      const conn = edge.label?.split(',').map(pair => pair.trim().split('->')) || [];
+      if (!edgeMap.has(key)) {
+        edgeMap.set(key, []);
+      }
+      edgeMap.get(key).push(...conn);
+    });
+
+    for (let [key, connections] of edgeMap.entries()) {
+      const [from, to] = key.split('->');
+      const inputs = connections.map(c => c[0]).join(', ');
+      const outputs = connections.map(c => c[1]).join(', ');
+      edgeList.push({
+        from,
+        to,
+        connection: { input: inputs, output: outputs }
+      });
+    }
+
+    const exportData = { edges: edgeList };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'graph.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function importJSON() {
+    const input = document.getElementById('fileInput');
+    input.click();
+    input.onchange = () => {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const obj = JSON.parse(e.target.result);
+          nodes.clear();
+          edges.clear();
+          const added = new Set();
+          const uniqueNodes = new Set();
+          let imported_edges = obj.edges
+            if (!obj.edges || !Array.isArray(obj.edges)) {
+                imported_edges = obj.task.edges
+            }
+            console.log(edges)
+            
+          imported_edges.forEach(e => {
+            uniqueNodes.add(e.from);
+            uniqueNodes.add(e.to);
+          });
+
+          let angle = 0;
+          const radius = 400;
+          const step = (2 * Math.PI) / uniqueNodes.size;
+
+          [...uniqueNodes].forEach(node => {
+            const x = radius * Math.cos(angle);
+            const y = radius * Math.sin(angle);
+            angle += step;
+            nodes.add({ id: node, label: node, x, y, fixed: false });
+          });
+
+          imported_edges.forEach(e => {
+            const inputFields = e.connection.input.split(',').map(s => s.trim());
+            const outputFields = e.connection.output.split(',').map(s => s.trim());
+            const pairs = inputFields.map((input, i) => `${input}->${outputFields[i]}`);
+            const edgeId = `${e.from}-${e.to}`;
+
+            if (!added.has(edgeId)) {
+              edges.add({ from: e.from, to: e.to, label: pairs.join(', ') });
+              added.add(edgeId);
+            } else {
+              const existing = edges.get({ filter: ed => ed.from === e.from && ed.to === e.to })[0];
+              const newLabel = existing.label + ', ' + pairs.join(', ');
+              edges.update({ id: existing.id, label: newLabel });
+            }
+          });
+
+          createNetwork();
+        } catch (err) {
+          alert("Failed to parse JSON");
+        }
+      };
+      reader.readAsText(file);
+    };
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Gordita', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .selector-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .selector-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg,rgb(102, 232, 234), #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.8rem;
+            color: #555;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            z-index: 10;
+            color:rgb(172, 102, 234);
+            font-size: 1.2rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 50px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .form-input.required {
+            border-color: #ff4757;
+            border-width: 2px;
+        }
+
+        .form-input.required:focus {
+            border-color: #ff4757;
+            box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 1rem 1rem 1rem 50px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+            cursor: pointer;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23667eea" d="M6 9L1 4h10z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background-color: white;
+        }
+
+        .go-button {
+            width: 25%;
+            padding: 1.2rem 2rem;
+            margin-top: 2rem;
+            background: linear-gradient(135deg,rgb(102, 232, 234), #764ba2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(172, 102, 234, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .go-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(201, 102, 234, 0.4);
+        }
+
+        .go-button:active {
+            transform: translateY(-1px);
+        }
+
+        .go-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .savePageContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            padding: 20px;
+        }
+
+        .save-button {
+            display: inline;
+            visibility: visible;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(238, 90, 82, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .save-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(238, 90, 82, 0.4);
+        }
+
+        #actions {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .add-action-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .add-action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .add-action-text {
+            font-size: 1.2rem;
+            color:rgb(34, 95, 186);
+            font-weight: bold;
+        }
+
+        /* New styles for API actions */
+        .api-action {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .api-action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .api-action-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .remove-action-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(238, 90, 82, 0.3);
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(238, 90, 82, 0.4);
+        }
+
+        .api-description {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            color: #555;
+            font-style: italic;
+        }
+
+        .parameters-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .parameter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .parameter-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .parameter-label.required::after {
+            content: " *";
+            color: #ff4757;
+        }
+
+        .parameter-input {
+            padding: 0.8rem 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .parameter-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .parameter-input.required {
+            border-color: #ff4757;
+        }
+
+        .parameter-input.required:focus {
+            border-color: #ff4757;
+            box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1);
+        }
+
+        .execute-button {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #2ed573, #1e824c);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(46, 213, 115, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .execute-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(46, 213, 115, 0.4);
+        }
+
+        .execute-button:active {
+            transform: translateY(-1px);
+        }
+
+        .execute-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .api-response {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+
+        .api-response.show {
+            display: block;
+        }
+
+        .api-response.success {
+            border-left-color: #2ed573;
+            background: #f0fff4;
+        }
+
+        .api-response.error {
+            border-left-color: #ff4757;
+            background: #fff5f5;
+        }
+
+        .response-header {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .response-content {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            background: white;
+            padding: 1rem;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .parameters-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .go-button {
+                width: 100%;
+            }
+            
+            .selector-container {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="dashboard-header">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/turing-logo-new.jpg') }}" alt="turing image"
+                style="width: 100px; scale: 2; display: block; margin: 0 auto;">
+        </div>
+    </header>
+
+    <div class="main-container">
+        <main class="content-area">
+            <div class="selector-container">
+                <h1 class="selector-title">API Environment</h1>
+
+                <div class="form-group">
+                    <label for="environment" class="form-label">Environment</label>
+                    <div class="input-container">
+                        <span class="input-icon">🌍</span>
+                        <input type="text" id="environment" class="form-input"
+                            placeholder="Enter environment name (e.g., hr_payroll)" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="interface" class="form-label">Interface</label>
+                    <div class="input-container">
+                        <span class="input-icon">🔧</span>
+                        <select id="interface" class="form-select">
+                            <option value="">Select an interface</option>
+                            <option value="1">Interface 1</option>
+                            <option value="2">Interface 2</option>
+                            <option value="3">Interface 3</option>
+                            <option value="4">Interface 4</option>
+                            <option value="5">Interface 5</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
+                    <button class="go-button" onclick="handleGo()">
+                        🚀 GO
+                    </button>
+                </div>
+            </div>
+
+            <div id="actions">
+                <div class="add-action-container" style="height: 100px; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+                    <button class="add-action-button" onclick="addAction()">
+                        +
+                    </button>
+                    <span class="add-action-text">Add Action</span>
+                </div>
+
+                <div id="api-actions-container">
+                    <!-- Dynamic API actions will be added here -->
+                </div>
+
+                <div>
+                    <button class="save-button" onclick="saveFilteredHTML()">
+                        Save Page
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const APIs = new Map();
+        let actionCounter = 0;
+
+        // Sample API data - this will be populated when you click GO
+        function initializeSampleAPI() {
+            APIs.set("upload_document", {
+                description: "Creates a new document associated with a user and worker.",
+                parameters: {
+                    user_id: { type: "string", description: "The ID of the user" },
+                    worker_id: { type: "string", description: "The ID of the worker" },
+                    title: { type: "string", description: "The title of the document" },
+                    file_type: { type: "string", description: "The type of file being uploaded" },
+                    status: { type: "string", description: "The status of the document" }
+                },
+                required: ['user_id', 'worker_id', 'title', 'file_type']
+            });
+        }
+
+        async function handleGo() {
+            const environment = document.getElementById('environment').value.trim();
+            const interface = document.getElementById('interface').value;
+            
+            if (!environment) {
+                showWrongMessage('Please enter an environment name');
+                return;
+            }
+            
+            if (!interface) {
+                showWrongMessage('Please select an interface');
+                return;
+            }
+            
+            console.log('Environment:', environment);
+            console.log('Interface:', interface);
+            
+            try {
+                const response = await fetch('/choose_env_interface', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        environment: environment,
+                        interface: interface
+                    })
+                });
+
+                if (!response.ok) {
+                    showWrongMessage('Failed to select Environment and Interface.');
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showCorrectMessage('Environment and Interface selected successfully!');
+                    console.log('Response:', data);
+                    
+                    // Clear existing APIs
+                    APIs.clear();
+                    
+                    // Populate APIs from response
+                    for (const func of data.functions_info) {
+                        APIs.set(func.name, {
+                            description: func.description,
+                            parameters: func.parameters,
+                            required: func.required
+                        });
+                    }
+                    console.log('APIs:', APIs);
+                } else {
+                    showWrongMessage('Failed to select Environment and Interface.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showWrongMessage('An error occurred while connecting to the server.');
+                
+                // For demo purposes, initialize sample API
+                initializeSampleAPI();
+                showCorrectMessage('Demo mode: Sample API loaded for testing.');
+            }
+        }
+
+        function addAction() {
+            if (APIs.size === 0) {
+                showWrongMessage('Please select an environment and interface first by clicking GO.');
+                return;
+            }
+
+            actionCounter++;
+            const actionId = `action_${actionCounter}`;
+            
+            const actionContainer = document.getElementById('api-actions-container');
+            
+            const actionDiv = document.createElement('div');
+            actionDiv.className = 'api-action';
+            actionDiv.id = actionId;
+            
+            actionDiv.innerHTML = `
+                <div class="api-action-header">
+                    <div class="api-action-title">Action</div>
+                    <button class="remove-action-button" onclick="removeAction('${actionId}')">×</button>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Select API</label>
+                    <div class="input-container">
+                        <span class="input-icon">🔌</span>
+                        <select class="form-select" onchange="selectAPI('${actionId}', this.value)">
+                            <option value="">Choose an API...</option>
+                            ${Array.from(APIs.keys()).map(apiKey => 
+                                `<option value="${apiKey}">${apiKey}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="${actionId}_description" class="api-description" style="display: none;"></div>
+                <div id="${actionId}_parameters" class="parameters-container"></div>
+                <div id="${actionId}_execute" style="display: none;">
+                    <button class="execute-button" onclick="executeAPI('${actionId}')">
+                        🚀 Execute API
+                    </button>
+                </div>
+                <div id="${actionId}_response" class="api-response"></div>
+            `;
+            
+            actionContainer.appendChild(actionDiv);
+            
+            // Scroll to the new action
+            actionDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function removeAction(actionId) {
+            const actionDiv = document.getElementById(actionId);
+            actionCounter--;
+            if (actionDiv) {
+                actionDiv.remove();
+            }
+        }
+
+        function selectAPI(actionId, apiKey) {
+            const descriptionDiv = document.getElementById(`${actionId}_description`);
+            const parametersDiv = document.getElementById(`${actionId}_parameters`);
+            const executeDiv = document.getElementById(`${actionId}_execute`);
+            const responseDiv = document.getElementById(`${actionId}_response`);
+            
+            // Clear previous content
+            parametersDiv.innerHTML = '';
+            responseDiv.innerHTML = '';
+            responseDiv.className = 'api-response';
+            
+            if (!apiKey) {
+                descriptionDiv.style.display = 'none';
+                executeDiv.style.display = 'none';
+                return;
+            }
+            
+            const apiInfo = APIs.get(apiKey);
+            if (!apiInfo) return;
+            
+            // Show description
+            descriptionDiv.innerHTML = apiInfo.description;
+            descriptionDiv.style.display = 'block';
+            
+            // Create parameter inputs
+            if (apiInfo.parameters) {
+                Object.entries(apiInfo.parameters).forEach(([paramName, paramInfo]) => {
+                    const isRequired = apiInfo.required && apiInfo.required.includes(paramName);
+                    
+                    const paramDiv = document.createElement('div');
+                    paramDiv.className = 'parameter-group';
+                    
+                    paramDiv.innerHTML = `
+                        <label class="parameter-label ${isRequired ? 'required' : ''}">${paramName}</label>
+                        <input 
+                            type="text" 
+                            class="parameter-input ${isRequired ? 'required' : ''}"
+                            placeholder="${paramInfo.description || `Enter ${paramName}`}"
+                            data-param="${paramName}"
+                            ${isRequired ? 'required' : ''}
+                        >
+                    `;
+                    
+                    parametersDiv.appendChild(paramDiv);
+                });
+            }
+            
+            // Show execute button
+            executeDiv.style.display = 'block';
+        }
+
+        async function executeAPI(actionId) {
+            const actionDiv = document.getElementById(actionId);
+            const apiSelect = actionDiv.querySelector('select');
+            const selectedAPI = apiSelect.value;
+            
+            if (!selectedAPI) {
+                showWrongMessage('Please select an API first.');
+                return;
+            }
+            
+            // Collect parameters
+            const parameters = {};
+            const paramInputs = actionDiv.querySelectorAll('.parameter-input');
+            let hasError = false;
+            
+            paramInputs.forEach(input => {
+                const paramName = input.dataset.param;
+                const value = input.value.trim();
+                
+                if (input.classList.contains('required') && !value) {
+                    input.style.borderColor = '#ff4757';
+                    hasError = true;
+                } else {
+                    input.style.borderColor = '#e1e5e9';
+                    parameters[paramName] = value;
+                }
+            });
+            
+            if (hasError) {
+                showWrongMessage('Please fill in all required fields.');
+                return;
+            }
+            
+            // Show loading state
+            const executeButton = actionDiv.querySelector('.execute-button');
+            const originalText = executeButton.textContent;
+            executeButton.textContent = '⏳ Executing...';
+            executeButton.disabled = true;
+            
+            const responseDiv = document.getElementById(`${actionId}_response`);
+            responseDiv.innerHTML = '<div class="response-header">Executing API...</div>';
+            responseDiv.className = 'api-response show';
+            
+            try {
+                const response = await fetch('/execute_api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        api_name: selectedAPI,
+                        parameters: parameters
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    responseDiv.className = 'api-response show success';
+                    responseDiv.innerHTML = `
+                        <div class="response-header">✅ Success</div>
+                        <div class="response-content">${JSON.stringify(result, null, 2)}</div>
+                    `;
+                    showCorrectMessage('API executed successfully!');
+                } else {
+                    responseDiv.className = 'api-response show error';
+                    responseDiv.innerHTML = `
+                        <div class="response-header">❌ Error</div>
+                        <div class="response-content">${JSON.stringify(result, null, 2)}</div>
+                    `;
+                    showWrongMessage('API execution failed. Check the response for details.');
+                }
+            } catch (error) {
+                responseDiv.className = 'api-response show error';
+                responseDiv.innerHTML = `
+                    <div class="response-header">❌ Network Error</div>
+                    <div class="response-content">Failed to connect to the server: ${error.message}</div>
+                `;
+                showWrongMessage('Network error occurred while executing the API.');
+            } finally {
+                executeButton.textContent = originalText;
+                executeButton.disabled = false;
+            }
+        }
+
+        function showCorrectMessage(text) {
+            const message = document.createElement('div');
+            message.textContent = text;
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4caf50;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-family: Arial, sans-serif;
+                transition: all 0.3s ease;
+            `;
+            document.body.appendChild(message);
+
+            setTimeout(() => {
+                message.style.opacity = '0';
+                message.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    document.body.removeChild(message);
+                }, 300);
+            }, 3000);
+        }
+
+        function showWrongMessage(text) {
+            const message = document.createElement('div');
+            message.textContent = text;
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f44336;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-family: Arial, sans-serif;
+                transition: all 0.3s ease;
+            `;
+            document.body.appendChild(message);
+
+            setTimeout(() => {
+                message.style.opacity = '0';
+                message.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    document.body.removeChild(message);
+                }, 300);
+            }, 3000);
+        }
+
+        function saveFilteredHTML() {
+            const clonedDoc = document.cloneNode(true);
+
+            const elementsToExclude = clonedDoc.querySelectorAll('.save-button');
+            elementsToExclude.forEach(element => {
+                element.remove();
+            });
+
+            const formTitle = clonedDoc.querySelector('main.content-area .form-title');
+            if (formTitle) {
+                formTitle.remove();
+            }
+
+            const formTextarea = clonedDoc.querySelector('main.content-area .form-textarea');
+            if (formTextarea) {
+                formTextarea.remove();
+            }
+
+            const queryBtn = clonedDoc.querySelector('main.content-area .query-btn');
+            if (queryBtn) {
+                queryBtn.remove();
+            }
+
+            const htmlContent = clonedDoc.documentElement.outerHTML;
+
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'filtered_page.html';
+
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            URL.revokeObjectURL(url);
+            showCorrectMessage('Page saved successfully!');
+        }
+
+        // Initialize sample API for demonstration
+        // Remove this in production when real API data is available
+        // initializeSampleAPI();
+    </script>
+</body>
+
+</html>
