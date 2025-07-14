@@ -222,10 +222,7 @@ def env_interface():
 def execute_api():
     global data, last_environment, last_interface  # Add global declaration
     
-    # print("data:", data)
-    # print("last_environment:", last_environment)
-    # print("last_interface:", last_interface)
-    
+
     passed_data = request.get_json()
     api_name = passed_data.get('api_name')
     api_name = api_name + "_invoke" if api_name else None
@@ -239,16 +236,25 @@ def execute_api():
     for argument, argument_value in arguments.items():
         if (argument_value == ''):
             arguments[argument] = None
+        else:
+            try:
+                arguments[argument] = ast.literal_eval(argument_value)
+            except (ValueError, SyntaxError):
+                arguments[argument] = argument_value
+            
     
     # print("Received data for API execution:", passed_data)
     
-    from tools import Tools
-    tools = Tools()
+    import importlib
+    import tools  
+    importlib.reload(tools) 
+
+    tools_instance = tools.Tools()
     
-    if hasattr(tools, api_name):
+    if hasattr(tools_instance, api_name):
         try:
             # Dynamically call the method with the provided arguments
-            result = getattr(tools, api_name)(data=data, **arguments)
+            result = getattr(tools_instance, api_name)(data=data, **arguments)
             print(f"Result from API {api_name}: {result}")
             return jsonify({
                 'output': json.loads(result) if isinstance(result, str) else result

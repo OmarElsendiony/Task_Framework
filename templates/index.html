@@ -1170,8 +1170,17 @@
                             selectAPI(actionID, action.name);
                             actionDiv.querySelectorAll('.parameter-input').forEach(input => {
                                 const paramName = input.dataset.param;
-                                if (action.arguments[paramName] !== undefined) {
-                                    input.value = action.arguments[paramName];
+                                let value = action.arguments[paramName];
+                                if (value !== undefined) {
+                                    // Check if value is a non-null object (but not an array or Date)
+                                    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                                        try {
+                                            value = JSON.stringify(value);
+                                        } catch (e) {
+                                            console.warn(`Failed to stringify value for ${paramName}`, e);
+                                        }
+                                    }
+                                    input.value = value;
                                 }
                             });
                             // console.log('Action ID:', actionID);
