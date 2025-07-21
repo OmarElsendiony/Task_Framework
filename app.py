@@ -174,8 +174,13 @@ def env_interface():
                 for api_file in API_files:
                     if api_file.endswith(".py") and not api_file.startswith("__"):
                         file_path = os.path.join(INTERFACE_PATH, api_file)
+                        # print(f"Processing file: {file_path}")
                         try:
                             function_info, invoke_method, imports = extract_file_info(file_path)
+                            # print(f"Extracted function info: {function_info}")
+                            # if not function_info:
+                            #     print(f"No function info found in {api_file}, skipping.")
+                            #     continue
                             importsSet.update(imports)
                             invoke_method = invoke_method.replace("invoke", function_info.get('name', 'invoke')+"_invoke")
                             invoke_methods.append(invoke_method)
@@ -233,14 +238,28 @@ def execute_api():
         }), 400
     
     arguments = passed_data.get('parameters', {})
+    cleaned_arguments = {}
+
+
+
     for argument, argument_value in arguments.items():
-        if (argument_value == ''):
-            arguments[argument] = None
-        else:
-            try:
-                arguments[argument] = ast.literal_eval(argument_value)
-            except (ValueError, SyntaxError):
-                arguments[argument] = argument_value
+        # Skip empty values
+        if argument_value == '':
+            continue
+
+        # Skip IDs (do not modify or parse)
+        if "id" == argument.lower() or "_id" in argument.lower() or "by" in argument.lower():
+            cleaned_arguments[argument] = argument_value
+            continue
+
+        # Try to evaluate literal (e.g., convert "True" → True, "123" → 123)
+        try:
+            cleaned_arguments[argument] = ast.literal_eval(argument_value)
+        except (ValueError, SyntaxError):
+            cleaned_arguments[argument] = argument_value
+
+    # Replace original dict
+    arguments = cleaned_arguments
             
     
     # print("Received data for API execution:", passed_data)
