@@ -985,8 +985,10 @@
                     responseDiv.className = 'api-response show success';
                     responseDiv.innerHTML = `
                         <div class="response-header">✅ Success</div>
-                        <div class="response-content">${JSON.stringify(result, null, 2)}</div>
+                        <div class="response-content"><pre></pre></div>
                     `;
+                    // Set the JSON content as text to preserve literals
+                    responseDiv.querySelector('pre').textContent = JSON.stringify(result, null, 2);
                     showCorrectMessage('API executed successfully!');
                 } else {
                     responseDiv.className = 'api-response show error';
