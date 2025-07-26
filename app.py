@@ -57,6 +57,7 @@ def extract_file_info(file_path: str) -> Dict[str, Any]:
     """
     try:
         # Read the file content
+        print(file_path)
         with open(file_path, "r") as file:
             content = file.read()
         
@@ -248,7 +249,7 @@ def execute_api():
             continue
 
         # Skip IDs (do not modify or parse)
-        if "id" == argument.lower() or "_id" in argument.lower() or "by" in argument.lower():
+        if "id" == argument.lower() or "_id" in argument.lower() or "by" in argument.lower() or "name" in argument.lower():
             cleaned_arguments[argument] = argument_value
             continue
 

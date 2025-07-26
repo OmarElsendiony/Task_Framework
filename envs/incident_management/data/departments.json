@@ -1,0 +1,177 @@
+{
+    "1": {
+        "name": "Set designer Department",
+        "manager_id": "72",
+        "company_id": "10",
+        "created_at": "2023-08-13 20:30:14.140453",
+        "updated_at": "2023-08-13 20:30:14.140453"
+    },
+    "2": {
+        "name": "Ambulance person Department",
+        "manager_id": "51",
+        "company_id": "3",
+        "created_at": "2020-10-08 15:23:28.621966",
+        "updated_at": "2020-10-08 15:23:28.621966"
+    },
+    "3": {
+        "name": "IT consultant Department",
+        "manager_id": "70",
+        "company_id": "13",
+        "created_at": "2020-04-13 14:32:00.171222",
+        "updated_at": "2020-04-13 14:32:00.171222"
+    },
+    "4": {
+        "name": "Scientist, forensic Department",
+        "manager_id": "8",
+        "company_id": "10",
+        "created_at": "2023-11-30 05:07:15.604259",
+        "updated_at": "2023-11-30 05:07:15.604259"
+    },
+    "5": {
+        "name": "Banker Department",
+        "manager_id": "4",
+        "company_id": "5",
+        "created_at": "2020-08-13 08:06:49.206691",
+        "updated_at": "2020-08-13 08:06:49.206691"
+    },
+    "6": {
+        "name": "Engineer, agricultural Department",
+        "manager_id": "49",
+        "company_id": "7",
+        "created_at": "2021-11-18 10:22:42.577806",
+        "updated_at": "2021-11-18 10:22:42.577806"
+    },
+    "7": {
+        "name": "Contracting civil engineer Department",
+        "manager_id": "70",
+        "company_id": "6",
+        "created_at": "2020-12-11 09:44:45.030264",
+        "updated_at": "2020-12-11 09:44:45.030264"
+    },
+    "8": {
+        "name": "Charity officer Department",
+        "manager_id": "29",
+        "company_id": "11",
+        "created_at": "2022-11-05 03:30:49.414006",
+        "updated_at": "2022-11-05 03:30:49.414006"
+    },
+    "9": {
+        "name": "Investment banker, corporate Department",
+        "manager_id": "75",
+        "company_id": "2",
+        "created_at": "2024-06-03 22:43:48.846918",
+        "updated_at": "2024-06-03 22:43:48.846918"
+    },
+    "10": {
+        "name": "Legal executive Department",
+        "manager_id": "58",
+        "company_id": "7",
+        "created_at": "2023-05-17 22:28:23.272095",
+        "updated_at": "2023-05-17 22:28:23.272095"
+    },
+    "11": {
+        "name": "Charity officer Department",
+        "manager_id": "1",
+        "company_id": "1",
+        "created_at": "2021-12-28 00:27:38.125811",
+        "updated_at": "2021-12-28 00:27:38.125811"
+    },
+    "12": {
+        "name": "Financial adviser Department",
+        "manager_id": "13",
+        "company_id": "13",
+        "created_at": "2021-10-08 05:33:43.216333",
+        "updated_at": "2021-10-08 05:33:43.216333"
+    },
+    "13": {
+        "name": "Armed forces training and education officer Department",
+        "manager_id": "72",
+        "company_id": "4",
+        "created_at": "2020-05-11 13:31:00.526246",
+        "updated_at": "2020-05-11 13:31:00.526246"
+    },
+    "14": {
+        "name": "Print production planner Department",
+        "manager_id": "83",
+        "company_id": "6",
+        "created_at": "2023-08-23 03:34:45.057842",
+        "updated_at": "2023-08-23 03:34:45.057842"
+    },
+    "15": {
+        "name": "Engineer, land Department",
+        "manager_id": "52",
+        "company_id": "6",
+        "created_at": "2022-01-04 02:41:40.648028",
+        "updated_at": "2022-01-04 02:41:40.648028"
+    },
+    "16": {
+        "name": "Designer, ceramics/pottery Department",
+        "manager_id": "44",
+        "company_id": "2",
+        "created_at": "2020-09-12 14:56:00.329138",
+        "updated_at": "2020-09-12 14:56:00.329138"
+    },
+    "17": {
+        "name": "Operations geologist Department",
+        "manager_id": "99",
+        "company_id": "15",
+        "created_at": "2020-04-21 00:40:20.761607",
+        "updated_at": "2020-04-21 00:40:20.761607"
+    },
+    "18": {
+        "name": "Public affairs consultant Department",
+        "manager_id": "83",
+        "company_id": "8",
+        "created_at": "2020-07-28 21:18:08.416554",
+        "updated_at": "2020-07-28 21:18:08.416554"
+    },
+    "19": {
+        "name": "Field trials officer Department",
+        "manager_id": "72",
+        "company_id": "5",
+        "created_at": "2023-07-28 22:47:37.705091",
+        "updated_at": "2023-07-28 22:47:37.705091"
+    },
+    "20": {
+        "name": "Professor Emeritus Department",
+        "manager_id": "75",
+        "company_id": "13",
+        "created_at": "2024-11-19 15:58:25.976801",
+        "updated_at": "2024-11-19 15:58:25.976801"
+    },
+    "21": {
+        "name": "Commercial/residential surveyor Department",
+        "manager_id": "44",
+        "company_id": "5",
+        "created_at": "2022-01-02 19:56:00.129826",
+        "updated_at": "2022-01-02 19:56:00.129826"
+    },
+    "22": {
+        "name": "Paramedic Department",
+        "manager_id": "57",
+        "company_id": "4",
+        "created_at": "2020-09-24 05:59:09.168065",
+        "updated_at": "2020-09-24 05:59:09.168065"
+    },
+    "23": {
+        "name": "Public librarian Department",
+        "manager_id": "44",
+        "company_id": "1",
+        "created_at": "2025-01-30 11:37:31.235864",
+        "updated_at": "2025-01-30 11:37:31.235864"
+    },
+    "24": {
+        "name": "Meteorologist Department",
+        "manager_id": "13",
+        "company_id": "1",
+        "created_at": "2023-10-14 06:19:48.050422",
+        "updated_at": "2023-10-14 06:19:48.050422"
+    },
+    "25": {
+        "name": "Research scientist (medical) Department",
+        "manager_id": "1",
+        "company_id": "1",
+        "created_at": "2024-05-30 07:34:21.075752",
+        "updated_at": "2024-05-30 07:34:21.075752"
+    }
+}

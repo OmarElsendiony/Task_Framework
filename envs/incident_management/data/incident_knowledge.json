@@ -1,0 +1,502 @@
+{
+    "1": {
+        "incident_id": "77",
+        "knowledge_base_id": "25",
+        "created_at": "2023-01-20 21:48:54.524448"
+    },
+    "2": {
+        "incident_id": "108",
+        "knowledge_base_id": "44",
+        "created_at": "2021-11-06 01:18:13.911847"
+    },
+    "3": {
+        "incident_id": "190",
+        "knowledge_base_id": "1",
+        "created_at": "2025-03-03 11:35:55.403335"
+    },
+    "4": {
+        "incident_id": "22",
+        "knowledge_base_id": "23",
+        "created_at": "2024-01-06 22:07:00.943627"
+    },
+    "5": {
+        "incident_id": "116",
+        "knowledge_base_id": "3",
+        "created_at": "2023-11-10 04:39:52.336590"
+    },
+    "6": {
+        "incident_id": "143",
+        "knowledge_base_id": "19",
+        "created_at": "2021-07-02 22:49:29.635370"
+    },
+    "7": {
+        "incident_id": "59",
+        "knowledge_base_id": "22",
+        "created_at": "2023-02-25 14:00:03.455009"
+    },
+    "8": {
+        "incident_id": "146",
+        "knowledge_base_id": "12",
+        "created_at": "2020-10-16 10:21:44.643525"
+    },
+    "9": {
+        "incident_id": "38",
+        "knowledge_base_id": "7",
+        "created_at": "2020-08-15 08:21:48.804047"
+    },
+    "10": {
+        "incident_id": "32",
+        "knowledge_base_id": "36",
+        "created_at": "2023-07-05 03:30:11.205415"
+    },
+    "11": {
+        "incident_id": "11",
+        "knowledge_base_id": "29",
+        "created_at": "2025-02-20 10:17:10.649891"
+    },
+    "12": {
+        "incident_id": "145",
+        "knowledge_base_id": "48",
+        "created_at": "2021-06-09 03:49:33.312800"
+    },
+    "13": {
+        "incident_id": "184",
+        "knowledge_base_id": "33",
+        "created_at": "2025-01-22 14:38:54.588430"
+    },
+    "14": {
+        "incident_id": "122",
+        "knowledge_base_id": "1",
+        "created_at": "2025-02-16 22:10:49.824002"
+    },
+    "15": {
+        "incident_id": "42",
+        "knowledge_base_id": "12",
+        "created_at": "2023-02-03 00:32:56.728633"
+    },
+    "16": {
+        "incident_id": "65",
+        "knowledge_base_id": "33",
+        "created_at": "2025-05-18 01:22:37.670950"
+    },
+    "17": {
+        "incident_id": "129",
+        "knowledge_base_id": "38",
+        "created_at": "2025-01-25 03:50:33.168324"
+    },
+    "18": {
+        "incident_id": "81",
+        "knowledge_base_id": "13",
+        "created_at": "2024-09-27 06:55:36.039535"
+    },
+    "19": {
+        "incident_id": "167",
+        "knowledge_base_id": "9",
+        "created_at": "2022-09-03 05:16:30.255527"
+    },
+    "20": {
+        "incident_id": "107",
+        "knowledge_base_id": "6",
+        "created_at": "2020-01-24 12:04:25.030345"
+    },
+    "21": {
+        "incident_id": "70",
+        "knowledge_base_id": "26",
+        "created_at": "2023-05-02 19:46:05.023685"
+    },
+    "22": {
+        "incident_id": "40",
+        "knowledge_base_id": "2",
+        "created_at": "2021-09-18 02:11:25.593188"
+    },
+    "23": {
+        "incident_id": "198",
+        "knowledge_base_id": "47",
+        "created_at": "2022-08-06 22:21:09.623840"
+    },
+    "24": {
+        "incident_id": "186",
+        "knowledge_base_id": "1",
+        "created_at": "2025-01-14 11:51:07.802449"
+    },
+    "25": {
+        "incident_id": "94",
+        "knowledge_base_id": "7",
+        "created_at": "2021-02-23 17:25:52.144889"
+    },
+    "26": {
+        "incident_id": "54",
+        "knowledge_base_id": "34",
+        "created_at": "2022-06-06 07:50:51.484373"
+    },
+    "27": {
+        "incident_id": "163",
+        "knowledge_base_id": "33",
+        "created_at": "2021-08-11 08:32:39.904493"
+    },
+    "28": {
+        "incident_id": "188",
+        "knowledge_base_id": "33",
+        "created_at": "2024-07-14 22:50:27.506016"
+    },
+    "29": {
+        "incident_id": "149",
+        "knowledge_base_id": "37",
+        "created_at": "2020-02-23 00:42:19.555676"
+    },
+    "30": {
+        "incident_id": "30",
+        "knowledge_base_id": "46",
+        "created_at": "2020-08-25 05:43:13.254899"
+    },
+    "31": {
+        "incident_id": "185",
+        "knowledge_base_id": "33",
+        "created_at": "2023-05-20 20:47:08.923572"
+    },
+    "32": {
+        "incident_id": "64",
+        "knowledge_base_id": "15",
+        "created_at": "2020-07-02 08:47:18.192916"
+    },
+    "33": {
+        "incident_id": "131",
+        "knowledge_base_id": "22",
+        "created_at": "2024-02-25 22:12:47.841749"
+    },
+    "34": {
+        "incident_id": "192",
+        "knowledge_base_id": "3",
+        "created_at": "2022-12-19 15:17:34.572228"
+    },
+    "35": {
+        "incident_id": "147",
+        "knowledge_base_id": "35",
+        "created_at": "2021-08-09 18:06:24.077726"
+    },
+    "36": {
+        "incident_id": "67",
+        "knowledge_base_id": "42",
+        "created_at": "2023-06-29 10:41:40.081697"
+    },
+    "37": {
+        "incident_id": "89",
+        "knowledge_base_id": "2",
+        "created_at": "2022-01-30 06:58:53.160016"
+    },
+    "38": {
+        "incident_id": "79",
+        "knowledge_base_id": "27",
+        "created_at": "2024-06-13 21:51:45.125405"
+    },
+    "39": {
+        "incident_id": "60",
+        "knowledge_base_id": "21",
+        "created_at": "2024-11-22 17:02:29.654481"
+    },
+    "40": {
+        "incident_id": "162",
+        "knowledge_base_id": "26",
+        "created_at": "2020-03-06 17:04:59.767489"
+    },
+    "41": {
+        "incident_id": "166",
+        "knowledge_base_id": "39",
+        "created_at": "2024-07-04 21:35:17.719156"
+    },
+    "42": {
+        "incident_id": "62",
+        "knowledge_base_id": "17",
+        "created_at": "2025-06-08 10:38:35.266285"
+    },
+    "43": {
+        "incident_id": "154",
+        "knowledge_base_id": "40",
+        "created_at": "2022-03-12 07:25:41.943991"
+    },
+    "44": {
+        "incident_id": "155",
+        "knowledge_base_id": "42",
+        "created_at": "2022-06-21 00:02:35.266382"
+    },
+    "45": {
+        "incident_id": "55",
+        "knowledge_base_id": "22",
+        "created_at": "2021-08-24 08:04:36.862793"
+    },
+    "46": {
+        "incident_id": "176",
+        "knowledge_base_id": "30",
+        "created_at": "2023-07-18 15:04:05.101277"
+    },
+    "47": {
+        "incident_id": "119",
+        "knowledge_base_id": "19",
+        "created_at": "2020-12-13 02:18:53.906353"
+    },
+    "48": {
+        "incident_id": "105",
+        "knowledge_base_id": "25",
+        "created_at": "2025-03-19 21:35:38.884672"
+    },
+    "49": {
+        "incident_id": "35",
+        "knowledge_base_id": "20",
+        "created_at": "2020-09-11 17:19:35.315787"
+    },
+    "50": {
+        "incident_id": "86",
+        "knowledge_base_id": "32",
+        "created_at": "2022-01-02 16:10:13.842588"
+    },
+    "51": {
+        "incident_id": "189",
+        "knowledge_base_id": "35",
+        "created_at": "2025-02-24 16:37:38.414717"
+    },
+    "52": {
+        "incident_id": "106",
+        "knowledge_base_id": "36",
+        "created_at": "2025-04-10 05:14:50.110800"
+    },
+    "53": {
+        "incident_id": "1",
+        "knowledge_base_id": "43",
+        "created_at": "2024-04-28 07:51:10.917333"
+    },
+    "54": {
+        "incident_id": "110",
+        "knowledge_base_id": "38",
+        "created_at": "2023-12-30 07:28:36.224806"
+    },
+    "55": {
+        "incident_id": "33",
+        "knowledge_base_id": "41",
+        "created_at": "2025-04-21 02:29:36.281349"
+    },
+    "56": {
+        "incident_id": "24",
+        "knowledge_base_id": "24",
+        "created_at": "2022-03-26 16:14:44.230523"
+    },
+    "57": {
+        "incident_id": "157",
+        "knowledge_base_id": "3",
+        "created_at": "2022-07-23 16:16:48.960763"
+    },
+    "58": {
+        "incident_id": "187",
+        "knowledge_base_id": "21",
+        "created_at": "2024-02-17 21:30:17.492281"
+    },
+    "59": {
+        "incident_id": "76",
+        "knowledge_base_id": "30",
+        "created_at": "2024-08-26 15:42:04.574229"
+    },
+    "60": {
+        "incident_id": "117",
+        "knowledge_base_id": "21",
+        "created_at": "2024-03-19 18:49:03.227273"
+    },
+    "61": {
+        "incident_id": "26",
+        "knowledge_base_id": "36",
+        "created_at": "2022-01-20 22:29:47.929270"
+    },
+    "62": {
+        "incident_id": "82",
+        "knowledge_base_id": "3",
+        "created_at": "2022-11-20 00:35:59.180975"
+    },
+    "63": {
+        "incident_id": "51",
+        "knowledge_base_id": "31",
+        "created_at": "2025-06-13 22:53:50.969076"
+    },
+    "64": {
+        "incident_id": "148",
+        "knowledge_base_id": "38",
+        "created_at": "2024-11-09 17:33:07.892678"
+    },
+    "65": {
+        "incident_id": "10",
+        "knowledge_base_id": "44",
+        "created_at": "2024-07-09 10:32:52.582243"
+    },
+    "66": {
+        "incident_id": "100",
+        "knowledge_base_id": "9",
+        "created_at": "2020-05-11 05:30:27.576780"
+    },
+    "67": {
+        "incident_id": "50",
+        "knowledge_base_id": "25",
+        "created_at": "2022-06-19 14:45:38.734117"
+    },
+    "68": {
+        "incident_id": "171",
+        "knowledge_base_id": "23",
+        "created_at": "2025-03-13 21:21:12.888878"
+    },
+    "69": {
+        "incident_id": "134",
+        "knowledge_base_id": "17",
+        "created_at": "2022-09-16 02:43:43.990070"
+    },
+    "70": {
+        "incident_id": "19",
+        "knowledge_base_id": "10",
+        "created_at": "2021-02-26 19:06:17.674322"
+    },
+    "71": {
+        "incident_id": "69",
+        "knowledge_base_id": "36",
+        "created_at": "2023-07-02 06:48:32.872380"
+    },
+    "72": {
+        "incident_id": "15",
+        "knowledge_base_id": "32",
+        "created_at": "2025-05-15 10:33:11.374512"
+    },
+    "73": {
+        "incident_id": "160",
+        "knowledge_base_id": "28",
+        "created_at": "2020-02-15 08:31:02.839994"
+    },
+    "74": {
+        "incident_id": "84",
+        "knowledge_base_id": "39",
+        "created_at": "2023-12-30 05:40:56.374238"
+    },
+    "75": {
+        "incident_id": "75",
+        "knowledge_base_id": "9",
+        "created_at": "2025-07-14 04:02:28.198503"
+    },
+    "76": {
+        "incident_id": "37",
+        "knowledge_base_id": "34",
+        "created_at": "2022-05-13 19:58:54.960665"
+    },
+    "77": {
+        "incident_id": "9",
+        "knowledge_base_id": "29",
+        "created_at": "2021-11-17 08:02:06.577666"
+    },
+    "78": {
+        "incident_id": "52",
+        "knowledge_base_id": "17",
+        "created_at": "2023-05-16 06:48:56.474509"
+    },
+    "79": {
+        "incident_id": "199",
+        "knowledge_base_id": "14",
+        "created_at": "2020-03-12 22:10:08.014057"
+    },
+    "80": {
+        "incident_id": "93",
+        "knowledge_base_id": "31",
+        "created_at": "2020-03-14 16:37:06.183600"
+    },
+    "81": {
+        "incident_id": "151",
+        "knowledge_base_id": "33",
+        "created_at": "2022-10-20 00:33:17.008060"
+    },
+    "82": {
+        "incident_id": "12",
+        "knowledge_base_id": "48",
+        "created_at": "2021-09-16 21:38:06.872671"
+    },
+    "83": {
+        "incident_id": "181",
+        "knowledge_base_id": "49",
+        "created_at": "2022-05-19 22:24:10.923099"
+    },
+    "84": {
+        "incident_id": "5",
+        "knowledge_base_id": "6",
+        "created_at": "2021-05-10 20:59:26.446977"
+    },
+    "85": {
+        "incident_id": "168",
+        "knowledge_base_id": "8",
+        "created_at": "2024-01-17 22:25:19.754292"
+    },
+    "86": {
+        "incident_id": "139",
+        "knowledge_base_id": "45",
+        "created_at": "2020-07-19 22:05:35.714917"
+    },
+    "87": {
+        "incident_id": "179",
+        "knowledge_base_id": "1",
+        "created_at": "2023-01-21 06:45:31.661404"
+    },
+    "88": {
+        "incident_id": "191",
+        "knowledge_base_id": "2",
+        "created_at": "2020-08-09 01:29:09.995544"
+    },
+    "89": {
+        "incident_id": "96",
+        "knowledge_base_id": "47",
+        "created_at": "2024-07-18 17:55:55.453817"
+    },
+    "90": {
+        "incident_id": "170",
+        "knowledge_base_id": "22",
+        "created_at": "2024-11-21 02:40:24.991166"
+    },
+    "91": {
+        "incident_id": "21",
+        "knowledge_base_id": "11",
+        "created_at": "2025-05-25 23:41:15.685258"
+    },
+    "92": {
+        "incident_id": "150",
+        "knowledge_base_id": "39",
+        "created_at": "2022-09-12 02:32:35.990688"
+    },
+    "93": {
+        "incident_id": "172",
+        "knowledge_base_id": "7",
+        "created_at": "2023-09-27 02:23:13.158332"
+    },
+    "94": {
+        "incident_id": "141",
+        "knowledge_base_id": "11",
+        "created_at": "2021-05-06 19:51:23.269943"
+    },
+    "95": {
+        "incident_id": "47",
+        "knowledge_base_id": "12",
+        "created_at": "2024-02-05 00:26:43.806257"
+    },
+    "96": {
+        "incident_id": "164",
+        "knowledge_base_id": "42",
+        "created_at": "2021-07-16 21:42:45.156261"
+    },
+    "97": {
+        "incident_id": "83",
+        "knowledge_base_id": "40",
+        "created_at": "2021-04-16 18:54:50.076049"
+    },
+    "98": {
+        "incident_id": "73",
+        "knowledge_base_id": "31",
+        "created_at": "2023-08-14 02:55:36.935887"
+    },
+    "99": {
+        "incident_id": "43",
+        "knowledge_base_id": "19",
+        "created_at": "2024-12-29 09:48:15.093929"
+    },
+    "100": {
+        "incident_id": "41",
+        "knowledge_base_id": "32",
+        "created_at": "2024-10-08 18:03:52.445152"
+    }
+}

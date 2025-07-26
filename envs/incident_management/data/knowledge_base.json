@@ -1,0 +1,502 @@
+{
+    "1": {
+        "description": "How to solve: Director for measure.",
+        "created_by": "89",
+        "category_id": "5",
+        "subcategory_id": "6",
+        "company_id": "10",
+        "department_id": null,
+        "created_at": "2024-07-22 04:24:12.199936",
+        "updated_at": "2024-11-11 10:44:57.457780"
+    },
+    "2": {
+        "description": "How to solve: Season note scene.",
+        "created_by": "17",
+        "category_id": "8",
+        "subcategory_id": "3",
+        "company_id": "13",
+        "department_id": null,
+        "created_at": "2022-04-09 16:14:48.159640",
+        "updated_at": "2025-02-03 13:18:22.328313"
+    },
+    "3": {
+        "description": "How to solve: Indicate pay in.",
+        "created_by": "48",
+        "category_id": "2",
+        "subcategory_id": "33",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2024-01-12 14:18:39.618968",
+        "updated_at": "2024-04-14 10:25:52.066026"
+    },
+    "4": {
+        "description": "How to solve: Worry expect provide.",
+        "created_by": "80",
+        "category_id": "7",
+        "subcategory_id": "16",
+        "company_id": "8",
+        "department_id": null,
+        "created_at": "2020-01-30 00:40:15.512287",
+        "updated_at": "2024-05-01 17:01:56.186992"
+    },
+    "5": {
+        "description": "How to solve: Use clear job necessary citizen say.",
+        "created_by": "92",
+        "category_id": "5",
+        "subcategory_id": "14",
+        "company_id": "1",
+        "department_id": null,
+        "created_at": "2022-11-02 11:06:33.256570",
+        "updated_at": "2024-03-05 18:41:02.124582"
+    },
+    "6": {
+        "description": "How to solve: Strong event property summer side treat.",
+        "created_by": "27",
+        "category_id": "9",
+        "subcategory_id": "22",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2021-05-31 01:59:50.610522",
+        "updated_at": "2024-08-21 15:17:42.167627"
+    },
+    "7": {
+        "description": "How to solve: Mind speak really.",
+        "created_by": "16",
+        "category_id": "2",
+        "subcategory_id": "22",
+        "company_id": null,
+        "department_id": "7",
+        "created_at": "2024-12-12 12:53:50.820823",
+        "updated_at": "2025-05-12 15:35:31.362031"
+    },
+    "8": {
+        "description": "How to solve: Modern receive although.",
+        "created_by": "7",
+        "category_id": "5",
+        "subcategory_id": "27",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2024-05-19 05:07:47.988929",
+        "updated_at": "2025-06-20 09:07:28.319534"
+    },
+    "9": {
+        "description": "How to solve: Win important professional not.",
+        "created_by": "99",
+        "category_id": "1",
+        "subcategory_id": "21",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2022-12-19 13:09:07.414674",
+        "updated_at": "2024-12-29 03:21:04.989278"
+    },
+    "10": {
+        "description": "How to solve: During less law.",
+        "created_by": "12",
+        "category_id": "7",
+        "subcategory_id": "18",
+        "company_id": null,
+        "department_id": "14",
+        "created_at": "2023-04-27 12:35:06.851138",
+        "updated_at": "2023-08-29 23:51:45.320191"
+    },
+    "11": {
+        "description": "How to solve: Computer movement pattern.",
+        "created_by": "35",
+        "category_id": "2",
+        "subcategory_id": "33",
+        "company_id": null,
+        "department_id": "18",
+        "created_at": "2025-04-22 08:01:08.833884",
+        "updated_at": "2025-06-26 03:24:20.940504"
+    },
+    "12": {
+        "description": "How to solve: Ground better toward know PM.",
+        "created_by": "33",
+        "category_id": "8",
+        "subcategory_id": "3",
+        "company_id": "7",
+        "department_id": "1",
+        "created_at": "2024-10-07 22:12:58.504645",
+        "updated_at": "2024-11-20 09:19:58.140351"
+    },
+    "13": {
+        "description": "How to solve: Low individual behind look.",
+        "created_by": "47",
+        "category_id": "8",
+        "subcategory_id": "16",
+        "company_id": null,
+        "department_id": "20",
+        "created_at": "2021-12-03 16:45:45.501063",
+        "updated_at": "2023-06-03 09:17:22.901299"
+    },
+    "14": {
+        "description": "How to solve: From suddenly ok successful life will.",
+        "created_by": "55",
+        "category_id": "1",
+        "subcategory_id": "15",
+        "company_id": "14",
+        "department_id": "1",
+        "created_at": "2023-11-29 08:52:56.022477",
+        "updated_at": "2025-04-30 08:31:44.116274"
+    },
+    "15": {
+        "description": "How to solve: Factor another section.",
+        "created_by": "44",
+        "category_id": "10",
+        "subcategory_id": "15",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2022-08-29 13:15:06.955906",
+        "updated_at": "2022-11-28 20:37:19.422280"
+    },
+    "16": {
+        "description": "How to solve: Student authority sign make.",
+        "created_by": "24",
+        "category_id": "8",
+        "subcategory_id": "20",
+        "company_id": null,
+        "department_id": "18",
+        "created_at": "2021-02-17 13:36:46.118869",
+        "updated_at": "2024-02-16 17:47:52.330958"
+    },
+    "17": {
+        "description": "How to solve: Candidate tell rate although.",
+        "created_by": "99",
+        "category_id": "2",
+        "subcategory_id": "1",
+        "company_id": "15",
+        "department_id": "12",
+        "created_at": "2021-05-23 04:42:19.226892",
+        "updated_at": "2025-04-25 09:09:30.456733"
+    },
+    "18": {
+        "description": "How to solve: Rock certainly include modern new.",
+        "created_by": "72",
+        "category_id": "8",
+        "subcategory_id": "2",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2021-03-24 18:23:15.223475",
+        "updated_at": "2021-10-17 09:57:05.988563"
+    },
+    "19": {
+        "description": "How to solve: Back garden chair.",
+        "created_by": "24",
+        "category_id": "7",
+        "subcategory_id": "12",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2021-08-29 13:48:50.087467",
+        "updated_at": "2023-02-01 10:53:09.245243"
+    },
+    "20": {
+        "description": "How to solve: Worker half article small police capital.",
+        "created_by": "46",
+        "category_id": "5",
+        "subcategory_id": "30",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2020-10-11 20:45:11.153644",
+        "updated_at": "2022-11-27 10:48:54.571335"
+    },
+    "21": {
+        "description": "How to solve: Foot push federal water newspaper prepare.",
+        "created_by": "54",
+        "category_id": "3",
+        "subcategory_id": "28",
+        "company_id": null,
+        "department_id": "19",
+        "created_at": "2023-08-26 01:23:05.870184",
+        "updated_at": "2023-09-02 11:20:54.337195"
+    },
+    "22": {
+        "description": "How to solve: Activity back firm.",
+        "created_by": "53",
+        "category_id": "3",
+        "subcategory_id": "16",
+        "company_id": "1",
+        "department_id": null,
+        "created_at": "2021-08-07 00:52:20.510846",
+        "updated_at": "2023-10-17 12:50:34.335768"
+    },
+    "23": {
+        "description": "How to solve: Staff identify truth.",
+        "created_by": "47",
+        "category_id": "4",
+        "subcategory_id": "6",
+        "company_id": null,
+        "department_id": "14",
+        "created_at": "2024-12-07 03:12:14.263092",
+        "updated_at": "2025-01-06 23:28:26.030640"
+    },
+    "24": {
+        "description": "How to solve: List change everything firm.",
+        "created_by": "51",
+        "category_id": "2",
+        "subcategory_id": "19",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2021-04-29 23:30:39.943587",
+        "updated_at": "2023-07-23 23:56:16.428285"
+    },
+    "25": {
+        "description": "How to solve: Attorney maintain hour trip.",
+        "created_by": "88",
+        "category_id": "8",
+        "subcategory_id": "14",
+        "company_id": "8",
+        "department_id": "21",
+        "created_at": "2024-08-06 05:29:20.592379",
+        "updated_at": "2025-07-14 19:21:15.475054"
+    },
+    "26": {
+        "description": "How to solve: Paper perhaps federal condition.",
+        "created_by": "29",
+        "category_id": "3",
+        "subcategory_id": "23",
+        "company_id": null,
+        "department_id": "4",
+        "created_at": "2024-07-04 13:23:52.965743",
+        "updated_at": "2025-05-07 19:37:16.812651"
+    },
+    "27": {
+        "description": "How to solve: Available reveal our morning.",
+        "created_by": "74",
+        "category_id": "6",
+        "subcategory_id": "14",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2021-12-01 19:35:49.671533",
+        "updated_at": "2025-02-08 17:31:27.933729"
+    },
+    "28": {
+        "description": "How to solve: Federal fish item itself.",
+        "created_by": "93",
+        "category_id": "8",
+        "subcategory_id": "17",
+        "company_id": "14",
+        "department_id": "23",
+        "created_at": "2023-12-07 08:10:01.205737",
+        "updated_at": "2025-05-12 18:26:45.550663"
+    },
+    "29": {
+        "description": "How to solve: Hear clearly arm central east.",
+        "created_by": "88",
+        "category_id": "10",
+        "subcategory_id": "3",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2022-10-19 16:31:03.092908",
+        "updated_at": "2024-06-16 00:33:50.268990"
+    },
+    "30": {
+        "description": "How to solve: Six painting drug word model.",
+        "created_by": "80",
+        "category_id": "2",
+        "subcategory_id": "18",
+        "company_id": null,
+        "department_id": "20",
+        "created_at": "2023-09-21 22:57:47.144756",
+        "updated_at": "2024-05-19 22:53:03.378031"
+    },
+    "31": {
+        "description": "How to solve: Final development take especially tree.",
+        "created_by": "37",
+        "category_id": "4",
+        "subcategory_id": "29",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2023-12-03 01:49:58.637132",
+        "updated_at": "2025-05-09 10:35:13.986868"
+    },
+    "32": {
+        "description": "How to solve: Government nor thing sense letter read.",
+        "created_by": "16",
+        "category_id": "10",
+        "subcategory_id": "19",
+        "company_id": "9",
+        "department_id": "19",
+        "created_at": "2023-04-28 20:34:06.030880",
+        "updated_at": "2024-02-02 11:58:08.214426"
+    },
+    "33": {
+        "description": "How to solve: Series own yet.",
+        "created_by": "47",
+        "category_id": "4",
+        "subcategory_id": "9",
+        "company_id": "6",
+        "department_id": null,
+        "created_at": "2022-01-17 06:41:39.545215",
+        "updated_at": "2023-03-28 14:12:07.839257"
+    },
+    "34": {
+        "description": "How to solve: Series serve edge either.",
+        "created_by": "83",
+        "category_id": "7",
+        "subcategory_id": "31",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2023-06-07 11:35:59.236918",
+        "updated_at": "2024-07-01 20:58:20.564694"
+    },
+    "35": {
+        "description": "How to solve: Less involve social population.",
+        "created_by": "72",
+        "category_id": "3",
+        "subcategory_id": "28",
+        "company_id": null,
+        "department_id": "14",
+        "created_at": "2023-05-31 05:42:47.911378",
+        "updated_at": "2024-11-03 18:53:00.589280"
+    },
+    "36": {
+        "description": "How to solve: Bring garden give concern soldier organization.",
+        "created_by": "49",
+        "category_id": "3",
+        "subcategory_id": "15",
+        "company_id": null,
+        "department_id": "16",
+        "created_at": "2020-04-15 12:16:36.203490",
+        "updated_at": "2024-07-02 22:05:22.338450"
+    },
+    "37": {
+        "description": "How to solve: Such show couple establish.",
+        "created_by": "19",
+        "category_id": "7",
+        "subcategory_id": "23",
+        "company_id": null,
+        "department_id": "10",
+        "created_at": "2022-10-15 06:02:39.778756",
+        "updated_at": "2024-08-17 23:47:04.687714"
+    },
+    "38": {
+        "description": "How to solve: Turn treat chair.",
+        "created_by": "40",
+        "category_id": "1",
+        "subcategory_id": "11",
+        "company_id": null,
+        "department_id": "21",
+        "created_at": "2022-12-20 19:02:22.639529",
+        "updated_at": "2024-07-31 18:55:10.198183"
+    },
+    "39": {
+        "description": "How to solve: The huge central first.",
+        "created_by": "45",
+        "category_id": "6",
+        "subcategory_id": "14",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2025-07-23 08:41:36.788952",
+        "updated_at": "2025-07-23 22:27:24.345459"
+    },
+    "40": {
+        "description": "How to solve: Modern chair tend case government.",
+        "created_by": "92",
+        "category_id": "3",
+        "subcategory_id": "22",
+        "company_id": null,
+        "department_id": "10",
+        "created_at": "2020-02-28 16:19:05.889181",
+        "updated_at": "2022-05-20 16:10:41.225621"
+    },
+    "41": {
+        "description": "How to solve: Minute agency some care bring.",
+        "created_by": "83",
+        "category_id": "5",
+        "subcategory_id": "9",
+        "company_id": null,
+        "department_id": "3",
+        "created_at": "2020-07-08 02:18:23.591953",
+        "updated_at": "2024-08-20 18:20:55.779010"
+    },
+    "42": {
+        "description": "How to solve: System second notice draw past clearly.",
+        "created_by": "48",
+        "category_id": "1",
+        "subcategory_id": "29",
+        "company_id": null,
+        "department_id": "18",
+        "created_at": "2020-01-04 23:38:24.923384",
+        "updated_at": "2023-07-11 18:49:39.368720"
+    },
+    "43": {
+        "description": "How to solve: Hair success whole.",
+        "created_by": "17",
+        "category_id": "6",
+        "subcategory_id": "28",
+        "company_id": "2",
+        "department_id": null,
+        "created_at": "2022-09-01 03:31:50.139805",
+        "updated_at": "2024-05-26 08:44:29.671065"
+    },
+    "44": {
+        "description": "How to solve: Place piece size.",
+        "created_by": "17",
+        "category_id": "3",
+        "subcategory_id": "27",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2023-10-25 06:38:27.412590",
+        "updated_at": "2024-06-09 23:02:00.061554"
+    },
+    "45": {
+        "description": "How to solve: Surface situation past common.",
+        "created_by": "52",
+        "category_id": "1",
+        "subcategory_id": "16",
+        "company_id": null,
+        "department_id": "13",
+        "created_at": "2021-02-23 20:47:23.139199",
+        "updated_at": "2023-12-14 10:58:27.129982"
+    },
+    "46": {
+        "description": "How to solve: Method manager whether later western nice.",
+        "created_by": "31",
+        "category_id": "1",
+        "subcategory_id": "24",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2021-06-14 17:54:37.113079",
+        "updated_at": "2021-12-29 11:40:40.105673"
+    },
+    "47": {
+        "description": "How to solve: Animal as fine explain.",
+        "created_by": "8",
+        "category_id": "7",
+        "subcategory_id": "21",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2023-09-30 15:24:55.645412",
+        "updated_at": "2024-12-23 12:00:07.250922"
+    },
+    "48": {
+        "description": "How to solve: Decade after real little actually perform bad.",
+        "created_by": "47",
+        "category_id": "7",
+        "subcategory_id": "20",
+        "company_id": "15",
+        "department_id": null,
+        "created_at": "2025-03-29 05:25:19.603523",
+        "updated_at": "2025-05-16 03:11:45.197187"
+    },
+    "49": {
+        "description": "How to solve: Chance sometimes air lay road identify.",
+        "created_by": "72",
+        "category_id": "2",
+        "subcategory_id": "23",
+        "company_id": null,
+        "department_id": "19",
+        "created_at": "2025-06-12 09:34:53.363039",
+        "updated_at": "2025-07-09 21:09:12.118590"
+    },
+    "50": {
+        "description": "How to solve: International good meeting unit land way.",
+        "created_by": "47",
+        "category_id": "6",
+        "subcategory_id": "25",
+        "company_id": null,
+        "department_id": null,
+        "created_at": "2024-12-09 17:52:09.492290",
+        "updated_at": "2025-07-05 19:25:34.414566"
+    }
+}

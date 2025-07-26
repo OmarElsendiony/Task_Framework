@@ -1,539 +1,534 @@
 from typing import Any, Dict
+from typing import Any, Dict, Optional
 import json
-import uuid
 
 class Tools:
     @staticmethod
-    def count_team_members_invoke(data: Dict[str, Any], team_id: str) -> str:
-        team_members = data.get("team_members", {})
-
-        count = sum(
-            1 for record in team_members.values()
-            if record.get("team_id") == team_id and record.get("left_at") is None
-        )
-
-        return json.dumps({
-            "team_id": team_id,
-            "active_member_count": count
-        })
-
-    @staticmethod
-    def get_user_profile_invoke(data: Dict[str, Any], user_id: str) -> str:
-        users = data.get("users", {})
-        if user_id not in users:
-            raise ValueError("User not found")
-        user = users[user_id]
-        return json.dumps({
-            "user_id": user_id,
-            "role": user.get("role"),
-            "locale": user.get("locale"),
-            "email": user.get("email"),
-            "timezone": user.get("timezone"),
-            "status": user.get("status")
-        })
-
-    @staticmethod
-    def list_organization_departments_invoke(
-        data: Dict[str, Any],
-        department_id: str = None,
-        organization_id: str = None,
-        manager_user_id: str = None,
-        name: str = None
-    ) -> str:
-        departments = data.get("org_departments", {})
-
-        def matches(dept_id, dept):
-            if department_id and dept_id != department_id:
-                return False
-            if organization_id and dept.get("organization_id") != organization_id:
-                return False
-            if manager_user_id and dept.get("manager_user_id") != manager_user_id:
-                return False
-            if name and name.lower() not in dept.get("name", "").lower():
-                return False
-            return True
-
-        results = [
-            {**dept, "department_id": dept_id}
-            for dept_id, dept in departments.items()
-            if matches(dept_id, dept)
-        ]
-
+    def fetch_sla_policies_invoke(data: Dict[str, Any], category_id: Optional[str] = None, 
+               priority: Optional[str] = None) -> str:
+        sla_policies = data.get("sla_policies", {})
+        results = []
+        
+        for policy in sla_policies.values():
+            if category_id and policy.get("category_id") != category_id:
+                continue
+            if priority and policy.get("priority") != priority:
+                continue
+            results.append(policy)
+        
         return json.dumps(results)
 
     @staticmethod
-    def get_worker_profile_invoke(
-        data: Dict[str, Any],
-        worker_id: str = None,
-        user_id: str = None,
-        organization_id: str = None
-    ) -> str:
-        workers = data.get("workers", {})
-
-        # Case 1: Direct lookup by worker_id
-        if worker_id:
-            if worker_id not in workers:
-                raise ValueError("Worker not found for the given worker_id")
-            worker = workers[worker_id]
-            if user_id and worker.get("user_id") != user_id:
-                raise ValueError("Provided user_id does not match the given worker_id")
-            return json.dumps({
-                "worker_id": worker_id,
-                "user_id": worker.get("user_id"),
-                "worker_type": worker.get("worker_type"),
-                "status": worker.get("status"),
-                "organization_id": worker.get("organization_id")
-            })
-
-        # Case 2: Composite key — user_id + organization_id
-        if user_id and organization_id:
-            for wid, w in workers.items():
-                if w.get("user_id") == user_id and w.get("organization_id") == organization_id:
-                    return json.dumps({
-                        "worker_id": wid,
-                        "user_id": w.get("user_id"),
-                        "worker_type": w.get("worker_type"),
-                        "status": w.get("status"),
-                        "organization_id": w.get("organization_id")
-                    })
-            raise ValueError("Worker not found for the given user_id and organization_id")
-
-        raise ValueError("You must provide either worker_id or both user_id and organization_id")
+    def create_subcategory_invoke(data: Dict[str, Any], category_id: str, name: str) -> str:
+        def generate_id(table: Dict[str, Any]) -> int:
+            if not table:
+                return 1
+            return max(int(k) for k in table.keys()) + 1
+        
+        categories = data.get("categories", {})
+        subcategories = data.get("subcategories", {})
+        
+        # Validate category exists
+        if str(category_id) not in categories:
+            raise ValueError(f"Category {category_id} not found")
+        
+        # Check if subcategory already exists in this category
+        for subcategory in subcategories.values():
+            if (subcategory.get("category_id") == category_id and 
+                subcategory.get("name", "").lower() == name.lower()):
+                raise ValueError(f"Subcategory '{name}' already exists in category {category_id}")
+        
+        subcategory_id = generate_id(subcategories)
+        timestamp = "2025-10-01T00:00:00Z"
+        
+        new_subcategory = {
+            "subcategory_id": subcategory_id,
+            "category_id": category_id,
+            "name": name,
+            "created_at": timestamp,
+            "updated_at": timestamp
+        }
+        
+        subcategories[str(subcategory_id)] = new_subcategory
+        return json.dumps(new_subcategory)
 
     @staticmethod
-    def submit_reimbursement_receipt_invoke(data: Dict[str, Any], reimbursement_id: str, **kwargs) -> str:
-        reimbursements = data.setdefault("reimbursements", {})
-
-        # If reimbursement does not exist, create a new record
-        if reimbursement_id not in reimbursements:
-            reimbursements[reimbursement_id] = {}
-
-        # Filter out document_id — do not store it
-        filtered_kwargs = {k: v for k, v in kwargs.items() if k != "document_id"}
-
-        # Update the reimbursement with the remaining fields
-        reimbursements[reimbursement_id].update(filtered_kwargs)
-
-        return json.dumps({
-            "reimbursement_id": reimbursement_id,
-            **reimbursements[reimbursement_id]
-        })
-
-    @staticmethod
-    def remove_team_member_invoke(
-        data: Dict[str, Any],
-        team_member_id: str = None,
-        worker_id: str = None,
-        team_id: str = None
-    ) -> str:
-        team_members = data.get("team_members", {})
-
-        target_id = None
-
-        # Case 1: Direct match via team_member_id
-        if team_member_id:
-            if team_member_id not in team_members:
-                return json.dumps({
-                    "status": "error",
-                    "message": "Team member ID not found",
-                    "team_member_id": team_member_id
-                })
-            record = team_members[team_member_id]
-
-            # Cross-validation if worker_id or team_id is provided
-            if worker_id and record.get("worker_id") != worker_id:
-                return json.dumps({
-                    "status": "error",
-                    "message": "worker_id does not match the team_member_id",
-                    "team_member_id": team_member_id
-                })
-            if team_id and record.get("team_id") != team_id:
-                return json.dumps({
-                    "status": "error",
-                    "message": "team_id does not match the team_member_id",
-                    "team_member_id": team_member_id
-                })
-
-            target_id = team_member_id
-
-        # Case 2: Match by worker_id + team_id
-        elif worker_id and team_id:
-            for tid, record in team_members.items():
-                if record.get("worker_id") == worker_id and record.get("team_id") == team_id:
-                    target_id = tid
-                    break
-            if not target_id:
-                return json.dumps({
-                    "status": "error",
-                    "message": "No team member found for given worker_id and team_id",
-                    "worker_id": worker_id,
-                    "team_id": team_id
-                })
-        else:
-            return json.dumps({
-                "status": "error",
-                "message": "You must provide either team_member_id or both worker_id and team_id"
-            })
-
-        removed = team_members.pop(target_id)
-        return json.dumps({
-            "status": "removed",
-            "team_member_id": target_id,
-            **removed
-        })
-
-    @staticmethod
-    def create_worker_invoke(
-        data: Dict[str, Any],
-        user_id: str,
-        worker_type: str,
-        status: str,
-        organization_id: str
-    ) -> str:
-        workers = data.setdefault("workers", {})
-
-        # Optional validations
-        if "users" in data and user_id not in data["users"]:
-            raise ValueError("User ID does not exist")
-        if "organizations" in data and organization_id not in data["organizations"]:
-            raise ValueError("Organization ID does not exist")
-
-        worker_id = str(uuid.uuid4())
-        workers[worker_id] = {
-            "user_id": user_id,
-            "worker_type": worker_type,
+    def create_incident_invoke(data: Dict[str, Any], title: str, description: str, 
+               reported_by: str, company_id: str, category_id: Optional[str] = None,
+               subcategory_id: Optional[str] = None, assigned_to: Optional[str] = None,
+               department_id: Optional[str] = None, priority: str = "medium",
+               status: str = "open") -> str:
+        def generate_id(table: Dict[str, Any]) -> int:
+            if not table:
+                return 1
+            return max(int(k) for k in table.keys()) + 1
+        
+        users = data.get("users", {})
+        companies = data.get("companies", {})
+        categories = data.get("categories", {})
+        subcategories = data.get("subcategories", {})
+        departments = data.get("departments", {})
+        incidents = data.get("incidents", {})
+        
+        # Validate required entities
+        if str(reported_by) not in users:
+            raise ValueError(f"Reporter user {reported_by} not found")
+        if str(company_id) not in companies:
+            raise ValueError(f"Company {company_id} not found")
+        
+        # Validate optional entities
+        if category_id and str(category_id) not in categories:
+            raise ValueError(f"Category {category_id} not found")
+        if subcategory_id and str(subcategory_id) not in subcategories:
+            raise ValueError(f"Subcategory {subcategory_id} not found")
+        if assigned_to and str(assigned_to) not in users:
+            raise ValueError(f"Assigned user {assigned_to} not found")
+        if department_id and str(department_id) not in departments:
+            raise ValueError(f"Department {department_id} not found")
+        
+        # Validate enums
+        valid_priorities = ["low", "medium", "high", "critical"]
+        if priority not in valid_priorities:
+            raise ValueError(f"Invalid priority. Must be one of {valid_priorities}")
+        
+        valid_statuses = ["open", "in_progress", "resolved", "closed"]
+        if status not in valid_statuses:
+            raise ValueError(f"Invalid status. Must be one of {valid_statuses}")
+        
+        incident_id = generate_id(incidents)
+        timestamp = "2025-10-01T00:00:00Z"
+        
+        new_incident = {
+            "incident_id": incident_id,
+            "title": title,
+            "description": description,
+            "category_id": category_id,
+            "subcategory_id": subcategory_id,
+            "reported_by": reported_by,
+            "assigned_to": assigned_to,
+            "department_id": department_id,
+            "company_id": company_id,
             "status": status,
-            "organization_id": organization_id
+            "priority": priority,
+            "created_at": timestamp,
+            "updated_at": timestamp
         }
-
-        return json.dumps({"worker_id": worker_id})
+        
+        incidents[str(incident_id)] = new_incident
+        return json.dumps(new_incident)
 
     @staticmethod
-    def get_time_entry_worker_invoke(
-        data: Dict[str, Any],
-        worker_id: str,
-        description: str = None,
-        time_entry_id: str = None
-    ) -> str:
-        time_entries = data.get("time_entries", {})
-
-        def matches(entry_id, entry):
-            if time_entry_id and entry_id != time_entry_id:
-                return False
-            if entry.get("worker_id") != worker_id:
-                return False
-            if description and description.lower() not in entry.get("description", "").lower():
-                return False
-            return True
-
-        results = [
-            {**entry, "time_entry_id": entry_id}
-            for entry_id, entry in time_entries.items()
-            if matches(entry_id, entry)
-        ]
-
+    def get_incident_comments_invoke(data: Dict[str, Any], incident_id: str, is_public: Optional[bool] = None) -> str:
+        comments = data.get("incident_comments", {})
+        results = []
+        
+        for comment in comments.values():
+            if comment.get("incident_id") != incident_id:
+                continue
+            if is_public is not None and comment.get("is_public") != is_public:
+                continue
+            results.append(comment)
+        
         return json.dumps(results)
 
     @staticmethod
-    def deactivate_user_invoke(data: Dict[str, Any], user_id: str) -> str:
+    def create_sla_policy_invoke(data: Dict[str, Any], name: str, priority: str, category_id: str,
+               response_time: int, resolve_time: int) -> str:
+        def generate_id(table: Dict[str, Any]) -> int:
+            if not table:
+                return 1
+            return max(int(k) for k in table.keys()) + 1
+        
+        categories = data.get("categories", {})
+        sla_policies = data.get("sla_policies", {})
+        
+        # Validate category exists
+        if str(category_id) not in categories:
+            raise ValueError(f"Category {category_id} not found")
+        
+        # Validate priority
+        valid_priorities = ["low", "medium", "high", "critical"]
+        if priority not in valid_priorities:
+            raise ValueError(f"Invalid priority. Must be one of {valid_priorities}")
+        
+        sla_id = generate_id(sla_policies)
+        timestamp = "2025-10-01T00:00:00Z"
+        
+        new_sla = {
+            "sla_id": sla_id,
+            "name": name,
+            "priority": priority,
+            "category_id": category_id,
+            "response_time": response_time,
+            "resolve_time": resolve_time,
+            "created_at": timestamp,
+            "updated_at": timestamp
+        }
+        
+        sla_policies[str(sla_id)] = new_sla
+        return json.dumps(new_sla)
+
+    @staticmethod
+    def fetch_breached_incident_slas_invoke(data: Dict[str, Any], company_id: str) -> str:
+        incident_slas = data.get("incident_sla", {})
+        incidents = data.get("incidents", {})
+        results = []
+        
+        if incident_slas:
+            for sla in incident_slas.values():
+                if sla.get("incident_id", {}) and sla.get("breached", False):
+                    if sla["incident_id"] in incidents:
+                        incident = incidents[sla["incident_id"]]
+                        if incident.get("company_id", {}) == company_id:
+                            results.append(sla)
+        
+        return json.dumps(results)
+
+    @staticmethod
+    def fetch_users_invoke(
+        data: Dict[str, Any],
+        company_id: Optional[str] = None,
+        department_id: Optional[str] = None,
+        role: Optional[str] = None,
+        status: Optional[str] = None,
+        timezone: Optional[str] = None,
+        email: Optional[str] = None,
+        first_name: Optional[str] = None,
+        last_name: Optional[str] = None
+    ) -> str:
         users = data.get("users", {})
-        if user_id not in users:
-            raise ValueError("User not found")
+        results = []
 
-        users[user_id]["status"] = "inactive"
-        return json.dumps({"user_id": user_id, "status": "inactive"})
-
-    @staticmethod
-    def allocate_time_entry_invoke(data: Dict[str, Any], worker_id: str, hours: float, task: str) -> str:
-        if hours <= 0 or hours > 24:
-            raise ValueError("Invalid hours range")
-
-        workers = data.get("workers", {})
-        if worker_id not in workers:
-            raise ValueError("Worker not found")
-
-        time_entries = data.setdefault("time_entries", {})
-        entry_id = str(uuid.uuid4())
-        time_entries[entry_id] = {
-            "worker_id": worker_id,
-            "duration_hours": round(hours, 2),
-            "project_code": "AUTO",
-            "description": task,
-            "status": "submitted",
-            "date": "2025-07-01",
-            "start_time": "2025-07-01T09:00:00Z",
-            "end_time": "2025-07-01T17:00:00Z",
-            "user_id": workers[worker_id]["user_id"]
-        }
-        return json.dumps({"time_entry_id": entry_id})
-
-    @staticmethod
-    def assign_worker_to_team_invoke(
-        data: Dict[str, Any],
-        user_id: str,
-        worker_id: str,
-        team_id: str,
-        role: str,
-        joined_at: str
-    ) -> str:
-        team_members = data.setdefault("team_members", {})
-
-        # Optional validations
-        if "users" in data and user_id not in data["users"]:
-            raise ValueError("User ID not found")
-        if "workers" in data and worker_id not in data["workers"]:
-            raise ValueError("Worker ID not found")
-        if "teams" in data and team_id not in data["teams"]:
-            raise ValueError("Team ID not found")
-
-        team_member_id = str(uuid.uuid4())
-
-        new_record = {
-            "user_id": user_id,
-            "worker_id": worker_id,
-            "team_id": team_id,
-            "role": role,
-            "joined_at": joined_at,
-            "left_at": None
-        }
-
-        team_members[team_member_id] = new_record
-
-        return json.dumps({
-            "team_member_id": team_member_id,
-            **new_record
-        })
-
-    @staticmethod
-    def get_worker_financial_summary_invoke(data: Dict[str, Any], worker_id: str) -> str:
-        payroll_items = data.get("payroll_items", {})
-        reimbursements = data.get("reimbursements", {})
-
-        total_payroll = sum(item.get("amount", 0) for item in payroll_items.values() if item.get("worker_id") == worker_id)
-        total_reimb = sum(item.get("amount", 0) for item in reimbursements.values() if item.get("worker_id") == worker_id)
-
-        return json.dumps({
-            "worker_id": worker_id,
-            "total_payroll_amount": round(total_payroll, 2),
-            "total_reimbursements_amount": round(total_reimb, 2)
-        })
-
-    @staticmethod
-    def list_organization_teams_invoke(
-        data: Dict[str, Any],
-        team_id: str = None,
-        organization_id: str = None,
-        name: str = None,
-        description: str = None
-    ) -> str:
-        teams = data.get("org_teams", {})
-
-        def matches(tid, team):
-            if team_id and tid != team_id:
-                return False
-            if organization_id and team.get("organization_id") != organization_id:
-                return False
-            if name and name.lower() not in team.get("name", "").lower():
-                return False
-            if description and description.lower() not in team.get("description", "").lower():
-                return False
-            return True
-
-        results = [
-            {**team, "team_id": tid}
-            for tid, team in teams.items()
-            if matches(tid, team)
-        ]
+        for user in users.values():
+            if company_id and str(user.get("company_id")) != str(company_id):
+                continue
+            if department_id and str(user.get("department_id")) != str(department_id):
+                continue
+            if role and user.get("role") != role:
+                continue
+            if status and user.get("status") != status:
+                continue
+            if timezone and user.get("timezone") != timezone:
+                continue
+            if email and user.get("email") != email:
+                continue
+            if first_name and first_name.lower() not in user.get("first_name", "").lower():
+                continue
+            if last_name and last_name.lower() not in user.get("last_name", "").lower():
+                continue
+            results.append(user)
 
         return json.dumps(results)
 
     @staticmethod
-    def create_user_profile_invoke(data: Dict[str, Any], name: str, email: str, role: str, timezone: str) -> str:
-        users = data.setdefault("users", {})
-        if any(u.get("email") == email for u in users.values()):
-            raise ValueError("Email already exists")
+    def get_company_by_name_invoke(data: Dict[str, Any], name: str) -> str:
+        companies = data.get("companies", {})
+        
+        for company in companies.values():
+            if company.get("name", "").lower() == name.lower():
+                return json.dumps(company)
+        
+        raise json.dumps({})
 
-        user_id = str(uuid.uuid4())
-        first_name, *last = name.split()
-        users[user_id] = {
-            "first_name": first_name,
-            "last_name": " ".join(last) if last else "",
-            "email": email,
-            "role": role,
-            "timezone": timezone,
-            "locale": "en-US",
-            "password_hash": "not_set",
-            "status": "active"
+    @staticmethod
+    def create_category_invoke(data: Dict[str, Any], name: str) -> str:
+        def generate_id(table: Dict[str, Any]) -> int:
+            if not table:
+                return 1
+            return max(int(k) for k in table.keys()) + 1
+        
+        categories = data.get("categories", {})
+        
+        # Check if category already exists
+        for category in categories.values():
+            if str(category.get("name", "")).lower() == (str(name)).lower():
+                raise ValueError(f"Category '{name}' already exists")
+        
+        category_id = generate_id(categories)
+        timestamp = "2025-10-01T00:00:00Z"
+        
+        new_category = {
+            "category_id": category_id,
+            "name": name,
+            "created_at": timestamp,
+            "updated_at": timestamp
         }
-        return json.dumps({"user_id": user_id})
+        
+        categories[str(category_id)] = new_category
+        return json.dumps(new_category)
 
     @staticmethod
-    def assign_worker_to_org_invoke(data: Dict[str, Any], worker_id: str, new_organization_id: str) -> str:
-        workers = data.get("workers", {})
-        organizations = data.get("organizations", {})
-
-        if worker_id not in workers:
-            raise ValueError(f"Worker '{worker_id}' not found.")
-
-        if new_organization_id not in organizations:
-            raise ValueError(f"Organization '{new_organization_id}' not found.")
-
-        workers[worker_id]["organization_id"] = new_organization_id
-        workers[worker_id]["updated_at"] = "2025-07-01T09:25:07.660396Z"
-
-        return json.dumps(workers[worker_id])
-
-    @staticmethod
-    def list_open_reimbursements_invoke(
-        data: Dict[str, Any],
-        user_id: str = None,
-        worker_id: str = None,
-        currency: str = None,
-        organization_id: str = None,
-        contract_id: str = None,
-        submit_date: str = None,
-        approve_date: str = None,
-        min_amount: float = None,
-        max_amount: float = None
-    ) -> str:
-        reimbursements = data.get("reimbursements", {})
-        workers = data.get("workers", {})
-
-        # Resolve user_id if only worker_id is provided
-        if not user_id and worker_id:
-            if worker_id not in workers:
-                return "Error: Worker not found"
-            user_id = workers[worker_id].get("user_id")
-
-        def matches(r):
-            if r.get("status") != "submitted":
-                return False
-            if user_id and r.get("user_id") != user_id:
-                return False
-            if currency and r.get("currency") != currency:
-                return False
-            if organization_id and r.get("organization_id") != organization_id:
-                return False
-            if contract_id and r.get("contract_id") != contract_id:
-                return False
-            if submit_date and r.get("submit_date") != submit_date:
-                return False
-            if approve_date and r.get("approve_date") != approve_date:
-                return False
-            if min_amount is not None and r.get("amount", 0) < min_amount:
-                return False
-            if max_amount is not None and r.get("amount", 0) > max_amount:
-                return False
-            return True
-
-        results = [r for r in reimbursements.values() if matches(r)]
+    def fetch_departments_invoke(data: Dict[str, Any], company_id: Optional[str] = None) -> str:
+        departments = data.get("departments", {})
+        results = []
+        
+        for department in departments.values():
+            if company_id and department.get("company_id") != company_id:
+                continue
+            results.append(department)
+        
         return json.dumps(results)
 
     @staticmethod
-    def update_virtual_card_limit_invoke(data: Dict[str, Any], card_id: str, new_limit: float) -> str:
-        cards = data.get("virtual_cards", {})
-        card = cards.get(card_id)
-
-        if not card:
-            raise ValueError("Card not found")
-        if card.get("status") in ["revoked", "expired", "blocked"]:
-            raise ValueError("Card cannot be modified in current status")
-        if new_limit <= 0 or new_limit > 100000:
-            raise ValueError("Limit must be between 1 and 100000")
-
-        card["limit"] = round(new_limit, 2)
-        return json.dumps({"card_id": card_id, "new_limit": new_limit})
-
-    @staticmethod
-    def list_organizations_invoke(
-        data: Dict[str, Any],
-        user_id: str = None,
-        worker_id: str = None,
-        name: str = None,
-        country: str = None,
-        timezone: str = None,
-        address_line1: str = None,
-        address_city: str = None,
-        address_zip: str = None
-    ) -> str:
-        workers = data.get("workers", {})
-        organizations = data.get("organizations", {})
-
-        # Resolve user_id if worker_id is given
-        if worker_id:
-            if worker_id not in workers:
-                raise ValueError("Worker not found for the given worker_id")
-            resolved_user_id = workers[worker_id].get("user_id")
-            if user_id and user_id != resolved_user_id:
-                raise ValueError("Provided user_id does not match worker_id")
-            user_id = resolved_user_id
-
-        # If user_id is present, limit org_ids to those associated with the user
-        org_ids = None
-        if user_id:
-            org_ids = {
-                w["organization_id"]
-                for w in workers.values()
-                if w.get("user_id") == user_id
-            }
-
-        def match(org):
-            if name and name.lower() not in org.get("name", "").lower():
-                return False
-            if country and org.get("country") != country:
-                return False
-            if timezone and org.get("timezone") != timezone:
-                return False
-            address = org.get("address", {})
-            if address_line1 and address.get("line1") != address_line1:
-                return False
-            if address_city and address.get("city") != address_city:
-                return False
-            if address_zip and address.get("zip") != address_zip:
-                return False
-            return True
-
-        # Apply filters
-        matched_orgs = [
-            org for oid, org in organizations.items()
-            if (org_ids is None or oid in org_ids) and match(org)
-        ]
-
-        return json.dumps(matched_orgs)
+    def fetch_incident_slas_invoke(data: Dict[str, Any], incident_id: Optional[str] = None, 
+               sla_id: Optional[str] = None, status: Optional[str] = None) -> str:
+        incident_slas = data.get("incident_sla", {})
+        results = []
+        
+        for sla in incident_slas.values():
+            if incident_id and sla.get("incident_id") != incident_id:
+                continue
+            if sla_id and sla.get("sla_id") != sla_id:
+                continue
+            if status and sla.get("status") != status:
+                continue
+            results.append(sla)
+        
+        return json.dumps(results)
 
     @staticmethod
-    def view_virtual_card_usage_invoke(data: Dict[str, Any], virtual_card_id: str = None, user_id: str = None) -> str:
-        cards = data.get("virtual_cards", {})
+    def fetch_incidents_invoke(data: Dict[str, Any], company_id: Optional[str] = None,
+               department_id: Optional[str] = None, assigned_to: Optional[str] = None,
+               status: Optional[str] = None, priority: Optional[str] = None,
+               category_id: Optional[str] = None) -> str:
+        incidents = data.get("incidents", {})
+        results = []
+        
+        for incident in incidents.values():
+            if company_id and incident.get("company_id") != company_id:
+                continue
+            if department_id and incident.get("department_id") != department_id:
+                continue
+            if assigned_to and incident.get("assigned_to") != assigned_to:
+                continue
+            if status and incident.get("status") != status:
+                continue
+            if priority and incident.get("priority") != priority:
+                continue
+            if category_id and incident.get("category_id") != category_id:
+                continue
+            results.append(incident)
+        
+        return json.dumps(results)
 
-        # Resolve virtual_card_id if only user_id is given
-        if not virtual_card_id:
-            if not user_id:
-                raise ValueError("Either virtual_card_id or user_id must be provided")
-            for cid, card in cards.items():
-                if card.get("user_id") == user_id:
-                    virtual_card_id = cid
-                    break
-            if not virtual_card_id:
-                raise ValueError("No virtual card found for the given user_id")
+    @staticmethod
+    def update_sla_policy_invoke(data: Dict[str, Any], sla_id: str, name: Optional[str] = None,
+               priority: Optional[str] = None, category_id: Optional[str] = None,
+               response_time: Optional[int] = None, resolve_time: Optional[int] = None) -> str:
+        categories = data.get("categories", {})
+        sla_policies = data.get("sla_policies", {})
+        
+        if str(sla_id) not in sla_policies:
+            raise ValueError(f"SLA policy {sla_id} not found")
+        
+        # Validate category if provided
+        if category_id and str(category_id) not in categories:
+            raise ValueError(f"Category {category_id} not found")
+        
+        # Validate priority if provided
+        if priority:
+            valid_priorities = ["low", "medium", "high", "critical"]
+            if priority not in valid_priorities:
+                raise ValueError(f"Invalid priority. Must be one of {valid_priorities}")
+        
+        sla = sla_policies[str(sla_id)]
+        
+        if name is not None:
+            sla["name"] = name
+        if priority is not None:
+            sla["priority"] = priority
+        if category_id is not None:
+            sla["category_id"] = category_id
+        if response_time is not None:
+            sla["response_time"] = response_time
+        if resolve_time is not None:
+            sla["resolve_time"] = resolve_time
+        
+        sla["updated_at"] = "2025-10-01T00:00:00Z"
+        
+        return json.dumps(sla)
 
-        card = cards.get(virtual_card_id)
-        if not card:
-            raise ValueError("Virtual card not found")
+    @staticmethod
+    def fetch_subcategories_invoke(data: Dict[str, Any], category_id: Optional[str] = None) -> str:
+        subcategories = data.get("subcategories", {})
+        results = []
+        
+        for subcategory in subcategories.values():
+            if category_id and subcategory.get("category_id") != category_id:
+                continue
+            results.append(subcategory)
+        
+        return json.dumps(results)
 
-        # Validate if both are provided
-        if user_id and card.get("user_id") != user_id:
-            raise ValueError("Provided user_id does not match the virtual_card_id")
+    @staticmethod
+    def get_category_by_name_invoke(data: Dict[str, Any], name: str) -> str:
+        categories = data.get("categories", {})
+        
+        for category in categories.values():
+            if category.get("name", "").lower() == name.lower():
+                return json.dumps(category)
+        
+        return json.dumps({})
 
-        # Simulated usage: 60% of the limit used
-        usage = float(card.get("limit", 0)) * 0.6
-        return json.dumps({
-            "card_id": virtual_card_id,
-            "user_id": card.get("user_id"),
-            "provider_id": card.get("provider_id"),
-            "limit": card.get("limit"),
-            "currency": card.get("currency"),
-            "status": card.get("status"),
-            "used": round(usage, 2),
-            "available": round(float(card.get("limit", 0)) - usage, 2)
-        })
+    @staticmethod
+    def update_category_invoke(data: Dict[str, Any], category_id: str, name: str) -> str:
+        categories = data.get("categories", {})
+        
+        if str(category_id) not in categories:
+            raise ValueError(f"Category {category_id} not found")
+        
+        # Check if another category already has this name
+        for cid, category in categories.items():
+            if (cid != str(category_id) and 
+                category.get("name", "").lower() == name.lower()):
+                raise ValueError(f"Category '{name}' already exists")
+        
+        category = categories[str(category_id)]
+        category["name"] = name
+        category["updated_at"] = "2025-10-01T00:00:00Z"
+        
+        return json.dumps(category)
+
+    @staticmethod
+    def log_incident_change_invoke(data: Dict[str, Any], incident_id: str, changed_by: str,
+               incident_values: Optional[Dict] = None, task_values: Optional[Dict] = None) -> str:
+        def generate_id(table: Dict[str, Any]) -> int:
+            if not table:
+                return 1
+            return max(int(k) for k in table.keys()) + 1
+        
+        incidents = data.get("incidents", {})
+        users = data.get("users", {})
+        tasks = data.get("tasks", {})
+        incident_history = data.get("incident_history", {})
+        if not incident_values and not task_values:
+            raise ValueError("Either incident_values or task_values must be provided")
+
+        # Validate incident exists
+        if str(incident_id) not in incidents:
+            raise ValueError(f"Incident {incident_id} not found")
+        
+        # Validate user exists
+        if str(changed_by) not in users:
+            raise ValueError(f"User {changed_by} not found")
+        
+        # Get current incident data for old values
+        current_incident = incidents[str(incident_id)]
+        
+        # Process incident values - capture old values and apply new ones
+        processed_incident_values = {}
+        if incident_values:
+            for field, new_value in incident_values.items():
+                old_value = current_incident.get(field)
+                # If new_value is None, keep the old value
+                actual_new_value = old_value if new_value is None else new_value
+                processed_incident_values[field] = {
+                    "old": old_value,
+                    "new": actual_new_value
+                }
+                # Apply the new value to the incident
+                current_incident[field] = actual_new_value
+        
+        # Process task values - capture old values and apply new ones
+        # Structure: {"task_id": {"field_name": "new_value", ...}, ...}
+        processed_task_values = {}
+        if task_values:
+            for task_id, task_changes in task_values.items():
+                task_id_str = str(task_id)
+                if task_id_str not in tasks:
+                    raise ValueError(f"Task {task_id} not found")
+                
+                current_task = tasks[task_id_str]
+                processed_task_values[task_id_str] = {}
+                
+                for field, new_value in task_changes.items():
+                    if field not in current_task:
+                        raise ValueError(f"Invalid field '{field}' for task {task_id}")
+                    
+                    old_value = current_task.get(field)
+                    # If new_value is None, keep the old value
+                    actual_new_value = old_value if new_value is None else new_value
+                    processed_task_values[task_id_str][field] = {
+                        "old": old_value,
+                        "new": actual_new_value
+                    }
+                    # Apply the new value to the task
+                    current_task[field] = actual_new_value
+        
+        history_id = generate_id(incident_history)
+        timestamp = "2025-10-01T00:00:00Z"
+        
+        new_history = {
+            "incident_history_id": str(history_id),
+            "incident_id": incident_id,
+            "changed_by": changed_by,
+            "incident_values": processed_incident_values if processed_incident_values else None,
+            "task_values": processed_task_values if processed_task_values else None,
+            "changed_at": timestamp
+        }
+        
+        incident_history[str(history_id)] = new_history
+        return json.dumps(new_history)
+
+    @staticmethod
+    def update_subcategory_invoke(data: Dict[str, Any], subcategory_id: str, name: str,
+               category_id: Optional[str] = None) -> str:
+        categories = data.get("categories", {})
+        subcategories = data.get("subcategories", {})
+        
+        if str(subcategory_id) not in subcategories:
+            raise ValueError(f"Subcategory {subcategory_id} not found")
+        
+        subcategory = subcategories[str(subcategory_id)]
+        target_category_id = category_id or subcategory.get("category_id")
+        
+        # Validate category exists if changing
+        if category_id and str(category_id) not in categories:
+            raise ValueError(f"Category {category_id} not found")
+        
+        # Check if another subcategory in the same category already has this name
+        for sid, sub in subcategories.items():
+            if (sid != str(subcategory_id) and 
+                sub.get("category_id") == target_category_id and
+                sub.get("name", "").lower() == name.lower()):
+                raise ValueError(f"Subcategory '{name}' already exists in category {target_category_id}")
+        
+        subcategory["name"] = name
+        if category_id:
+            subcategory["category_id"] = category_id
+        subcategory["updated_at"] = "2025-10-01T00:00:00Z"
+        
+        return json.dumps(subcategory)
+
+    @staticmethod
+    def update_attached_incident_sla_invoke(data: Dict[str, Any], incident_id: str, sla_id: str,
+               response_due: Optional[str] = None, resolve_due: Optional[str] = None,
+               breached: Optional[bool] = None, status: Optional[str] = None) -> str:
+        incident_slas = data.get("incident_sla", {})
+        
+        if str(incident_sla_id) not in incident_slas:
+            raise ValueError(f"Incident SLA {incident_sla_id} not found")
+        
+        # Validate status if provided
+        if status:
+            valid_statuses = ["Pending", "Completed", "Cancelled"]
+            if status not in valid_statuses:
+                raise ValueError(f"Invalid status. Must be one of {valid_statuses}")
+        
+        
+        sla = incident_slas[str(incident_sla_id)]
+        timestamp = "2025-10-01T00:00:00Z"
+        
+        if response_due is not None:
+            sla["response_due"] = response_due
+        if resolve_due is not None:
+            sla["resolve_due"] = resolve_due
+        if breached is not None:
+            sla["breached"] = breached
+        if status is not None:
+            sla["status"] = status
+        
+        sla["updated_at"] = timestamp
+        
+        return json.dumps(sla)
 

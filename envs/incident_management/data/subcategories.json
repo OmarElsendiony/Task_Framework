@@ -1,0 +1,206 @@
+{
+    "1": {
+        "category_id": "1",
+        "name": "Laptop",
+        "created_at": "2021-07-29 13:24:42.100914",
+        "updated_at": "2021-07-29 13:24:42.100914"
+    },
+    "2": {
+        "category_id": "1",
+        "name": "Printer",
+        "created_at": "2023-08-04 00:11:49.770149",
+        "updated_at": "2023-08-04 00:11:49.770149"
+    },
+    "3": {
+        "category_id": "1",
+        "name": "Monitor",
+        "created_at": "2023-11-17 00:49:55.077903",
+        "updated_at": "2023-11-17 00:49:55.077903"
+    },
+    "4": {
+        "category_id": "1",
+        "name": "Keyboard/Mouse",
+        "created_at": "2020-03-27 10:29:08.812927",
+        "updated_at": "2020-03-27 10:29:08.812927"
+    },
+    "5": {
+        "category_id": "2",
+        "name": "CRM",
+        "created_at": "2022-04-10 11:59:10.777993",
+        "updated_at": "2022-04-10 11:59:10.777993"
+    },
+    "6": {
+        "category_id": "2",
+        "name": "Email Client",
+        "created_at": "2021-07-07 15:28:35.428594",
+        "updated_at": "2021-07-07 15:28:35.428594"
+    },
+    "7": {
+        "category_id": "2",
+        "name": "Operating System",
+        "created_at": "2021-11-25 12:23:46.900029",
+        "updated_at": "2021-11-25 12:23:46.900029"
+    },
+    "8": {
+        "category_id": "2",
+        "name": "Custom App",
+        "created_at": "2022-08-19 16:37:18.820023",
+        "updated_at": "2022-08-19 16:37:18.820023"
+    },
+    "9": {
+        "category_id": "3",
+        "name": "VPN",
+        "created_at": "2023-01-17 18:51:35.441082",
+        "updated_at": "2023-01-17 18:51:35.441082"
+    },
+    "10": {
+        "category_id": "3",
+        "name": "Wi-Fi",
+        "created_at": "2021-04-12 06:45:22.636083",
+        "updated_at": "2021-04-12 06:45:22.636083"
+    },
+    "11": {
+        "category_id": "3",
+        "name": "Firewall",
+        "created_at": "2021-04-04 09:10:33.562741",
+        "updated_at": "2021-04-04 09:10:33.562741"
+    },
+    "12": {
+        "category_id": "3",
+        "name": "DNS",
+        "created_at": "2024-01-03 01:40:07.546510",
+        "updated_at": "2024-01-03 01:40:07.546510"
+    },
+    "13": {
+        "category_id": "4",
+        "name": "Password Reset",
+        "created_at": "2024-06-17 07:56:45.738600",
+        "updated_at": "2024-06-17 07:56:45.738600"
+    },
+    "14": {
+        "category_id": "4",
+        "name": "New Account",
+        "created_at": "2020-07-19 07:00:53.596959",
+        "updated_at": "2020-07-19 07:00:53.596959"
+    },
+    "15": {
+        "category_id": "4",
+        "name": "Permissions",
+        "created_at": "2023-07-08 09:21:23.597586",
+        "updated_at": "2023-07-08 09:21:23.597586"
+    },
+    "16": {
+        "category_id": "4",
+        "name": "Account Lockout",
+        "created_at": "2023-09-30 02:43:09.829050",
+        "updated_at": "2023-09-30 02:43:09.829050"
+    },
+    "17": {
+        "category_id": "5",
+        "name": "Office Maintenance",
+        "created_at": "2025-04-28 05:29:26.367159",
+        "updated_at": "2025-04-28 05:29:26.367159"
+    },
+    "18": {
+        "category_id": "5",
+        "name": "HVAC",
+        "created_at": "2020-05-12 19:40:35.733774",
+        "updated_at": "2020-05-12 19:40:35.733774"
+    },
+    "19": {
+        "category_id": "5",
+        "name": "Room Booking",
+        "created_at": "2022-07-19 07:35:42.320820",
+        "updated_at": "2022-07-19 07:35:42.320820"
+    },
+    "20": {
+        "category_id": "6",
+        "name": "enable extensible niches",
+        "created_at": "2020-07-15 18:05:32.481357",
+        "updated_at": "2020-07-15 18:05:32.481357"
+    },
+    "21": {
+        "category_id": "6",
+        "name": "optimize extensible platforms",
+        "created_at": "2024-10-04 01:38:26.731677",
+        "updated_at": "2024-10-04 01:38:26.731677"
+    },
+    "22": {
+        "category_id": "6",
+        "name": "aggregate real-time schemas",
+        "created_at": "2020-08-11 11:13:08.343781",
+        "updated_at": "2020-08-11 11:13:08.343781"
+    },
+    "23": {
+        "category_id": "7",
+        "name": "target synergistic technologies",
+        "created_at": "2020-06-30 12:56:14.166675",
+        "updated_at": "2020-06-30 12:56:14.166675"
+    },
+    "24": {
+        "category_id": "7",
+        "name": "matrix bricks-and-clicks synergies",
+        "created_at": "2025-06-21 04:34:57.181340",
+        "updated_at": "2025-06-21 04:34:57.181340"
+    },
+    "25": {
+        "category_id": "7",
+        "name": "whiteboard visionary deliverables",
+        "created_at": "2022-07-19 15:56:43.852648",
+        "updated_at": "2022-07-19 15:56:43.852648"
+    },
+    "26": {
+        "category_id": "8",
+        "name": "synthesize distributed bandwidth",
+        "created_at": "2023-11-09 20:55:20.183853",
+        "updated_at": "2023-11-09 20:55:20.183853"
+    },
+    "27": {
+        "category_id": "8",
+        "name": "repurpose cross-platform functionalities",
+        "created_at": "2023-12-10 12:49:45.226714",
+        "updated_at": "2023-12-10 12:49:45.226714"
+    },
+    "28": {
+        "category_id": "8",
+        "name": "re-intermediate bleeding-edge relationships",
+        "created_at": "2025-01-28 01:23:33.184169",
+        "updated_at": "2025-01-28 01:23:33.184169"
+    },
+    "29": {
+        "category_id": "9",
+        "name": "expedite back-end relationships",
+        "created_at": "2022-06-09 00:14:38.857639",
+        "updated_at": "2022-06-09 00:14:38.857639"
+    },
+    "30": {
+        "category_id": "9",
+        "name": "drive visionary functionalities",
+        "created_at": "2022-06-02 07:09:48.723332",
+        "updated_at": "2022-06-02 07:09:48.723332"
+    },
+    "31": {
+        "category_id": "9",
+        "name": "strategize 24/365 vortals",
+        "created_at": "2021-03-04 08:13:05.525718",
+        "updated_at": "2021-03-04 08:13:05.525718"
+    },
+    "32": {
+        "category_id": "10",
+        "name": "reinvent wireless eyeballs",
+        "created_at": "2020-12-03 00:46:18.962945",
+        "updated_at": "2020-12-03 00:46:18.962945"
+    },
+    "33": {
+        "category_id": "10",
+        "name": "deliver intuitive architectures",
+        "created_at": "2024-05-06 21:15:54.806040",
+        "updated_at": "2024-05-06 21:15:54.806040"
+    },
+    "34": {
+        "category_id": "10",
+        "name": "expedite efficient markets",
+        "created_at": "2021-09-23 06:50:32.797736",
+        "updated_at": "2021-09-23 06:50:32.797736"
+    }
+}

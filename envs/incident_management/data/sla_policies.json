@@ -1,0 +1,137 @@
+{
+    "1": {
+        "name": "Critical Priority SLA",
+        "priority": "critical",
+        "category_id": "8",
+        "response_time": "480",
+        "resolve_time": "1440",
+        "created_at": "2024-02-17 00:52:01.058088",
+        "updated_at": "2024-02-17 00:52:01.058088"
+    },
+    "2": {
+        "name": "Medium Priority SLA",
+        "priority": "medium",
+        "category_id": null,
+        "response_time": "480",
+        "resolve_time": "4320",
+        "created_at": "2024-09-02 02:33:05.122975",
+        "updated_at": "2024-09-02 02:33:05.122975"
+    },
+    "3": {
+        "name": "Low Priority SLA",
+        "priority": "low",
+        "category_id": null,
+        "response_time": "240",
+        "resolve_time": "60",
+        "created_at": "2021-08-06 19:14:46.336369",
+        "updated_at": "2021-08-06 19:14:46.336369"
+    },
+    "4": {
+        "name": "Low Priority SLA",
+        "priority": "low",
+        "category_id": null,
+        "response_time": "120",
+        "resolve_time": "1440",
+        "created_at": "2021-08-26 19:26:27.464924",
+        "updated_at": "2021-08-26 19:26:27.464924"
+    },
+    "5": {
+        "name": "Medium Priority SLA",
+        "priority": "medium",
+        "category_id": "8",
+        "response_time": "15",
+        "resolve_time": "1440",
+        "created_at": "2021-11-07 11:17:19.950970",
+        "updated_at": "2021-11-07 11:17:19.950970"
+    },
+    "6": {
+        "name": "Critical Priority SLA",
+        "priority": "critical",
+        "category_id": null,
+        "response_time": "30",
+        "resolve_time": "4320",
+        "created_at": "2022-11-14 00:51:46.511057",
+        "updated_at": "2022-11-14 00:51:46.511057"
+    },
+    "7": {
+        "name": "Medium Priority SLA",
+        "priority": "medium",
+        "category_id": "2",
+        "response_time": "60",
+        "resolve_time": "1440",
+        "created_at": "2021-12-12 15:02:29.015783",
+        "updated_at": "2021-12-12 15:02:29.015783"
+    },
+    "8": {
+        "name": "Low Priority SLA",
+        "priority": "low",
+        "category_id": null,
+        "response_time": "240",
+        "resolve_time": "1440",
+        "created_at": "2022-06-25 15:05:16.493327",
+        "updated_at": "2022-06-25 15:05:16.493327"
+    },
+    "9": {
+        "name": "Critical Priority SLA",
+        "priority": "critical",
+        "category_id": "2",
+        "response_time": "30",
+        "resolve_time": "60",
+        "created_at": "2022-11-28 21:07:07.265862",
+        "updated_at": "2022-11-28 21:07:07.265862"
+    },
+    "10": {
+        "name": "Medium Priority SLA",
+        "priority": "medium",
+        "category_id": null,
+        "response_time": "60",
+        "resolve_time": "480",
+        "created_at": "2023-10-19 12:20:49.276812",
+        "updated_at": "2023-10-19 12:20:49.276812"
+    },
+    "11": {
+        "name": "Critical Priority SLA",
+        "priority": "critical",
+        "category_id": "7",
+        "response_time": "480",
+        "resolve_time": "240",
+        "created_at": "2024-06-14 10:41:53.786105",
+        "updated_at": "2024-06-14 10:41:53.786105"
+    },
+    "12": {
+        "name": "Low Priority SLA",
+        "priority": "low",
+        "category_id": "2",
+        "response_time": "240",
+        "resolve_time": "4320",
+        "created_at": "2023-08-23 06:34:38.413768",
+        "updated_at": "2023-08-23 06:34:38.413768"
+    },
+    "13": {
+        "name": "Critical Priority SLA",
+        "priority": "critical",
+        "category_id": "9",
+        "response_time": "240",
+        "resolve_time": "1440",
+        "created_at": "2024-04-25 03:40:44.788574",
+        "updated_at": "2024-04-25 03:40:44.788574"
+    },
+    "14": {
+        "name": "Critical Priority SLA",
+        "priority": "critical",
+        "category_id": null,
+        "response_time": "480",
+        "resolve_time": "1440",
+        "created_at": "2023-10-25 15:00:05.842509",
+        "updated_at": "2023-10-25 15:00:05.842509"
+    },
+    "15": {
+        "name": "Medium Priority SLA",
+        "priority": "medium",
+        "category_id": null,
+        "response_time": "240",
+        "resolve_time": "60",
+        "created_at": "2023-10-31 05:38:50.135427",
+        "updated_at": "2023-10-31 05:38:50.135427"
+    }
+}
