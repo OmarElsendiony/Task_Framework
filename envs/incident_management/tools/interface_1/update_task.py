@@ -43,7 +43,7 @@ class UpdateTask(Tool):
         if due_date is not None:
             task["due_date"] = due_date
         
-        task["updated_at"] = "2025-10-01T00:00:00Z"
+        task["updated_at"] = "2025-10-01T00:00:00"
         return json.dumps(task)
 
     @staticmethod

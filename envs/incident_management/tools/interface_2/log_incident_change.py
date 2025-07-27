@@ -70,7 +70,7 @@ class LogIncidentChange(Tool):
                     current_task[field] = actual_new_value
         
         history_id = generate_id(incident_history)
-        timestamp = "2025-10-01T00:00:00Z"
+        timestamp = "2025-10-01T00:00:00"
         
         new_history = {
             "incident_history_id": str(history_id),

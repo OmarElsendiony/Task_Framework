@@ -25,7 +25,7 @@ class CreateSubcategory(Tool):
                 raise ValueError(f"Subcategory '{name}' already exists in category {category_id}")
         
         subcategory_id = generate_id(subcategories)
-        timestamp = "2025-10-01T00:00:00Z"
+        timestamp = "2025-10-01T00:00:00"
         
         new_subcategory = {
             "subcategory_id": subcategory_id,

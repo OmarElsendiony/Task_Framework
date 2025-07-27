@@ -24,7 +24,7 @@ class CreateSLAPolicy(Tool):
             raise ValueError(f"Invalid priority. Must be one of {valid_priorities}")
         
         sla_id = generate_id(sla_policies)
-        timestamp = "2025-10-01T00:00:00Z"
+        timestamp = "2025-10-01T00:00:00"
         
         new_sla = {
             "sla_id": sla_id,

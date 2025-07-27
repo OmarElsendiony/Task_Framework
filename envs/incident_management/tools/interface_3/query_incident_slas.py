@@ -20,6 +20,9 @@ class QueryIncidentSLAs(Tool):
             if sla_id and sla.get("sla_id") != sla_id:
                 continue
 
+            if sla.get("incident_id") not in company_incidents_ids:
+                continue
+
             if incident_id and (sla.get("incident_id") != incident_id or sla.get("incident_id") not in company_incidents_ids):
                 # print(f"Skipping SLA {sla.get('sla_id')} for incident {sla.get('incident_id')}, not in company {company_id}")
                 # print(f"Incident IDs in company {company_id}: {company_incidents_ids}")
@@ -41,7 +44,7 @@ class QueryIncidentSLAs(Tool):
         return {
             "type": "function",
             "function": {
-                "name": "fetch_incident_slas",
+                "name": "query_incident_slas",
                 "description": "Fetch incident SLAs of a company with optional filters",
                 "parameters": {
                     "type": "object",

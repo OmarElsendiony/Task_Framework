@@ -21,7 +21,7 @@ class UpdateAttachedIncidentSLA(Tool):
         
         
         sla = incident_slas[str(incident_sla_id)]
-        timestamp = "2025-10-01T00:00:00Z"
+        timestamp = "2025-10-01T00:00:00"
         
         if response_due is not None:
             sla["response_due"] = response_due

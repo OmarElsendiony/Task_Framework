@@ -18,7 +18,7 @@ class UpdateCategory(Tool):
         
         category = categories[str(category_id)]
         category["name"] = name
-        category["updated_at"] = "2025-10-01T00:00:00Z"
+        category["updated_at"] = "2025-10-01T00:00:00"
         
         return json.dumps(category)
 

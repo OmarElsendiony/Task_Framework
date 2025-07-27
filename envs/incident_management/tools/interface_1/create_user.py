@@ -44,7 +44,7 @@ class CreateUser(Tool):
             raise ValueError(f"Invalid status. Must be one of {valid_statuses}")
         
         user_id = generate_id(users)
-        timestamp = "2025-10-01T00:00:00Z"
+        timestamp = "2025-10-01T00:00:00"
         
         new_user = {
             "user_id": user_id,

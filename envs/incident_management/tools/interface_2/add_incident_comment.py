@@ -26,7 +26,7 @@ class AddIncidentComment(Tool):
             raise ValueError(f"User {user_id} not found")
         
         comment_id = generate_id(comments)
-        timestamp = "2025-10-01T00:00:00Z"
+        timestamp = "2025-10-01T00:00:00"
         
         new_comment = {
             "incident_comment_id": comment_id,
@@ -54,7 +54,7 @@ class AddIncidentComment(Tool):
                         "incident_id": {"type": "string", "description": "ID of the incident"},
                         "user_id": {"type": "string", "description": "ID of the user adding the comment"},
                         "comment_text": {"type": "string", "description": "Text of the comment"},
-                        "is_public": {"type": "boolean", "description": "Whether the comment is public or private"}
+                        "is_public": {"type": "boolean", "description": "True if the comment is public, False if private"}
                     },
                     "required": ["incident_id", "user_id", "comment_text"]
                 }

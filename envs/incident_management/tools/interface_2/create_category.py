@@ -18,7 +18,7 @@ class CreateCategory(Tool):
                 raise ValueError(f"Category '{name}' already exists")
         
         category_id = generate_id(categories)
-        timestamp = "2025-10-01T00:00:00Z"
+        timestamp = "2025-10-01T00:00:00"
         
         new_category = {
             "category_id": category_id,

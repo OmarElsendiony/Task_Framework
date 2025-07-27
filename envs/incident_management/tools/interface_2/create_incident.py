@@ -48,7 +48,7 @@ class CreateIncident(Tool):
             raise ValueError(f"Invalid status. Must be one of {valid_statuses}")
         
         incident_id = generate_id(incidents)
-        timestamp = "2025-10-01T00:00:00Z"
+        timestamp = "2025-10-01T00:00:00"
         
         new_incident = {
             "incident_id": incident_id,

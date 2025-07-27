@@ -37,7 +37,7 @@ class UpdateSLAPolicy(Tool):
         if resolve_time is not None:
             sla["resolve_time"] = resolve_time
         
-        sla["updated_at"] = "2025-10-01T00:00:00Z"
+        sla["updated_at"] = "2025-10-01T00:00:00"
         
         return json.dumps(sla)
 

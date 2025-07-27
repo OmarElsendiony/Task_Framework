@@ -60,7 +60,7 @@ class UpdateIncident(Tool):
         if subcategory_id is not None:
             incident["subcategory_id"] = subcategory_id
         
-        incident["updated_at"] = "2025-10-01T00:00:00Z"
+        incident["updated_at"] = "2025-10-01T00:00:00"
         return json.dumps(incident)
 
     @staticmethod

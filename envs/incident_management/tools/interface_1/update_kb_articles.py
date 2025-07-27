@@ -41,7 +41,7 @@ class UpdateKbArticle(Tool):
         if department_id is not None:
             article["department_id"] = department_id
         
-        article["updated_at"] = "2025-10-01T00:00:00Z"
+        article["updated_at"] = "2025-10-01T00:00:00"
         return json.dumps(article)
 
     @staticmethod

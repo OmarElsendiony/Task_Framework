@@ -47,7 +47,7 @@ class UpdateUserProfile(Tool):
         if status is not None:
             user["status"] = status
         
-        user["updated_at"] = "2025-10-01T00:00:00Z"
+        user["updated_at"] = "2025-10-01T00:00:00"
         return json.dumps(user)
 
     @staticmethod

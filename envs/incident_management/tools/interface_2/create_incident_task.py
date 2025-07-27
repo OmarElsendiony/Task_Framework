@@ -36,7 +36,7 @@ class CreateIncidentTask(Tool):
             raise ValueError(f"Invalid status. Must be one of {valid_statuses}")
         
         task_id = generate_id(tasks)
-        timestamp = "2025-10-01T00:00:00Z"
+        timestamp = "2025-10-01T00:00:00"
         
         new_task = {
             "task_id": task_id,
