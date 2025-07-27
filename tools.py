@@ -4,6 +4,38 @@ import json
 
 class Tools:
     @staticmethod
+    def fetch_incident_slas_invoke(data: Dict[str, Any], company_id, incident_id: Optional[str] = None,
+               sla_id: Optional[str] = None, status: Optional[str] = None) -> str:
+        incident_slas = data.get("incident_sla", {})
+        incidents = data.get("incidents", {})
+        company_incidents_ids = [incident_k for incident_k, incident_v in incidents.items() if incident_v.get("company_id") == company_id]
+        results = []
+
+        if not company_incidents_ids:
+            return json.dumps(results)
+
+        
+        for sla in incident_slas.values():
+            if sla_id and sla.get("sla_id") != sla_id:
+                continue
+
+            if incident_id and (sla.get("incident_id") != incident_id or sla.get("incident_id") not in company_incidents_ids):
+                print(f"Skipping SLA {sla.get('sla_id')} for incident {sla.get('incident_id')}, not in company {company_id}")
+                print(f"Incident IDs in company {company_id}: {company_incidents_ids}")
+                continue
+            
+            if sla_id and sla.get("sla_id") != sla_id:
+                continue
+            
+            if sla.get("status") and status and sla.get("status") != status:
+                continue
+            
+            results.append(sla)
+
+
+        return json.dumps(results)
+
+    @staticmethod
     def fetch_sla_policies_invoke(data: Dict[str, Any], category_id: Optional[str] = None, 
                priority: Optional[str] = None) -> str:
         sla_policies = data.get("sla_policies", {})
@@ -15,6 +47,23 @@ class Tools:
             if priority and policy.get("priority") != priority:
                 continue
             results.append(policy)
+        
+        return json.dumps(results)
+
+    @staticmethod
+    def get_incident_tasks_invoke(data: Dict[str, Any], incident_id: int, assigned_to: Optional[int] = None,
+               status: Optional[str] = None) -> str:
+        tasks = data.get("tasks", {})
+        results = []
+        
+        for task in tasks.values():
+            if task.get("incident_id") != incident_id:
+                continue
+            if assigned_to and task.get("assigned_to") != assigned_to:
+                continue
+            if status and task.get("status") != status:
+                continue
+            results.append(task)
         
         return json.dumps(results)
 
@@ -228,7 +277,7 @@ class Tools:
             if company.get("name", "").lower() == name.lower():
                 return json.dumps(company)
         
-        raise json.dumps({})
+        return json.dumps({})
 
     @staticmethod
     def create_category_invoke(data: Dict[str, Any], name: str) -> str:
@@ -270,21 +319,91 @@ class Tools:
         return json.dumps(results)
 
     @staticmethod
-    def fetch_incident_slas_invoke(data: Dict[str, Any], incident_id: Optional[str] = None, 
-               sla_id: Optional[str] = None, status: Optional[str] = None) -> str:
-        incident_slas = data.get("incident_sla", {})
-        results = []
+    def add_incident_comment_invoke(data: Dict[str, Any], incident_id: str, user_id: str, 
+               comment_text: str, is_public: bool = True) -> str:
         
-        for sla in incident_slas.values():
-            if incident_id and sla.get("incident_id") != incident_id:
-                continue
-            if sla_id and sla.get("sla_id") != sla_id:
-                continue
-            if status and sla.get("status") != status:
-                continue
-            results.append(sla)
+        def generate_id(table: Dict[str, Any]) -> int:
+            if not table:
+                return 1
+            return max(int(k) for k in table.keys()) + 1
         
-        return json.dumps(results)
+        incidents = data.get("incidents", {})
+        users = data.get("users", {})
+        comments = data.get("incident_comments", {})
+        
+        # Validate incident exists
+        if str(incident_id) not in incidents:
+            raise ValueError(f"Incident {incident_id} not found")
+        
+        # Validate user exists
+        if str(user_id) not in users:
+            raise ValueError(f"User {user_id} not found")
+        
+        comment_id = generate_id(comments)
+        timestamp = "2025-10-01T00:00:00Z"
+        
+        new_comment = {
+            "incident_comment_id": comment_id,
+            "incident_id": incident_id,
+            "user_id": user_id,
+            "comment_text": comment_text,
+            "is_public": is_public,
+            "created_at": timestamp,
+            "updated_at": timestamp
+        }
+        
+        comments[str(comment_id)] = new_comment
+        return json.dumps(new_comment)
+
+    @staticmethod
+    def create_incident_task_invoke(data: Dict[str, Any], incident_id: str, description: str,
+               assigned_to: str, priority: str = "medium", 
+               due_date: Optional[str] = None, status: str = "todo") -> str:
+        
+        def generate_id(table: Dict[str, Any]) -> int:
+            if not table:
+                return 1
+            return max(int(k) for k in table.keys()) + 1
+        
+        incidents = data.get("incidents", {})
+        users = data.get("users", {})
+        tasks = data.get("tasks", {})
+        
+        # Validate incident exists
+        if str(incident_id) not in incidents:
+            raise ValueError(f"Incident {incident_id} not found")
+        
+        # Validate assigned user exists
+        if str(assigned_to) not in users:
+            raise ValueError(f"Assigned user {assigned_to} not found")
+        
+        # Validate priority
+        valid_priorities = ["low", "medium", "high", "critical"]
+        if priority not in valid_priorities:
+            raise ValueError(f"Invalid priority. Must be one of {valid_priorities}")
+        
+        # Validate status
+        valid_statuses = ["todo", "in_progress", "blocked", "done", "cancelled"]
+        if status not in valid_statuses:
+            raise ValueError(f"Invalid status. Must be one of {valid_statuses}")
+        
+        task_id = generate_id(tasks)
+        timestamp = "2025-10-01T00:00:00Z"
+        
+        new_task = {
+            "task_id": task_id,
+            "incident_id": incident_id,
+            "description": description,
+            "assigned_to": assigned_to,
+            "status": status,
+            "priority": priority,
+            "due_date": due_date,
+            "created_at": timestamp,
+            "updated_at": timestamp
+        }
+        
+        tasks[str(task_id)] = new_task
+        return json.dumps({"task_id": task_id})
 
     @staticmethod
     def fetch_incidents_invoke(data: Dict[str, Any], company_id: Optional[str] = None,

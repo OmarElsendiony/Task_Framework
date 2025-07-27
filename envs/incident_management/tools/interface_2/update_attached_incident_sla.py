@@ -49,7 +49,7 @@ class UpdateAttachedIncidentSLA(Tool):
                         "incident_sla_id": {"type": "string", "description": "ID of the incident SLA"},
                         "response_due": {"type": "string", "description": "Response due timestamp"},
                         "resolve_due": {"type": "string", "description": "Resolve due timestamp"},
-                        "breached": {"type": "boolean", "description": "Whether SLA is breached"},
+                        "breached": {"type": "boolean", "description": "Whether SLA is breached. True if breached, False otherwise"},
                         "status": {"type": "string", "description": "SLA status (Pending, Completed, Cancelled)"}
                     },
                     "required": ["incident_id", "sla_id"]
