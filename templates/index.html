@@ -981,6 +981,22 @@
                 
                 const result = await response.json();
                 
+                function fixNewlines(obj) {
+                    if (typeof obj === 'string') {
+                        return obj.replace(/\\n/g, '\n');
+                    }
+                    if (Array.isArray(obj)) {
+                        return obj.map(fixNewlines);
+                    }
+                    if (obj && typeof obj === 'object') {
+                        const fixed = {};
+                        for (let key in obj) {
+                            fixed[key] = fixNewlines(obj[key]);
+                        }
+                        return fixed;
+                    }
+                    return obj;
+                }
                 if (response.ok) {
                     responseDiv.className = 'api-response show success';
                     responseDiv.innerHTML = `
@@ -988,7 +1004,11 @@
                         <div class="response-content"><pre></pre></div>
                     `;
                     // Set the JSON content as text to preserve literals
-                    responseDiv.querySelector('pre').textContent = JSON.stringify(result, null, 2);
+                    
+                    // Process the data to convert literal \n to actual newlines
+
+                    const fixedResult = fixNewlines(result);
+                    responseDiv.querySelector('pre').textContent = JSON.stringify(fixedResult, null, 2);
                     showCorrectMessage('API executed successfully!');
                 } else {
                     responseDiv.className = 'api-response show error';
