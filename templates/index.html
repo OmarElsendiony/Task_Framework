@@ -1270,6 +1270,7 @@
         }
 
         // Graph Editor Variables
+        // Graph Editor Variables
         const nodes = new vis.DataSet([]);
         const edges = new vis.DataSet([]);
         let network = null;
@@ -1321,20 +1322,7 @@
             },
             edges: { arrows: 'to' },
             physics: false,
-            layout: { 
-                improvedLayout: false,
-                hierarchical: {
-                    enabled: true,
-                    levelSeparation: 200,
-                    nodeSpacing: 150,
-                    treeSpacing: 200,
-                    blockShifting: true,
-                    edgeMinimization: true,
-                    parentCentralization: true,
-                    direction: 'LR',        // Left-Right
-                    sortMethod: 'hubsize'
-                }
-            }
+            layout: { improvedLayout: false }
         };
 
         function createNetwork(options = defaultOptions) {
@@ -1360,117 +1348,6 @@
                 content.classList.remove('expanded');
                 toggle.textContent = '▼';
             }
-        }
-
-        // Helper function to create left-to-right linear layout with proper spacing
-        function createLinearLayout(nodeNames, edgeData = []) {
-            const nodePositions = new Map();
-            
-            // Calculate minimum spacing based on node label lengths
-            const calculateNodeWidth = (label) => {
-                // Approximate width: 8px per character + 40px padding
-                return Math.max(80, label.length * 8 + 40);
-            };
-            
-            // Build adjacency list to understand connections
-            const graph = new Map();
-            const inDegree = new Map();
-            const outDegree = new Map();
-            
-            // Initialize all nodes
-            nodeNames.forEach(node => {
-                graph.set(node, []);
-                inDegree.set(node, 0);
-                outDegree.set(node, 0);
-            });
-            
-            // Build graph from edges
-            edgeData.forEach(edge => {
-                if (graph.has(edge.from) && graph.has(edge.to)) {
-                    graph.get(edge.from).push(edge.to);
-                    inDegree.set(edge.to, inDegree.get(edge.to) + 1);
-                    outDegree.set(edge.from, outDegree.get(edge.from) + 1);
-                }
-            });
-            
-            // Find root nodes (nodes with no incoming edges)
-            let roots = nodeNames.filter(node => inDegree.get(node) === 0);
-            
-            // If no clear roots, pick nodes with highest out-degree as roots
-            if (roots.length === 0 && nodeNames.length > 0) {
-                const maxOutDegree = Math.max(...nodeNames.map(node => outDegree.get(node)));
-                roots = nodeNames.filter(node => outDegree.get(node) === maxOutDegree);
-                if (roots.length === 0) {
-                    roots = [nodeNames[0]];
-                }
-            }
-            
-            // Topological sort for left-to-right positioning
-            const levels = [];
-            const visited = new Set();
-            const processing = new Set();
-            
-            // BFS to assign levels (columns)
-            function assignLevels() {
-                let currentLevel = [...roots];
-                let levelIndex = 0;
-                
-                while (currentLevel.length > 0) {
-                    levels[levelIndex] = [...currentLevel];
-                    const nextLevel = [];
-                    
-                    currentLevel.forEach(node => {
-                        visited.add(node);
-                        graph.get(node).forEach(child => {
-                            if (!visited.has(child) && !processing.has(child)) {
-                                // Check if all parents of this child are already visited
-                                const parents = nodeNames.filter(n => graph.get(n).includes(child));
-                                const allParentsVisited = parents.every(parent => visited.has(parent));
-                                
-                                if (allParentsVisited && !nextLevel.includes(child)) {
-                                    nextLevel.push(child);
-                                    processing.add(child);
-                                }
-                            }
-                        });
-                    });
-                    
-                    currentLevel = nextLevel;
-                    levelIndex++;
-                }
-                
-                // Handle any remaining unvisited nodes (disconnected components)
-                const unvisited = nodeNames.filter(node => !visited.has(node));
-                if (unvisited.length > 0) {
-                    levels[levelIndex] = unvisited;
-                }
-            }
-            
-            assignLevels();
-            
-            // Calculate positions with proper spacing
-            let currentX = 0;
-            const verticalSpacing = 120; // Space between nodes vertically
-            const minHorizontalSpacing = 180; // Minimum horizontal space between levels
-            
-            levels.forEach((levelNodes, levelIndex) => {
-                // Calculate max width in this level
-                const maxWidthInLevel = Math.max(...levelNodes.map(node => calculateNodeWidth(node)));
-                
-                // Calculate vertical positions for this level
-                const totalHeight = (levelNodes.length - 1) * verticalSpacing;
-                const startY = -totalHeight / 2;
-                
-                levelNodes.forEach((node, nodeIndex) => {
-                    const y = startY + (nodeIndex * verticalSpacing);
-                    nodePositions.set(node, { x: currentX, y });
-                });
-                
-                // Move to next column with proper spacing
-                currentX += Math.max(maxWidthInLevel, minHorizontalSpacing);
-            });
-            
-            return nodePositions;
         }
 
         function exportGraphJSON() {
@@ -1536,19 +1413,15 @@
                             uniqueNodes.add(e.to);
                         });
 
-                        // Use linear left-to-right layout instead of circular
-                        const nodeNames = [...uniqueNodes];
-                        const positions = createLinearLayout(nodeNames, imported_edges);
+                        let angle = 0;
+                        const radius = 200;
+                        const step = (2 * Math.PI) / uniqueNodes.size;
 
-                        nodeNames.forEach(node => {
-                            const pos = positions.get(node) || { x: 0, y: 0 };
-                            nodes.add({ 
-                                id: node, 
-                                label: node, 
-                                x: pos.x, 
-                                y: pos.y, 
-                                fixed: { x: false, y: false }
-                            });
+                        [...uniqueNodes].forEach(node => {
+                            const x = radius * Math.cos(angle);
+                            const y = radius * Math.sin(angle);
+                            angle += step;
+                            nodes.add({ id: node, label: node, x, y, fixed: false });
                         });
 
                         imported_edges.forEach(e => {
@@ -1602,25 +1475,28 @@
             }
             
             try {
-                // Remove duplicates
+                // Remove duplicates (optional - in case same node appears multiple times)
                 const uniqueNodeNames = [...new Set(nodeList)];
                 
                 // Clear existing nodes and edges
                 nodes.clear();
                 edges.clear();
                 
-                // Use linear left-to-right layout
-                const positions = createLinearLayout(uniqueNodeNames, []);
+                // Calculate positions for nodes in a circle
+                const radius = 200;
+                const angleStep = (2 * Math.PI) / uniqueNodeNames.length;
                 
-                uniqueNodeNames.forEach(nodeName => {
-                    const pos = positions.get(nodeName) || { x: 0, y: 0 };
+                uniqueNodeNames.forEach((nodeName, index) => {
+                    const angle = index * angleStep;
+                    const x = radius * Math.cos(angle);
+                    const y = radius * Math.sin(angle);
                     
                     nodes.add({
                         id: nodeName,
                         label: nodeName,
-                        x: pos.x,
-                        y: pos.y,
-                        fixed: { x: false, y: false }
+                        x: x,
+                        y: y,
+                        fixed: false
                     });
                 });
                 
@@ -1629,7 +1505,7 @@
                     network.setData({ nodes, edges });
                 }
                 
-                showCorrectMessage(`Successfully populated ${uniqueNodeNames.length} nodes in linear layout!`);
+                showCorrectMessage(`Successfully populated ${uniqueNodeNames.length} nodes!`);
                 
             } catch (error) {
                 showWrongMessage('Error creating nodes: ' + error.message);
