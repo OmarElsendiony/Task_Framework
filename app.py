@@ -249,7 +249,7 @@ def execute_api():
             continue
 
         # Skip IDs (do not modify or parse)
-        if "id" == argument.lower() or "_id" in argument.lower() or "by" in argument.lower() or "name" in argument.lower():
+        if "id" == argument.lower() or "_id" in argument.lower() or "by" in argument.lower() or "name" in argument.lower() or "_to" in argument.lower():
             cleaned_arguments[argument] = argument_value
             continue
 
