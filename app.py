@@ -7,14 +7,32 @@ from flask_cors import CORS
 import ast
 from typing import Dict, Any
 import re
+from flask import Flask, session, g
+from flask_session import Session
+from dotenv import load_dotenv
+load_dotenv()
 
+
+# app = Flask(__name__)
 app = Flask(__name__ , static_url_path='')
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super-secret-key")
 cors = CORS(app)
+app.config["SESSION_PERMANENT"] = False
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
 
 ###################### GLOBAL ENVIRONMENTS ##################################
-last_environment = None
-last_interface = None
-data = dict()
+# last_environment = None
+# last_interface = None
+# data = dict()
+
+@app.before_request
+def load_session_data():
+    g.environment = session.get("environment")
+    # print(g.environment)
+    g.interface = session.get("interface")
+    g.data = session.get("data", {})
+    # print(g.data)
 
 ######################## UTILITY FUNCTIONS ##################################
 def ast_to_python_value(node):
@@ -57,7 +75,6 @@ def extract_file_info(file_path: str) -> Dict[str, Any]:
     """
     try:
         # Read the file content
-        print(file_path)
         with open(file_path, "r") as file:
             content = file.read()
         
@@ -148,23 +165,29 @@ def env_interface():
             environment = passed_inputs.get('environment') if passed_inputs else None
             interface = passed_inputs.get('interface') if passed_inputs else None
             
-            global last_environment, last_interface, data
-            if (environment != last_environment):
-                data.clear()
-                last_environment = environment
+            # global last_environment, last_interface, data
+            
+            # print(environment, session.get("environment"))
+            if environment != session.get("environment"):
+                g.data.clear()
                 ENVS_PATH = "envs"
                 DATA_PATH = f"{ENVS_PATH}/{environment}/data"
                 data_files = os.listdir(DATA_PATH)
+                # print("Loaded data:")
                 for data_file in data_files:
                     if data_file.endswith(".json"):
                         data_file_path = os.path.join(DATA_PATH, data_file)
                         with open(data_file_path, "r") as file:
-                            data[data_file.split('.')[0]] = json.load(file)
-            # print(data)
+                            g.data[data_file.split('.')[0]] = json.load(file)
+                session["environment"] = environment
+                session["interface"] = interface
+                session["data"] = g.data
+                # print("data", g.data)
             
+            # print(session["environment"], session["interface"])
             if environment and interface:
-                last_interface = interface
-                last_environment = environment
+                # last_interface = interface
+                # last_environment = environment
                 ENVS_PATH = "envs"
                 TOOLS_PATH = f"{ENVS_PATH}/{environment}/tools"
                 INTERFACE_PATH = f"{TOOLS_PATH}/interface_{interface}"
@@ -226,8 +249,8 @@ def env_interface():
 
 @app.route('/execute_api', strict_slashes=False, methods=["GET", "POST"])
 def execute_api():
-    global data, last_environment, last_interface  # Add global declaration
-    
+    # global data, last_environment, last_interface  # Add global declaration
+
 
     passed_data = request.get_json()
     api_name = passed_data.get('api_name')
@@ -273,9 +296,10 @@ def execute_api():
     
     if hasattr(tools_instance, api_name):
         try:
+            # print(g.data)
             # Dynamically call the method with the provided arguments
-            result = getattr(tools_instance, api_name)(data=data, **arguments)
-            print(f"Result from API {api_name}: {result}")
+            result = getattr(tools_instance, api_name)(data=g.data, **arguments)
+            # print(f"Result from API {api_name}: {result}")
             return jsonify({
                 'output': json.loads(result) if isinstance(result, str) else result
             }), 200

@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+
+    <title>Task Framework</title>
     <script src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
     <link href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" rel="stylesheet" />
     <style>
@@ -359,9 +361,10 @@
             padding: 0.8rem 1rem;
             border: 2px solid #e1e5e9;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.8rem;
             transition: all 0.3s ease;
             background: #fafbfc;
+            field-sizing: content;
         }
 
         .parameter-input:focus {
@@ -572,6 +575,34 @@
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
 
+        .run-all-button {
+            background: linear-gradient(45deg, #ff9500, #ff6b35);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 149, 0, 0.3);
+            margin: 0 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .run-all-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 149, 0, 0.4);
+        }
+
+        .run-all-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         #network {
             width: 100%;
             height: 500px;
@@ -579,7 +610,52 @@
             border-radius: 12px;
             background: #fafbfc;
         }
+.radio-button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 1rem;
+    background: #fafbfc;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+}
 
+.radio-input {
+    display: none;
+}
+
+.radio-button {
+    display: inline-block;
+    padding: 12px 20px;
+    background: white;
+    border: 2px solid #e1e5e9;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #555;
+    transition: all 0.3s ease;
+    text-align: center;
+    min-width: 80px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.radio-button:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.radio-input:checked + .radio-button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #667eea;
+    color: white;
+    font-weight: 600;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+}
         @media (max-width: 768px) {
             .parameters-container {
                 grid-template-columns: 1fr;
@@ -609,8 +685,8 @@
 <body>
     <header class="dashboard-header">
         <div class="logo">
-            <img id="image-logo" src="{{ url_for('static', filename='images/turing-logo-new.jpg') }}" alt="turing image"
-                style="width: 100px; scale: 2; display: block; margin: 0 auto;">
+            <a href='/'><img id="image-logo" src="{{ url_for('static', filename='images/turing-logo-new.jpg') }}" alt="turing image"
+                style="width: 100px; scale: 2; display: block; margin: 0 auto;"></a>
         </div>
     </header>
 
@@ -672,6 +748,11 @@
                     <div>
                         <button class="export-button" onclick="exportActions()">
                             Export Actions
+                        </button>
+                    </div>
+                    <div>
+                        <button class="run-all-button" onclick="runAllActions()" id="run-all-btn">
+                            🚀 Run All Actions
                         </button>
                     </div>
                 </div>
@@ -760,7 +841,7 @@
             console.log('Interface:', interface);
             
             try {
-                const response = await fetch('http://127.0.0.1:5000/choose_env_interface', {
+                const response = await fetch('/choose_env_interface', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -773,6 +854,7 @@
 
                 if (!response.ok) {
                     showWrongMessage('Failed to select Environment and Interface.');
+                    console.error('Error details:', await response.json());
                     return;
                 }
 
@@ -803,6 +885,74 @@
             }
         }
 
+        async function runAllActions() {
+            const actionElements = document.querySelectorAll('.api-action');
+            const runAllBtn = document.getElementById('run-all-btn');
+            
+            if (actionElements.length === 0) {
+                showWrongMessage('No actions to execute.');
+                return;
+            }
+            
+            // Check if all actions have selected APIs
+            let hasInvalidActions = false;
+            actionElements.forEach((actionEl, index) => {
+                const selectedRadio = actionEl.querySelector('input[type="radio"]:checked');
+                if (!selectedRadio) {
+                    showWrongMessage(`Action ${index + 1} doesn't have an API selected.`);
+                    hasInvalidActions = true;
+                }
+            });
+            
+            if (hasInvalidActions) {
+                return;
+            }
+            
+            // Disable the run all button
+            runAllBtn.textContent = '⏳ Running All Actions...';
+            runAllBtn.disabled = true;
+            
+            let successCount = 0;
+            let errorCount = 0;
+            
+            try {
+                for (let i = 0; i < actionElements.length; i++) {
+                    const actionEl = actionElements[i];
+                    const actionId = actionEl.id;
+                    
+                    showCorrectMessage(`Executing Action ${i + 1} of ${actionElements.length}...`);
+                    
+                    try {
+                        await executeAPI(actionId);
+                        successCount++;
+                    } catch (error) {
+                        console.error(`Error executing action ${i + 1}:`, error);
+                        errorCount++;
+                    }
+                    
+                    // Wait 1 seconds before next action (except for the last one)
+                    if (i < actionElements.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+                
+                // Show final summary
+                if (errorCount === 0) {
+                    showCorrectMessage(`All ${successCount} actions executed successfully!`);
+                } else {
+                    showWrongMessage(`Execution completed: ${successCount} successful, ${errorCount} failed.`);
+                }
+                
+            } catch (error) {
+                console.error('Error in runAllActions:', error);
+                showWrongMessage('An error occurred while running actions.');
+            } finally {
+                // Re-enable the button
+                runAllBtn.textContent = '🚀 Run All Actions';
+                runAllBtn.disabled = false;
+            }
+        }
+        
         function addAction() {
             if (APIs.size === 0) {
                 showWrongMessage('Please select an environment and interface first by clicking GO.');
@@ -823,19 +973,22 @@
                     <div class="api-action-title">Action</div>
                     <button class="remove-action-button" onclick="removeAction('${actionId}')">×</button>
                 </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Select API</label>
-                    <div class="input-container">
-                        <span class="input-icon">🔌</span>
-                        <select class="form-select" onchange="selectAPI('${actionId}', this.value)">
-                            <option value="">Choose an API...</option>
-                            ${Array.from(APIs.keys()).map(apiKey => 
-                                `<option value="${apiKey}">${apiKey}</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                </div>
+                                
+<div class="form-group">
+    <label class="form-label">Select API</label>
+    <div class="radio-button-container" id="${actionId}_radio_container">
+        ${Array.from(APIs.keys()).map(apiKey => `
+            <input type="radio" 
+                   id="${actionId}_${apiKey}" 
+                   name="${actionId}_api" 
+                   value="${apiKey}" 
+                   class="radio-input"
+                   onchange="selectAPI('${actionId}', this.value)">
+            <label for="${actionId}_${apiKey}" class="radio-button">${apiKey}</label>
+        `).join('')}
+    </div>
+</div>
+
                 
                 <div id="${actionId}_description" class="api-description" style="display: none;"></div>
                 <div id="${actionId}_parameters" class="parameters-container"></div>
@@ -893,6 +1046,7 @@
             const apiInfo = APIs.get(apiKey);
             if (!apiInfo) return;
             
+            
             // Show description
             descriptionDiv.innerHTML = apiInfo.description;
             descriptionDiv.style.display = 'block';
@@ -925,10 +1079,11 @@
         }
 
         async function executeAPI(actionId) {
+            const environment = document.getElementById('environment').value.trim();
             const actionDiv = document.getElementById(actionId);
-            const apiSelect = actionDiv.querySelector('select');
-            const selectedAPI = apiSelect.value;
-            
+            const selectedRadio = actionDiv.querySelector('input[type="radio"]:checked');
+            const selectedAPI = selectedRadio ? selectedRadio.value : null;
+                        
             if (!selectedAPI) {
                 showWrongMessage('Please select an API first.');
                 return;
@@ -968,14 +1123,15 @@
             responseDiv.className = 'api-response show';
             
             try {
-                const response = await fetch('http://127.0.0.1:5000/execute_api', {
+                const response = await fetch('/execute_api', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         api_name: selectedAPI,
-                        parameters: parameters
+                        parameters: parameters,
+                        environment: environment
                     })
                 });
                 
@@ -1188,7 +1344,10 @@
                             // added.add(action.name);
                             [actionID, actionDiv] = addAction();
                             if (actionID === null || actionDiv === null) return;
-                            actionDiv.querySelector('select').value = action.name;
+                            const radioButton = actionDiv.querySelector(`input[type="radio"][value="${action.name}"]`);
+                            if (radioButton) {
+                                radioButton.checked = true;
+                            }
                             selectAPI(actionID, action.name);
                             actionDiv.querySelectorAll('.parameter-input').forEach(input => {
                                 const paramName = input.dataset.param;
@@ -1221,8 +1380,8 @@
             const actionElements = document.querySelectorAll('.api-action');
             
             actionElements.forEach(actionEl => {
-                const apiSelect = actionEl.querySelector('select');
-                const selectedAPI = apiSelect.value;
+                const selectedRadio = actionEl.querySelector('input[type="radio"]:checked');
+                const selectedAPI = selectedRadio ? selectedRadio.value : null;
                 
                 if (!selectedAPI) return;
                 
@@ -1231,10 +1390,37 @@
                 
                 paramInputs.forEach(input => {
                     const paramName = input.dataset.param;
-                    const value = input.value.trim();
+                    const paramVal = input.value.trim();
+                    console.log(paramName, paramVal);
+                    if (paramVal !== '') {
+                        // console.log(Number.isNaN(Number(paramVal)))
+                        if (!Number.isNaN(Number(paramVal)) && !paramName.includes('phone') && !paramName.includes('mobile')) {
+                            console.log('parsing number')
+                            if (paramName.includes('_id') || paramName.includes('_by') || paramName.includes('_to')) {
+                                parameters[paramName] = paramVal; // Keep as string for IDs
+                            }
+                            else {
+                                parameters[paramName] = Number(paramVal);
+                            }
+                        } else if (paramVal === 'true' || paramVal === 'false') {
+                            // console.log('mgegege')
+                            parameters[paramName] = (paramVal === 'true');
+                        } else if (paramVal.startsWith('{') || paramVal.startsWith('[')) {
+                            // console.log('parsing json')
+                            try {
+                                parameters[paramName] = JSON.parse(paramVal);
+                            } catch (e) {
+                                parameters[paramName] = paramVal; // Fallback to string if parsing fails
+                            }
+                        } else {
+                            // console.log('hereeee')
+                            parameters[paramName] = paramVal;
+                        }
+                    }
+                    /* const value = input.value.trim();
                     if (value !== '') {
                         parameters[paramName] = value;
-                    }
+                    } */
                 });
                 // console.log(actionEl.querySelector('.response-content'))
                 output = actionEl.querySelector('.response-content');
@@ -1458,24 +1644,25 @@
             // Initialize nodeList as an empty array
             let nodeList = [];
             
-            // Get the actions container
-            const actions = document.querySelector('#actions');
+            // Get all API action containers
+            const actionElements = document.querySelectorAll('.api-action');
             
-            // Extract values from all select elements
-            actions.querySelectorAll('select').forEach(select => {
-                if (select.value && select.value.trim() !== '') {
-                    nodeList.push(select.value);
+            // Extract selected API names from radio buttons
+            actionElements.forEach(actionEl => {
+                const selectedRadio = actionEl.querySelector('input[type="radio"]:checked');
+                if (selectedRadio && selectedRadio.value) {
+                    nodeList.push(selectedRadio.value);
                 }
             });
             
             // Check if we have any nodes to work with
             if (nodeList.length === 0) {
-                showWrongMessage('There are no actions to populate nodes from.');
+                showWrongMessage('No actions with selected APIs found. Please add actions and select APIs first.');
                 return;
             }
             
             try {
-                // Remove duplicates (optional - in case same node appears multiple times)
+                // Remove duplicates (optional - in case same API appears multiple times)
                 const uniqueNodeNames = [...new Set(nodeList)];
                 
                 // Clear existing nodes and edges
@@ -1496,18 +1683,39 @@
                         label: nodeName,
                         x: x,
                         y: y,
-                        fixed: false
+                        fixed: false,
+                        color: {
+                            background: '#667eea',
+                            border: '#764ba2',
+                            highlight: {
+                                background: '#764ba2',
+                                border: '#667eea'
+                            }
+                        },
+                        font: {
+                            color: 'white',
+                            size: 14,
+                            face: 'Arial'
+                        }
                     });
                 });
                 
                 // Update the network if it exists
                 if (network) {
                     network.setData({ nodes, edges });
+                    // Fit the network to show all nodes
+                    network.fit({
+                        animation: {
+                            duration: 1000,
+                            easingFunction: 'easeInOutQuad'
+                        }
+                    });
                 }
                 
-                showCorrectMessage(`Successfully populated ${uniqueNodeNames.length} nodes!`);
+                showCorrectMessage(`Successfully populated ${uniqueNodeNames.length} nodes from your actions!`);
                 
             } catch (error) {
+                console.error('Error creating nodes:', error);
                 showWrongMessage('Error creating nodes: ' + error.message);
             }
         }
