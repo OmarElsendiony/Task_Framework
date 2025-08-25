@@ -468,11 +468,12 @@
             transition: all 0.3s ease;
         }
 
+        
         .graph-editor-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 2rem;
+            padding: 1rem 1.8rem;
             background: linear-gradient(135deg, rgba(102, 232, 234, 0.1), rgba(118, 75, 162, 0.1));
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             cursor: pointer;
@@ -610,52 +611,53 @@
             border-radius: 12px;
             background: #fafbfc;
         }
-.radio-button-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 1rem;
-    background: #fafbfc;
-    border: 2px solid #e1e5e9;
-    border-radius: 12px;
-}
 
-.radio-input {
-    display: none;
-}
+        .radio-button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 1rem;
+            background: #fafbfc;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+        }
 
-.radio-button {
-    display: inline-block;
-    padding: 12px 20px;
-    background: white;
-    border: 2px solid #e1e5e9;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #555;
-    transition: all 0.3s ease;
-    text-align: center;
-    min-width: 80px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
+        .radio-input {
+            display: none;
+        }
 
-.radio-button:hover {
-    background: rgba(102, 126, 234, 0.1);
-    border-color: #667eea;
-    color: #667eea;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-}
+        .radio-button {
+            display: inline-block;
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #555;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 80px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
-.radio-input:checked + .radio-button {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-color: #667eea;
-    color: white;
-    font-weight: 600;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
-}
+        .radio-button:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .radio-input:checked + .radio-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            color: white;
+            font-weight: 600;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+        }
         @media (max-width: 768px) {
             .parameters-container {
                 grid-template-columns: 1fr;
@@ -679,6 +681,284 @@
                 width: 200px;
             }
         }
+    </style>
+
+    <style>
+        .container-diff {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .textarea-diff {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #fafafa;
+        }
+
+        .textarea-diff:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .controls-diff {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .button-diff:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-diff:active {
+            transform: translateY(0);
+        }
+
+        .diff-section {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .diff-panel {
+            flex: 1;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .diff-header {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .diff-content {
+            padding: 15px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .diff-added {
+            background: linear-gradient(90deg, #d4edda, #c3e6cb);
+            color: #155724;
+            padding: 2px 4px;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+            margin: 1px 0;
+            display: inline-block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .diff-removed {
+            background: linear-gradient(90deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            padding: 2px 4px;
+            border-radius: 4px;
+            border-left: 3px solid #dc3545;
+            // text-decoration: line-through;
+            margin: 1px 0;
+            display: inline-block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .diff-unchanged {
+            color: #333;
+        }
+
+        .diff-line {
+            display: block;
+            margin: 2px 0;
+            padding: 2px 0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .input-section, .diff-section {
+                flex-direction: column;
+            }
+            
+            .container-diff {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 50px 20px;
+        }
+
+        /* Diff Editor Styles */
+        .diff-container {
+            width: 100%;
+            background: #ffffff;
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            margin: 2rem 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e6e6e6;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .diff-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.8rem;
+            background: #f7f9fa;
+            border-bottom: 1px solid #e6e6e6;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .diff-header:hover {
+            background: #eef3f5;
+        }
+
+        .diff-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diff-title span {
+            color: #48bba1; /* accent teal */
+        }
+
+        .diff-toggle {
+            background: #48bba1; /* teal button */
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(72, 187, 161, 0.25);
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .diff-toggle:hover {
+            background: #ff8c69; /* coral hover */
+            box-shadow: 0 4px 10px rgba(255, 140, 105, 0.3);
+        }
+
+        #task-diff-content {
+            display: none;
+            padding: 1.8rem;
+            color: #444;
+        }
+
+        #task-diff-content.expanded {
+            display: block;
+        }
+
     </style>
 </head>
 
@@ -758,11 +1038,79 @@
                 </div>
             </div>
 
-                        <!-- Graph Editor Section -->
+            <!-- Difference between actions -->
+            <div class="diff-container">
+                <div class="diff-header" onclick="toggleDiff()">
+                    <div class="diff-title">
+                        Task Difference Analyzer
+                    </div>
+                    <button class="diff-toggle" id="diff-toggle">
+                        ▼
+                    </button>
+                </div>
+
+                <div id="task-diff-content">
+                    <h1>Task Diff Analyzer</h1>
+                    <div class="input-section">
+                        <div class="input-group">
+                            <label for="text1">📄 Original Task</label>
+                            <textarea class="textarea-diff" id="text1" placeholder="Paste your original text here...">The quick brown fox jumps over the lazy dog.
+            This is a sample text for comparison.
+            You can modify this text to see differences.</textarea>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="text2">📝 New Task</label>
+                            <textarea class="textarea-diff" id="text2" placeholder="Paste your modified text here...">The quick red fox jumps over the sleepy cat.
+            This is a sample text for comparison and analysis.
+            You can modify this content to see differences highlighted.</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="controls-diff">
+                        <button class="button-diff" onclick="compareDiff()">🔍 Compare Texts</button>
+                        <button class="button-diff" onclick="clearAll()">🗑️ Clear All</button>
+                        <button class="button-diff" onclick="swapTexts()">🔄 Swap Texts</button>
+                    </div>
+                    
+                    <div class="stats" id="stats" style="display: none;">
+                        <div class="stat-item">
+                            <div class="stat-number" id="addedCount">0</div>
+                            <div class="stat-label">Added</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="removedCount">0</div>
+                            <div class="stat-label">Removed</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="unchangedCount">0</div>
+                            <div class="stat-label">Unchanged</div>
+                        </div>
+                    </div>
+                    
+                    <div class="diff-section">
+                        <div class="diff-panel">
+                            <div class="diff-header">🔴 Old task</div>
+                            <div class="diff-content" id="originalDiff">
+                                <div class="empty-state">Click "Compare Texts" to see the original text with deletions highlighted</div>
+                            </div>
+                        </div>
+                        
+                        <div class="diff-panel">
+                            <div class="diff-header">🟢 New task</div>
+                            <div class="diff-content" id="modifiedDiff">
+                                <div class="empty-state">Click "Compare Texts" to see the modified text with additions highlighted</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Graph Editor Section -->
             <div class="graph-editor-container">
                 <div class="graph-editor-header" onclick="toggleGraphEditor()">
                     <div class="graph-editor-title">
-                        <span>📊</span>
                         Graph Editor Playground
                     </div>
                     <button class="graph-editor-toggle" id="graph-toggle">
@@ -1310,6 +1658,20 @@
             URL.revokeObjectURL(url);
             showCorrectMessage('Page saved successfully!');
         }
+        /////////////////////////////////////////////
+        env = null;
+        model_provider = null;
+        model = null;
+        num_trials = null;
+        temperature = null;
+        interface_num = null;
+        edgesBefore = null; // so as not to conflict with graph edges
+        user_id = null;
+        instruction = null;
+        actionsBefore = null;
+        ////////////////////////////////////////////
+        // taskBefore_text = null;
+
 
         function importActions() {
             const input = document.getElementById('fileInput');
@@ -1319,8 +1681,22 @@
                 const file = input.files[0];
                 const reader = new FileReader();
                 reader.onload = e => {
+                    
                     try {
+                        // taskBefore = e.target.result
+                        // console.log('File content:', taskBefore);
                         const obj = JSON.parse(e.target.result);
+                        env = obj["env"]
+                        model_provider = obj["model_provider"]
+                        model = obj["model"]
+                        num_trials = obj["num_trials"]
+                        temperature = obj["temperature"]
+                        interface_num = obj["interface_num"]
+                        user_id = obj["task"]["user_id"]
+                        instruction = obj["task"]["instruction"]
+                        actionsBefore = obj["task"]["actions"]
+                        edgesBefore = obj["task"]["edges"]
+
                         console.log('Imported actions:', obj);
                         // const added = new Set();
                         let imported_actions = obj.actions;
@@ -1375,7 +1751,7 @@
             };
         }
 
-        function exportActions() {
+        function getTaskActions(){
             const actions = [];
             const actionElements = document.querySelectorAll('.api-action');
             
@@ -1385,7 +1761,7 @@
                 
                 if (!selectedAPI) return;
                 
-                const parameters = {};
+                const parameters = new Map();
                 const paramInputs = actionEl.querySelectorAll('.parameter-input');
                 
                 paramInputs.forEach(input => {
@@ -1395,26 +1771,25 @@
                     if (paramVal !== '') {
                         // console.log(Number.isNaN(Number(paramVal)))
                         if (!Number.isNaN(Number(paramVal)) && !paramName.includes('phone') && !paramName.includes('mobile')) {
-                            console.log('parsing number')
+                            // console.log('parsing number')
                             if (paramName.includes('_id') || paramName.includes('_by') || paramName.includes('_to')) {
-                                parameters[paramName] = paramVal; // Keep as string for IDs
+                                parameters.set(paramName, paramVal); // Keep as string for IDs
                             }
                             else {
-                                parameters[paramName] = Number(paramVal);
+                                parameters.set(paramName, Number(paramVal));
                             }
                         } else if (paramVal === 'true' || paramVal === 'false') {
                             // console.log('mgegege')
-                            parameters[paramName] = (paramVal === 'true');
+                            parameters.set(paramName, (paramVal === 'true'));
                         } else if (paramVal.startsWith('{') || paramVal.startsWith('[')) {
                             // console.log('parsing json')
                             try {
-                                parameters[paramName] = JSON.parse(paramVal);
+                                parameters.set(paramName, JSON.parse(paramVal));
                             } catch (e) {
-                                parameters[paramName] = paramVal; // Fallback to string if parsing fails
+                                parameters.set(paramName, paramVal); // Fallback to string if parsing fails
                             }
                         } else {
-                            // console.log('hereeee')
-                            parameters[paramName] = paramVal;
+                            parameters.set(paramName, paramVal);
                         }
                     }
                     /* const value = input.value.trim();
@@ -1438,10 +1813,14 @@
                 
                 actions.push({
                     name: selectedAPI,
-                    arguments: parameters,
+                    arguments: Object.fromEntries(parameters),
                     output: output
                 });
             });
+            return actions;
+        }
+        function exportActions() {
+            actions = getTaskActions();
             
             const exportData = { actions: actions };
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -1717,6 +2096,283 @@
             } catch (error) {
                 console.error('Error creating nodes:', error);
                 showWrongMessage('Error creating nodes: ' + error.message);
+            }
+        }
+    </script>
+
+    
+    <script>
+        function computeLineDiff(text1, text2) {
+            const lines1 = text1.split('\n');
+            const lines2 = text2.split('\n');
+            
+            // Create a more sophisticated diff using LCS (Longest Common Subsequence) approach
+            const matrix = [];
+            for (let i = 0; i <= lines1.length; i++) {
+                matrix[i] = [];
+                for (let j = 0; j <= lines2.length; j++) {
+                    if (i === 0) matrix[i][j] = j;
+                    else if (j === 0) matrix[i][j] = i;
+                    else if (lines1[i - 1] === lines2[j - 1]) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j - 1] + 1
+                        );
+                    }
+                }
+            }
+            
+            // Backtrack to find the diff
+            const diff = [];
+            let i = lines1.length, j = lines2.length;
+            
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && lines1[i - 1] === lines2[j - 1]) {
+                    diff.unshift({ type: 'unchanged', value: lines1[i - 1] });
+                    i--;
+                    j--;
+                } else if (j > 0 && (i === 0 || matrix[i][j - 1] <= matrix[i - 1][j])) {
+                    diff.unshift({ type: 'added', value: lines2[j - 1] });
+                    j--;
+                } else if (i > 0) {
+                    diff.unshift({ type: 'removed', value: lines1[i - 1] });
+                    i--;
+                }
+            }
+            
+            return diff;
+        }
+
+        function computeWordDiff(line1, line2) {
+            const words1 = line1.split(/(\s+)/);
+            const words2 = line2.split(/(\s+)/);
+            
+            const diff = [];
+            let i = 0, j = 0;
+            
+            while (i < words1.length || j < words2.length) {
+                if (i >= words1.length) {
+                    diff.push({ type: 'added', value: words2[j] });
+                    j++;
+                } else if (j >= words2.length) {
+                    diff.push({ type: 'removed', value: words1[i] });
+                    i++;
+                } else if (words1[i] === words2[j]) {
+                    diff.push({ type: 'unchanged', value: words1[i] });
+                    i++;
+                    j++;
+                } else {
+                    // Look ahead for matches
+                    let foundMatch = false;
+                    
+                    // Check if current word from text1 appears later in text2
+                    for (let k = j + 1; k < Math.min(j + 3, words2.length); k++) {
+                        if (words1[i] === words2[k]) {
+                            for (let l = j; l < k; l++) {
+                                diff.push({ type: 'added', value: words2[l] });
+                            }
+                            diff.push({ type: 'unchanged', value: words1[i] });
+                            i++;
+                            j = k + 1;
+                            foundMatch = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!foundMatch) {
+                        // Check if current word from text2 appears later in text1
+                        for (let k = i + 1; k < Math.min(i + 3, words1.length); k++) {
+                            if (words2[j] === words1[k]) {
+                                for (let l = i; l < k; l++) {
+                                    diff.push({ type: 'removed', value: words1[l] });
+                                }
+                                diff.push({ type: 'unchanged', value: words2[j] });
+                                i = k + 1;
+                                j++;
+                                foundMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!foundMatch) {
+                        diff.push({ type: 'removed', value: words1[i] });
+                        diff.push({ type: 'added', value: words2[j] });
+                        i++;
+                        j++;
+                    }
+                }
+            }
+            
+            return diff;
+        }
+
+        function formatDiffForPanel(diff, showType) {
+            let result = '';
+            let stats = { added: 0, removed: 0, unchanged: 0 };
+            
+            diff.forEach(item => {
+                stats[item.type]++;
+                
+                if (item.type === 'unchanged') {
+                    result += `<span class="diff-unchanged">${escapeHtml(item.value)}</span>\n`;
+                } else if (item.type === 'added' && (showType === 'both' || showType === 'added')) {
+                    result += `<span class="diff-added">${escapeHtml(item.value)}</span>\n`;
+                } else if (item.type === 'removed' && (showType === 'both' || showType === 'removed')) {
+                    result += `<span class="diff-removed">${escapeHtml(item.value)}</span>\n`;
+                } else if (item.type === 'added' && showType === 'removed') {
+                    // Don't show additions in the "removed" panel
+                } else if (item.type === 'removed' && showType === 'added') {
+                    // Don't show removals in the "added" panel
+                } else {
+                    result += `<span class="diff-unchanged">${escapeHtml(item.value)}</span>\n`;
+                }
+            });
+            
+            return { content: result, stats };
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function compareDiff() {
+            const text1 = document.getElementById('text1').value;
+            const text2 = document.getElementById('text2').value;
+            
+            if (!text1.trim() && !text2.trim()) {
+                document.getElementById('originalDiff').innerHTML = '<div class="empty-state">Please enter text in at least one field</div>';
+                document.getElementById('modifiedDiff').innerHTML = '<div class="empty-state">Please enter text in at least one field</div>';
+                document.getElementById('stats').style.display = 'none';
+                return;
+            }
+            
+            const lineDiff = computeLineDiff(text1, text2);
+            
+            // Enhanced diff that also does word-level comparison within changed lines
+            const enhancedDiff = [];
+            lineDiff.forEach(item => {
+                if (item.type === 'unchanged') {
+                    enhancedDiff.push(item);
+                } else {
+                    // For added/removed lines, we keep them as is for line-level diff
+                    enhancedDiff.push(item);
+                }
+            });
+            
+            // Format for both panels
+            const originalResult = formatDiffForPanel(enhancedDiff, 'removed');
+            const modifiedResult = formatDiffForPanel(enhancedDiff, 'added');
+            
+            document.getElementById('originalDiff').innerHTML = originalResult.content || '<div class="empty-state">No content to display</div>';
+            document.getElementById('modifiedDiff').innerHTML = modifiedResult.content || '<div class="empty-state">No content to display</div>';
+            
+            // Update stats
+            const totalStats = {
+                added: enhancedDiff.filter(item => item.type === 'added').length,
+                removed: enhancedDiff.filter(item => item.type === 'removed').length,
+                unchanged: enhancedDiff.filter(item => item.type === 'unchanged').length
+            };
+            
+            document.getElementById('addedCount').textContent = totalStats.added;
+            document.getElementById('removedCount').textContent = totalStats.removed;
+            document.getElementById('unchangedCount').textContent = totalStats.unchanged;
+            document.getElementById('stats').style.display = 'flex';
+        }
+
+        function clearAll() {
+            document.getElementById('text1').value = '';
+            document.getElementById('text2').value = '';
+            document.getElementById('originalDiff').innerHTML = '<div class="empty-state">Click "Compare Texts" to see differences</div>';
+            document.getElementById('modifiedDiff').innerHTML = '<div class="empty-state">Click "Compare Texts" to see differences</div>';
+            document.getElementById('stats').style.display = 'none';
+        }
+
+        function swapTexts() {
+            const text1 = document.getElementById('text1').value;
+            const text2 = document.getElementById('text2').value;
+            document.getElementById('text1').value = text2;
+            document.getElementById('text2').value = text1;
+            if (document.getElementById('stats').style.display === 'flex') {
+                compareDiff();
+            }
+        }
+
+        // Auto-compare when typing (with debounce)
+        let compareTimeout;
+        function autoCompare() {
+            clearTimeout(compareTimeout);
+            compareTimeout = setTimeout(compareDiff, 500);
+        }
+
+        document.getElementById('text1').addEventListener('input', autoCompare);
+        document.getElementById('text2').addEventListener('input', autoCompare);
+
+        // Initialize with example comparison
+        /* window.onload = function() {
+            compareDiff();
+        }; */
+        function mapToObj(map) {
+            return Object.fromEntries(map);
+        }
+
+        diffExpanded = false;
+        function toggleDiff() {
+            if (env === null) {
+                showWrongMessage('Please import a task first to compare it with the current task!');
+                return;
+            }
+            numberOutputs = document.querySelectorAll('.response-content').length
+            numberInputs = document.querySelectorAll('.parameters-container').length
+
+            if (numberOutputs != numberInputs) {
+                showWrongMessage('Mismatched number of inputs and outputs. Please ensure you have run all actions.');
+                return;
+            }
+            
+            const content = document.getElementById('task-diff-content');
+            const toggle = document.getElementById('diff-toggle');
+            diffExpanded = !diffExpanded;
+            if (diffExpanded) {
+                taskBeforeReconstructed = new Map(); taskAfterConstructed = new Map();
+                taskBeforeReconstructed["env"] = env; taskAfterConstructed["env"] = env;
+                taskBeforeReconstructed["model_provider"] = model_provider; taskAfterConstructed["model_provider"] = model_provider;
+                taskBeforeReconstructed["model"] = model; taskAfterConstructed["model"] = model;
+                taskBeforeReconstructed["num_trials"] = num_trials; taskAfterConstructed["num_trials"] = num_trials;
+                taskBeforeReconstructed["temperature"] = temperature; taskAfterConstructed["temperature"] = temperature;
+                taskBeforeReconstructed["interface_num"] = interface_num; taskAfterConstructed["interface_num"] = interface_num;
+                taskBeforeReconstructed["task"] = new Map(); taskAfterConstructed["task"] = new Map();
+                taskBeforeReconstructed["task"].set("user_id", user_id); taskAfterConstructed["task"].set("user_id", user_id);
+                taskBeforeReconstructed["task"].set("instruction", instruction); taskAfterConstructed["task"].set("instruction", instruction);
+                taskBeforeReconstructed["task"].set("actions", actionsBefore); taskAfterConstructed["task"].set("actions", getTaskActions());
+                taskBeforeReconstructed["task"].set("edges", edgesBefore); taskAfterConstructed["task"].set("edges", edgesBefore);
+
+                // console.log(taskBeforeReconstructed)
+                document.getElementById("text1").value = JSON.stringify(
+                { ...taskBeforeReconstructed, task: mapToObj(taskBeforeReconstructed["task"]) },
+                null,
+                2
+                );
+                document.getElementById("text2").value = JSON.stringify(
+                    { ...taskAfterConstructed, task: mapToObj(taskAfterConstructed["task"]) },
+                    null,
+                    2
+                );
+
+                content.classList.add('expanded');
+                toggle.textContent = '▲';
+                // Initialize network when expanded for the first time
+                if (!network) {
+                    createNetwork();
+                }
+            } else {
+                content.classList.remove('expanded');
+                toggle.textContent = '▼';
             }
         }
     </script>
