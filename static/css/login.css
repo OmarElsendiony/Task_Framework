@@ -1,0 +1,165 @@
+/* login.css - External stylesheet for login page */
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  color: white;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  height: 100vh;
+}
+
+/* Button styles */
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #4285f4;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.button:hover {
+  background-color: #357ae8;
+}
+
+/* Google login button specific styles */
+.google-login-button {
+  background-color: rgb(32, 33, 36);
+}
+
+.google-login-button:hover {
+  background-color: rgb(48, 49, 52);
+}
+
+/* Layout containers */
+.container {
+  display: flex;
+  -webkit-box-align: stretch;
+  align-items: stretch;
+  flex-direction: row;
+  gap: 0px;
+  height: 100vh;
+}
+
+.partition {
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  padding: 40px 40px;
+  background-color: #f3f4f6;
+  width: 50%;
+  height: 100%;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Left partition - logo section */
+.partition.left {
+  background-color: #1A202C;
+  align-items: flex-start;
+}
+
+/* Right partition - login section */
+.partition.right {
+  background-color: #2D3748;
+}
+
+/* Image styles */
+img {
+  max-width: 90%;
+  height: 100%;
+}
+
+/* Logo container */
+.logo-container {
+  width: 100%;
+}
+
+.logo-container a {
+  display: block;
+}
+
+/* Splash image container */
+.splash-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Login content */
+.login-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.login-content h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.login-content p {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+/* Google icon in button */
+.google-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* Button content alignment */
+.button-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  
+  .partition {
+    width: 100%;
+    height: 50vh;
+    padding: 20px;
+  }
+  
+  .login-content h1 {
+    font-size: 1.5rem;
+  }
+  
+  .login-content p {
+    font-size: 1rem;
+  }
+}
+
+img[alt="Turing Logo"] {
+  width: 100px; 
+}
+
+.partition.left {
+  overflow: hidden;
+}
+
+.logo-container a {
+  text-align: start;
+}

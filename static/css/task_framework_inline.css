@@ -1,0 +1,71 @@
+
+/************************** INLINE STYLES **********************************/
+/* task-framework-inline.css - Extracted inline styles only */
+
+/* Logo image styles */
+.logo img {
+  width: 100px;
+  scale: 2;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Go button container */
+.go-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+/* Add action container */
+.add-action-container {
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* Import/Export container */
+.import-export-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 20px 0px;
+  flex: 1.1;
+}
+
+/* Hidden file input */
+.hidden-file-input {
+  display: none;
+}
+
+/* Stats container (initially hidden) */
+.stats-hidden {
+  display: none;
+}
+
+/* Edge creation textarea */
+.edge-creation-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+/* Graph file input (hidden) */
+.graph-file-input-hidden {
+  display: none;
+}
+
+/* Save button container */
+.save-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
