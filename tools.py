@@ -64,7 +64,7 @@ class Tools:
             if investor.get("contact_email") == contact_email:
                 return json.dumps({
                     "success": False,
-                    "error": "An investor with this email already exists"
+                    "error": "An investor with this email already exists " + contact_email
                 })
         
         investor_id = generate_id(investors)
@@ -1198,7 +1198,6 @@ class Tools:
                 requester_id = user.get("user_id")
                 break
         else:
-            print("elseeeeeee")
             return json.dumps({
                 "approval_valid": False,
                 "error": f"No user found with email: {requester_email}"
@@ -1219,16 +1218,13 @@ class Tools:
         
         # Check if calculated approval code exists
         approvals_found_for_code = []
-        print((approvals.keys()))
         for approval in approvals.values():
             # print(approval)
             # break
             if approval.get("code") == calculated_approval_code:
                 approvals_found_for_code.append(approval)
-        print(approvals_found_for_code)
-        print(calculated_approval_code)
+
         if not approvals_found_for_code:
-            print("no codeee")
             return json.dumps({
                 "approval_valid": False,
                 "error": f"No approval found"
