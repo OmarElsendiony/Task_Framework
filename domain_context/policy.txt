@@ -1,0 +1,440 @@
+HR Payroll Policy & SOPs
+Introduction
+This document defines the operational guide for an HR Payroll automation agent. It is designed for single-turn execution: each procedure must be self-contained and completed in one interaction.
+Validation first: All inputs must be validated. If any required element is missing or invalid, the process halts with a clear error message.
+Halt conditions: If approvals are missing, compliance not satisfied, or external systems fail, the process halts with explicit instructions.
+Logging: All steps must be logged. Every create, update, approve, reject, delete, or execute action must generate an audit log entry.
+Role-based permissions: Only the defined roles can perform specified actions.
+The elevated roles are: HR director, payroll_administrator, finance_officer, it_administrator, compliance_officer
+Roles & Responsibilities
+HR Director
+Approve HR policies and major structural changes (departments, job levels).
+Own role definitions and segregation of duties.
+Escalation owner for compliance-critical HR actions.
+Create and update department records
+Create and update benefits plans
+Create job positions
+Post and close job openings
+HR Manager
+Oversee daily HR operations across recruitment, onboarding, leave, and employee records.
+Ensure SOP adherence and timely approvals where required.
+Process employee onboarding
+Process employee offboarding and terminations
+Manage performance review cycles
+Update employee profiles
+Create and manage training programs
+Process leave requests
+Create and update department records
+Create job positions
+Manage skills managements and job position skill requirements
+Post and close job openings
+Hiring Manager
+Raise requisitions, participate in interviews, provide hiring decisions.
+Cannot access payroll or benefits data unless explicitly granted.
+Participate in interview scheduling and outcome recording
+Manage application stage transitions per workflow
+Create job positions
+Associate skills with job positions
+Post and close job openings
+Schedule interviews and record outcomes
+Can approve timesheet entries
+Recruiter
+Manage candidates and applications, schedule interviews, record outcomes.
+Cannot approve compensation, payroll, or benefits.
+Create and manage candidate records
+Create job applications and manage application stages
+Schedule interviews and record interview outcomes
+Manage application stage transitions per workflow
+Add candidate records to the system
+Create job positions
+Post and close job openings
+Payroll Administrator
+Create, update, and process payroll records, bonuses, and deductions.
+Cannot approve their own payroll runs.
+Submit and manage timesheet entries
+Process payroll runs and calculations
+Process payroll corrections
+Aggregate hours and compute gross pay, deductions, and net pay
+Process timesheet submissions and corrections
+Finance Officer
+Validate payroll accuracy and statutory deductions; approve or reject payroll runs.
+Reconcile payroll with finance ledgers; authorize reimbursements and payouts.
+Process expense reimbursements
+Validate payroll calculations and reconciliation
+Create and update benefits plans
+Update expense reimbursement records
+Compliance Officer
+Approve or reject compliance-sensitive actions (tax filings, terminations, incidents).
+Halt operations if legal or regulatory violations are detected.
+IT / System Administrator
+Configure RBAC, MFA, encryption; manage backups and audit logs.
+Provision/deprovision system access promptly upon status change.
+Employee
+Provide accurate personal information; submit timesheets promptly.
+Acknowledge policies and participate in reviews and training as required.
+Submit timesheet entries with accurate work dates and hours
+Enroll in and complete training programs
+Submit leave requests with proper documentation
+Participate in performance review cycles
+Submit expense reimbursement requests
+Upload and manage personal documents
+Standard Operating Procedures
+User Provisioning
+Input Validation
+Validate that email is present, follows valid email format, and is unique in the system using discover_user_entities
+Validate that role is one of the supported system roles (HR Director, HR Manager, Recruiter, Payroll Administrator, Hiring Manager, Finance Officer, IT Administrator, Compliance Officer, Employee)
+Validate that first name and last name are provided and non-empty
+Check that user with this email does not already exist in the system using discover_user_entities
+Authorization Check
+Check if HR Director or IT Administrator approval is required for elevated roles (administrative and financial access roles) using check_approval
+If approval is missing for elevated roles, then output 'Halt: Approval missing for elevated role assignment'
+Record Creation
+Create new user with required information: first name, last name, email, role using manage_user
+Set optional information if provided: phone number
+Set system defaults: active status, multi-factor authentication enabled
+Generate unique user identifier
+Audit Logging
+Log the user provisioning action as a creation event in the audit trail using manage_audit_logs
+Create/Update Department
+Input Validation
+For creation:
+Validate that department name is provided and non-empty
+Validate that assigned manager exists in the employee system and has active status using discover_employee_entities
+Validate that budget amount follows proper decimal format if provided
+For updates: Validate that department exists and has active status using discover_department_entities
+Authorization Check
+Check that HR Director approval is obtained for department creation, updates, or manager changes using check_approval
+If approval is missing, then output 'Halt: Approval missing for department operation'
+Record Management
+For creation:
+Create department with required information: department name, assigned manager using manage_department
+Set optional information if provided: budget allocation
+Set system defaults: active status
+For updates: Update specified information while maintaining organizational integrity using manage_department
+Audit Logging
+Log the department action as creation or update event in the audit trail using manage_audit_logs
+Create/Update Job Position
+Input Validation
+For creation:
+Validate that position title and department assignment are provided
+Validate that assigned department exists and has active status using discover_department_entities
+Validate that employment type is within supported categories (full-time, part-time, contract, intern, temporary)
+Validate that minimum hourly rate does not exceed maximum rate if both provided
+Validate that salary rates are positive monetary values
+For updates: Validate that position exists in the system using discover_job_entities
+Authorization Check
+Check that HR Director or Hiring Manager approval is obtained for positions using check_approval
+If approval is missing, then output 'Halt: Approval missing for publishable position'
+Post Job Opening
+Input Validation
+Validate that position exists and currently has draft status using discover_job_entities
+Validate that position contains all required information for publication
+Status Update
+Change job position status from draft to open for public visibility using manage_job_position
+Update modification timestamp
+Audit Logging
+Log the job posting action as an update event in the audit trail using manage_audit_logs
+Skills Management
+Validate that the skill name is provided and valid. If skill name is missing or invalid, then output 'Halt: Invalid skill details: [list]'
+Check that HR Director approval is obtained for skills catalog operations using check_approval. If approval is missing, then output 'Halt: Approval missing for skills operation'
+For creation, check that skill name does not already exist using discover_job_entities. If duplicate exists, then output 'Halt: Skill name already exists'
+Create or update the skill record with the status provided (active/inactive) using manage_skill
+Log the skills catalog action in the audit log using manage_audit_logs
+Job Position Skills Management
+Validate that the position ID is valid and skill IDs are provided using discover_job_entities. If position ID is invalid or skill IDs missing, then output 'Halt: Invalid position skills details: [list]'
+Check that HR Director or Hiring Manager approval is obtained for position skills changes using check_approval. If approval is missing, then output 'Halt: Approval missing for position skills operation'
+Verify that the job position exists and all specified skills exist in the skills catalog using discover_job_entities
+For adding skills, check that skills are not already associated with the position. For removing skills, check that skills are currently associated
+Add or remove skill associations for the job position using manage_job_position_skills
+Log the position skills management action in the audit log using manage_audit_logs
+Close Job Opening
+Input Validation
+Validate that position exists and currently has open status using discover_job_entities
+Status Update
+Change job position status from open to closed using manage_job_position
+Audit Logging
+Log the job closing event as an update event in the audit trail using manage_audit_logs
+Adding Candidate Record
+Input Validation
+Validate that first name, last name, and email are provided and non-empty
+Validate that email is unique in the system using discover_recruitment_entities
+Validate that source is within accepted recruitment channels (job board, referral, company website, recruiter, social media, career fair)
+Record Creation
+Create candidate with required information: first name, last name, email, recruitment source using manage_candidate
+Set optional information if provided: phone number, address
+Set the status of the candidate as new if the status is not specified. The allowed statuses are: 'new', 'screening','interviewing','offer','hired','rejected','withdrawn'
+Audit Logging
+Log the candidate creation as a creation event in the audit trail using manage_audit_logs
+Create/Update Job Application
+Input Validation
+For creation:
+Validate that candidate and position exist and are valid using discover_recruitment_entities and discover_job_entities
+Validate that assigned recruiter exists and has recruiter role using discover_user_entities
+Validate that application date is provided and not in future
+For updates:
+Validate that application exists using discover_recruitment_entities
+Validate status transitions follow proper workflow. Applications follow a linear progression: submitted → under_review → screening (with AI scoring) → interviewing → offer_made → accepted. Applications can exit to 'rejected' or 'withdrawn' from any active stage but cannot move backward, transition from terminal states (accepted, rejected, withdrawn), or skip intermediate steps.
+Record Management
+For creation:
+Create application with required information: candidate, position, application date, assigned recruiter using manage_job_applications
+Set status of the application as submitted unless the state is specified. The allowed states are: 'submitted','under_review','screening','interviewing','offer_made','accepted','rejected','withdrawn'
+For updates:
+Update specified information, ensure status transitions are valid using manage_job_applications
+Optional information that are not required to create the job application but preferred: AI screening score (percentage), final hiring decision, current status
+Audit Logging
+Log the application action as creation or update event in the audit trail using manage_audit_logs
+Manage Application Stage
+Input Validation
+Validate that the application exists, and the stage transition is valid using discover_recruitment_entities. If application is not found or stage transition is invalid, then output 'Halt: Invalid application status change'
+Validate that AI screening score is within acceptable percentage range (0-100) if provided
+Validate that final decision is within accepted options (hire, reject, hold) if provided
+Authorization Check
+Check that Recruiter or Hiring Manager approval is obtained using check_approval
+Record Update
+Update job application status and AI screening score if provided using manage_job_applications
+Set final hiring decision (hire, reject, hold) if provided
+Audit Logging
+Log the stage change as an update event in the audit trail using manage_audit_logs
+Schedule Interview
+Input Validation
+Validate that the application and interviewer exist using discover_recruitment_entities and discover_user_entities. If application or interviewer is missing → output 'Halt: Invalid interview scheduling details'
+Validate that interview type is within accepted categories (phone screening, technical, behavioral, panel, final)
+Validate that scheduled date and time is in the future
+Validate that duration is a positive time value with reasonable default
+Record Creation
+Create interview with required information: application, interviewer, interview type, scheduled date and time using manage_interviews
+Set optional information if provided: duration
+Set system defaults: scheduled status, standard duration
+Generate unique interview identifier
+Audit Logging
+Log the interview scheduling as a creation event in the audit trail using manage_audit_logs
+Record Interview Outcome
+Input Validation
+Validate that interview exists and has scheduled or completed status using discover_recruitment_entities
+Validate that overall rating is within accepted scale (excellent through poor)
+Validate that individual scores are within acceptable numeric range if provided (technical, communication, cultural fit)
+Validate that recommendation is within accepted options (strong hire, hire, no hire, strong no hire)
+Record Update
+Update interview with outcome information: overall rating, individual scores, recommendation using manage_interviews
+Change status to completed
+Update related job application status based on interview outcome using manage_job_applications. The update for job application is as follows: positive recommendations ('strong_hire' or 'hire') advance 'interviewing' status to 'offer_made', while negative recommendations ('no_hire' or 'strong_no_hire') immediately set status to 'rejected'. When no recommendation is provided, applications with 'excellent' or 'good' ratings remain at 'interviewing' for potential additional interviews, while 'poor' or 'below_average' ratings trigger 'rejected' status. Final interviews with positive recommendations automatically advance to 'offer_made'.
+Audit Logging
+Log the interview outcome as an update event in the audit trail using manage_audit_logs
+Employee Onboarding
+Input Validation
+Validate that all required information is provided: user account, position assignment, hire date
+Validate that user account exists and is not already associated with an employee record using discover_user_entities and discover_employee_entities
+Validate that assigned position exists and has active status using discover_job_entities
+Validate that hire date is not in the past
+Validate that hourly rate is positive monetary value, if provided
+Validate optional information if provided: manager assignment (must exist in employee system using discover_employee_entities), date of birth, address
+Authorization Check
+Check that HR Manager approval is obtained and Compliance verification for eligibility documents is completed using check_approval
+If approvals are missing, then output 'Halt: Approval or compliance verification missing'
+Record Creation
+Create employee record with required information: user account, position, hire date using manage_employee
+Set optional information if provided: manager assignment, personal details, compensation rate
+Set system defaults: active employment status
+Update user account to active status using manage_user
+Document Generation
+Generate and store welcome documents in the document management system using manage_document_storage
+Audit Logging
+Log all onboarding actions as creation events in the audit trail using manage_audit_logs
+Update Employee Profile
+Input Validation
+Validate that employee exists and has active status using discover_employee_entities
+Validate that employment status is within accepted values (active, terminated, on leave, suspended)
+Validate that hourly rate is positive monetary value if provided
+Record Update
+Update employee record information using manage_employee
+Track before and after values for audit purposes
+Audit Logging
+Log before and after values as update events in the audit trail using manage_audit_logs
+Employee Offboarding
+Input Validation
+Validate that employee exists and has active employment status using discover_employee_entities
+Check for pending payroll records that have not been finalized using discover_payroll_entities
+Check for active benefits enrollments using discover_benefits_entities
+Check for incomplete training programs using discover_training_entities
+Authorization Check
+Check that HR Manager and Compliance Officer approvals are obtained using check_approval
+If approvals are missing, then output 'Halt: Required approvals missing'
+Record Updates
+Set employee employment status to terminated using manage_employee
+Update user account status to inactive using manage_user
+Terminate active benefits enrollments using manage_employee_benefits
+Cancel incomplete training enrollments using manage_employee_training
+Audit Logging
+Log all offboarding steps as update events in the audit trail using manage_audit_logs
+Timesheet Submission
+Input Validation
+Validate that employee exists and has active status using discover_employee_entities
+Validate that work date is provided and not in future
+Validate that clock in and clock out times are provided and logical (clock in occurs before clock out)
+Validate that break duration is non-negative time value with reasonable default
+Record Creation
+Create timesheet with required information: employee, work date, clock in time, clock out time using manage_timesheet_entries
+Calculate total hours worked based on time difference minus break duration
+Set optional information if provided: break duration, project assignment
+Set system defaults: submitted status, zero break time
+Audit Logging
+Log the timesheet submission as a creation event in the audit trail using manage_audit_logs
+Timesheet Approval/Correction
+Input Validation
+Validate that timesheet exists in the system using discover_timesheet_entities
+Validate that approver has payroll administrator or hiring manager role using discover_user_entities
+Validate status transitions follow proper workflow (draft or submitted to approved or rejected)
+Authorization Check
+Verify approver is authorized manager (Payroll Administrator or Hiring Manager) using check_approval
+If unauthorized, then output 'Halt: Unauthorized access'
+Record Update
+Update timesheet with approver information and change status to approved or rejected using manage_timesheet_entries
+Adjust time information if correction requested (total hours, break duration)
+Audit Logging
+Log approval and corrections as update events in the audit trail using manage_audit_logs
+Process Payroll Run
+Input Validation
+Validate that all required information is provided: employee, pay period dates
+Validate that pay period dates are logical (start date before end date)
+Validate that hourly rate is positive monetary value
+Aggregate approved timesheet hours for the specified pay period using discover_timesheet_entities
+Authorization Check
+Check that Finance Officer approval is obtained using check_approval
+If approval is missing, then output 'Halt: Finance Officer approval required'
+Record Creation/Update
+Create payroll record with required information: employee, pay period dates, hourly rate using manage_payroll_records
+Calculate hours worked from approved timesheets
+Audit Logging
+Log all payroll transactions as creation events in the audit trail using manage_audit_logs
+Payroll Correction
+Input Validation
+Validate that payroll record exists in the system using discover_payroll_entities
+Validate that correction information is valid (hours worked and hourly rate must be positive)
+Authorization Check
+Check that Finance Officer approval is obtained using check_approval
+If approval is missing, then output 'Halt: Finance Officer approval required'
+Record Update
+Adjust payroll record with correction details using manage_payroll_records
+Update modification timestamp
+Audit Logging
+Log the payroll correction as an update event in the audit trail using manage_audit_logs
+Create/Update Benefits Plan
+Input Validation
+For creation:
+Validate that plan name and plan type are provided
+Validate that plan type is within supported categories (health insurance, dental, vision, life insurance, disability, retirement, paid time off, flexible spending)
+Validate that effective date is provided and expiration date occurs after effective date if provided
+Validate that cost amounts are non-negative monetary values if provided
+For updates: Validate that plan exists in the system using discover_benefits_entities
+Authorization Check
+Check that HR Director or Finance Officer approval is obtained using check_approval
+If approval is missing, then output 'Halt: HR Director or Finance Officer approval required'
+Record Management
+For creation: Create plan with required information: plan name, plan type, effective date using manage_benefits_plans
+Set optional information if provided: provider, employee cost, employer cost, expiration date
+Set system defaults: active status
+For updates: Update specified information while maintaining date consistency using manage_benefits_plans
+Audit Logging
+Log the benefits plan action as creation or update event in the audit trail using manage_audit_logs
+Employee Benefits Enrollment & Update
+Input Validation
+For enrollment: Validate that employee and benefits plan exist and have active status using discover_employee_entities and discover_benefits_entities
+Validate that enrollment date is provided and not in future
+Validate that coverage level is within accepted options (employee only, employee plus spouse, employee plus children, family coverage)
+Check that employee is not already enrolled in the same plan type using discover_benefits_entities
+For updates: Validate that enrollment record exists using discover_benefits_entities
+Record Management
+For enrollment: Create benefits enrollment with required information: employee, plan, enrollment date, coverage level using manage_employee_benefits
+Set optional information if provided: beneficiary name and relationship
+Set system defaults: active enrollment status
+For updates: Update specified information, validate status transitions using manage_employee_benefits
+Audit Logging
+Log the benefits enrollment change as creation or update event in the audit trail using manage_audit_logs
+Performance Review Cycle
+Input Validation
+Validate that employee and reviewer exist and have active status using discover_employee_entities
+Validate that review period dates are logical (start date before end date)
+Validate that review type is within accepted categories (annual, quarterly, probationary, project-based)
+Authorization Check
+Check that HR Manager approval is obtained for final approval using check_approval
+If approval is missing, then output 'Halt: HR Manager approval required'
+Record Management
+Create performance review with required information: employee, reviewer, review period dates, review type, overall rating using manage_performance_reviews
+Set optional score information if provided for various competency areas
+Update status through proper progression (draft to submitted to approved)
+Audit Logging
+Log all status transitions as creation or update events in the audit trail using manage_audit_logs
+Creating Training Program
+Validate that all program fields are provided and valid. If program fields are missing or invalid, then output 'Halt: Invalid training program details'
+Create or update training programs with mandatory flag if the training is required and set status to 'active' using manage_training_programs
+Log the training program action in the audit trail using manage_audit_logs
+Employee Training Enrollment & Completion
+Validate that the employee and training program are valid using discover_employee_entities and discover_training_entities. If employee or program is invalid, then output 'Halt: Invalid training enrollment'
+Create or update employee training record with status progression (enrolled → completed) and set expiry date if applicable using manage_employee_training
+Log the training enrollment and completion in the audit trail using manage_audit_logs
+Document Upload & Management
+Validate that the document type is supported and all required metadata is provided. If document type is unsupported or metadata is missing, then output 'Halt: Invalid document metadata: [list]'
+Insert document into document storage system with confidentiality level and retention period in years, and store file pointer using manage_document_storage
+Log the document creation in the audit trail using manage_audit_logs
+Audit Trail Logging (Global)
+Input Validation
+Validate that all required information is provided: user, action type, reference type, reference identifier
+Validate that user exists in the system using discover_user_entities
+Validate that action type is within accepted values (create, read, update, delete, approve, reject)
+For field-level changes, validate that field name, old value, and new value are provided
+Record Creation
+Create audit log entry with all provided information using manage_audit_logs
+Set timestamp to current system time
+For record-level operations (create or delete), set field-level change information to null
+Error Handling
+If audit log write fails, then output 'Halt: Audit trail failure'
+Leave Request Processing
+Input Validation
+Validate that employee exists and has active status using discover_employee_entities
+Validate that leave type is within accepted categories (annual, sick, family medical leave, personal, bereavement, jury duty)
+Validate that start and end dates are provided and logical (start date on or before end date, not in past)
+Calculate requested days from date range
+Record Creation
+Create leave request with required information: employee, leave type, start date, end date, requested days using manage_leave_requests
+Calculate and set remaining balance after this request
+Set the approval status as pending unless logging a leave request that has many changes incurred to it.
+Audit Logging
+Log the leave request submission as a creation event in the audit trail using manage_audit_logs
+Create/Update Expense Reimbursement
+Input Validation
+For creation:
+Validate that employee, expense date, amount, and expense type are provided
+Validate that employee exists and has active status using discover_employee_entities
+Validate that expense type is within accepted categories (travel, meals, equipment, training, other)
+Validate that amount is positive monetary value
+Validate that expense date is not in future
+For updates: Validate that reimbursement record exists and has submitted status using discover_expense_entities
+Record Management
+For creation: Create reimbursement with required information: employee, expense date, amount, expense type using manage_expense_reimbursements
+For updates: Update specified information (amount, receipt location) only if status allows modification using manage_expense_reimbursements
+Audit Logging
+Log the reimbursement action as creation or update event in the audit trail using manage_audit_logs
+Process Expense Reimbursement
+Input Validation
+Validate that reimbursement record exists in the system using discover_expense_entities
+Validate that approving user exists and has appropriate role using discover_user_entities
+Validate that status is within accepted values (approved, rejected, paid)
+Validate status transitions follow proper workflow (submitted to approved or rejected, approved to paid)
+Record Update
+Update reimbursement status to specified value using manage_expense_reimbursements
+Set approver information to approving user if status is approved
+Set payment date if status is paid and payment date is provided
+Audit Logging
+Log the reimbursement processing as an update event in the audit trail using manage_audit_logs
+Payroll Deductions Management
+Input Validation
+Validate that payroll record exists in the system using discover_payroll_entities
+Validate that deduction type is within accepted categories (tax, insurance, retirement, garnishment, equipment, other)
+Validate that deduction amount is positive monetary value
+Validate that creator exists in the user system using discover_user_entities
+Record Creation
+Create deduction with required information: payroll record, deduction type, amount, creator using manage_payroll_deductions
+Generate unique deduction identifier
+Audit Logging
+Log the deduction creation as a creation event in the audit trail using manage_audit_logs
+

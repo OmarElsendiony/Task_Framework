@@ -1,0 +1,322 @@
+{
+  "task_file": "tools_regression_tests/interface_1/manage_benefits_plan_tests.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "plan_data": {
+          "plan_name": "Premium Health Insurance",
+          "plan_type": "health insurance",
+          "effective_date": "2025-01-01",
+          "hr_director_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "plan_id": "54",
+          "message": "Benefits plan 54 created successfully",
+          "plan_data": {
+            "plan_id": "54",
+            "plan_name": "Premium Health Insurance",
+            "plan_type": "health insurance",
+            "provider": null,
+            "employee_cost": null,
+            "employer_cost": null,
+            "status": "active",
+            "effective_date": "2025-01-01",
+            "expiration_date": null,
+            "created_at": "2025-10-01T12:00:00",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "plan_data": {
+          "plan_name": "Dental Plus",
+          "plan_type": "dental",
+          "provider": "DentalCorp",
+          "employee_cost": 25.5,
+          "employer_cost": 75.0,
+          "effective_date": "2025-01-01",
+          "expiration_date": "2025-12-31",
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "plan_id": "55",
+          "message": "Benefits plan 55 created successfully",
+          "plan_data": {
+            "plan_id": "55",
+            "plan_name": "Dental Plus",
+            "plan_type": "dental",
+            "provider": "DentalCorp",
+            "employee_cost": 25.5,
+            "employer_cost": 75.0,
+            "status": "active",
+            "effective_date": "2025-01-01",
+            "expiration_date": "2025-12-31",
+            "created_at": "2025-10-01T12:00:00",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "plan_data": {
+          "plan_name": "Vision Care Basic",
+          "plan_type": "vision",
+          "effective_date": "2025-06-01",
+          "status": "inactive",
+          "hr_director_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "plan_id": "56",
+          "message": "Benefits plan 56 created successfully",
+          "plan_data": {
+            "plan_id": "56",
+            "plan_name": "Vision Care Basic",
+            "plan_type": "vision",
+            "provider": null,
+            "employee_cost": null,
+            "employer_cost": null,
+            "status": "inactive",
+            "effective_date": "2025-06-01",
+            "expiration_date": null,
+            "created_at": "2025-10-01T12:00:00",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "plan_id": "1",
+        "plan_data": {
+          "employee_cost": 50.0,
+          "employer_cost": 150.0,
+          "hr_director_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "plan_id": "1",
+          "message": "Benefits plan 1 updated successfully",
+          "plan_data": {
+            "plan_id": "1",
+            "plan_name": "Blue Cross Blue Shield Health Plan",
+            "plan_type": "health_insurance",
+            "provider": "Blue Cross Blue Shield",
+            "employee_cost": 50.0,
+            "employer_cost": 150.0,
+            "status": "active",
+            "effective_date": "2022-12-21",
+            "expiration_date": null,
+            "created_at": "2022-12-12T01:45:00",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "plan_id": "2",
+        "plan_data": {
+          "status": "inactive",
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "plan_id": "2",
+          "message": "Benefits plan 2 updated successfully",
+          "plan_data": {
+            "plan_id": "2",
+            "plan_name": "Kaiser Permanente HMO",
+            "plan_type": "health_insurance",
+            "provider": "Kaiser Permanente",
+            "employee_cost": 200.0,
+            "employer_cost": 750.0,
+            "status": "inactive",
+            "effective_date": "2024-04-14",
+            "expiration_date": null,
+            "created_at": "2024-03-28T20:47:08",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "plan_data": {
+          "plan_name": "401k Plan",
+          "plan_type": "retirement",
+          "effective_date": "2025-01-01"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: HR Director or Finance Officer approval required"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "plan_data": {
+          "plan_name": "Invalid Plan",
+          "plan_type": "invalid_type",
+          "effective_date": "2025-01-01",
+          "hr_director_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid plan_type. Must be one of: health insurance, dental, vision, life insurance, disability, retirement, paid time off, flexible spending"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "plan_data": {
+          "plan_name": "Backward Dates Plan",
+          "plan_type": "health insurance",
+          "effective_date": "2025-12-31",
+          "expiration_date": "2025-01-01",
+          "hr_director_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Expiration date must occur after effective date"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "plan_data": {
+          "plan_name": "Negative Cost Plan",
+          "plan_type": "dental",
+          "employee_cost": -10.0,
+          "effective_date": "2025-01-01",
+          "hr_director_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: employee_cost must be a non-negative monetary value"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "plan_id": "999",
+        "plan_data": {
+          "employee_cost": 50.0,
+          "hr_director_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Benefits plan 999 not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "plan_id": "1",
+        "plan_data": {
+          "employee_cost": 50.0
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: HR Director or Finance Officer approval required"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "plan_data": {
+          "plan_type": "health insurance",
+          "effective_date": "2025-01-01",
+          "hr_director_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid benefits plan details: plan_name"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "invalid_action"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Invalid action 'invalid_action'. Must be 'create' or 'update'"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "plan_data is required for create action"
+        },
+        200
+      ]
+    }
+  ]
+}

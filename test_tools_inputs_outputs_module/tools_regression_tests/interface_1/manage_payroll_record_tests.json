@@ -1,0 +1,170 @@
+{
+    "env": "hr_experts",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "create",
+                    "payroll_data": {
+                        "employee_id": "1",
+                        "pay_period_start": "2025-10-01",
+                        "pay_period_end": "2025-10-15",
+                        "hourly_rate": 25.50,
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "create",
+                    "payroll_data": {
+                        "employee_id": "2",
+                        "pay_period_start": "2025-10-01",
+                        "pay_period_end": "2025-10-15",
+                        "hourly_rate": 30.00,
+                        "payment_date": "2025-10-20",
+                        "approved_by": "finance_manager",
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "create",
+                    "payroll_data": {
+                        "employee_id": "3",
+                        "pay_period_start": "2025-09-16",
+                        "pay_period_end": "2025-09-30",
+                        "hourly_rate": 22.75,
+                        "status": "draft",
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "update",
+                    "payroll_id": "1",
+                    "payroll_data": {
+                        "hours_worked": 80.0,
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "update",
+                    "payroll_id": "2",
+                    "payroll_data": {
+                        "status": "paid",
+                        "payment_date": "2025-10-22",
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "create",
+                    "payroll_data": {
+                        "employee_id": "999",
+                        "pay_period_start": "2025-10-01",
+                        "pay_period_end": "2025-10-15",
+                        "hourly_rate": 25.50,
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "create",
+                    "payroll_data": {
+                        "employee_id": "1",
+                        "pay_period_start": "2025-10-15",
+                        "pay_period_end": "2025-10-01",
+                        "hourly_rate": 25.50,
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "create",
+                    "payroll_data": {
+                        "employee_id": "1",
+                        "pay_period_start": "2025-10-01",
+                        "pay_period_end": "2025-10-15",
+                        "hourly_rate": -5.00,
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "create",
+                    "payroll_data": {
+                        "employee_id": "1",
+                        "pay_period_start": "2025-10-01",
+                        "pay_period_end": "2025-10-15",
+                        "hourly_rate": 25.50
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "update",
+                    "payroll_id": "999",
+                    "payroll_data": {
+                        "hours_worked": 40.0,
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "update",
+                    "payroll_id": "1",
+                    "payroll_data": {
+                        "hours_worked": -10.0,
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "create",
+                    "payroll_data": {
+                        "pay_period_start": "2025-10-01",
+                        "pay_period_end": "2025-10-15",
+                        "hourly_rate": 25.50,
+                        "finance_officer_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "invalid_action"
+                }
+            },
+            {
+                "name": "manage_payroll_record",
+                "arguments": {
+                    "action": "create"
+                }
+            }
+        ]
+    }
+}

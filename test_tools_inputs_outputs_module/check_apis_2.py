@@ -1,27 +1,17 @@
-import os
+# import os
 import json
-import glob
+# import glob
 from running_tasks import *
 
 
-def find_all_task_files(base_path="week_11"):
-    """
-    Find all task.json files in the directory structure.
-    Pattern: week_11/*/dhanraj-*-*/task.json
-    """
-    pattern = os.path.join(base_path, "**", "task.json")
-    task_files = glob.glob(pattern, recursive=True)
-    return task_files
-
-
-def run_single_task(task_file_path):
+def run_single_task(task_data):
     """
     Run a single task from a task.json file.
     Returns (success: bool, error_message: str or None)
     """
     try:
-        with open(task_file_path, 'r') as f:
-            task_data = json.load(f)
+        # with open(task_file_path, 'r') as f:
+        #     task_data = json.load(f)
         
         environment = task_data.get("env")
         interface = task_data.get("interface_num")
@@ -54,18 +44,8 @@ def run_single_task(task_file_path):
         # print(f"  Successfully completed all actions for {task_file_path}")
         return True, None
         
-    except FileNotFoundError:
-        error_msg = f"Task file not found: {task_file_path}"
-        # print(f"  ERROR: {error_msg}")
-        return False, error_msg
-    except json.JSONDecodeError as e:
-        error_msg = f"Invalid JSON in task file {task_file_path}: {str(e)}"
-        # print(f"  ERROR: {error_msg}")
-        return False, error_msg
     except Exception as e:
-        error_msg = f"Unexpected error processing {task_file_path}: {str(e)}"
-        # print(f"  ERROR: {error_msg}")
-        return False, error_msg
+        return False, e
 
 
 def run_all_tasks(base_path="week_11"):  
@@ -73,11 +53,7 @@ def run_all_tasks(base_path="week_11"):
     Find and run all task.json files, logging errors to a file.
     """
     # Find all task files
-    task_files = find_all_task_files(base_path)
-    
-    if not task_files:
-        print("No task.json files found in the directory structure.")
-        return
+    # task_files = find_all_task_files(base_path)
     
     # print(f"Found {len(task_files)} task files to process:")
     # for task_file in task_files:

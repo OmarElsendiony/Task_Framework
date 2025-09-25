@@ -1,0 +1,312 @@
+{
+  "task_file": "tools_regression_tests/interface_1/manage_payroll_record_tests.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "payroll_data": {
+          "employee_id": "1",
+          "pay_period_start": "2025-10-01",
+          "pay_period_end": "2025-10-15",
+          "hourly_rate": 25.5,
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "payroll_id": "597",
+          "message": "Payroll record 597 created successfully with 0.0 hours",
+          "payroll_data": {
+            "payroll_id": "597",
+            "employee_id": "1",
+            "pay_period_start": "2025-10-01",
+            "pay_period_end": "2025-10-15",
+            "hours_worked": 0.0,
+            "hourly_rate": 25.5,
+            "payment_date": null,
+            "status": "approved",
+            "approved_by": null,
+            "created_at": "2025-10-01T12:00:00",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "payroll_data": {
+          "employee_id": "2",
+          "pay_period_start": "2025-10-01",
+          "pay_period_end": "2025-10-15",
+          "hourly_rate": 30.0,
+          "payment_date": "2025-10-20",
+          "approved_by": "finance_manager",
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "payroll_id": "598",
+          "message": "Payroll record 598 created successfully with 0.0 hours",
+          "payroll_data": {
+            "payroll_id": "598",
+            "employee_id": "2",
+            "pay_period_start": "2025-10-01",
+            "pay_period_end": "2025-10-15",
+            "hours_worked": 0.0,
+            "hourly_rate": 30.0,
+            "payment_date": "2025-10-20",
+            "status": "approved",
+            "approved_by": "finance_manager",
+            "created_at": "2025-10-01T12:00:00",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "payroll_data": {
+          "employee_id": "3",
+          "pay_period_start": "2025-09-16",
+          "pay_period_end": "2025-09-30",
+          "hourly_rate": 22.75,
+          "status": "draft",
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Invalid fields for payroll creation: status"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "payroll_id": "1",
+        "payroll_data": {
+          "hours_worked": 80.0,
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "payroll_id": "1",
+          "message": "Payroll record 1 corrected successfully",
+          "payroll_data": {
+            "payroll_id": "1",
+            "employee_id": "2",
+            "pay_period_start": "2024-09-01",
+            "pay_period_end": "2024-09-30",
+            "hours_worked": 80.0,
+            "hourly_rate": 16.0,
+            "payment_date": null,
+            "status": "approved",
+            "approved_by": "35",
+            "created_at": "2024-10-02T23:53:05",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "payroll_id": "2",
+        "payroll_data": {
+          "status": "paid",
+          "payment_date": "2025-10-22",
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "payroll_id": "2",
+          "message": "Payroll record 2 corrected successfully",
+          "payroll_data": {
+            "payroll_id": "2",
+            "employee_id": "2",
+            "pay_period_start": "2024-10-01",
+            "pay_period_end": "2024-10-31",
+            "hours_worked": 8.58,
+            "hourly_rate": 16.0,
+            "payment_date": "2025-10-22",
+            "status": "paid",
+            "approved_by": "33",
+            "created_at": "2024-11-01T20:28:45",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "payroll_data": {
+          "employee_id": "999",
+          "pay_period_start": "2025-10-01",
+          "pay_period_end": "2025-10-15",
+          "hourly_rate": 25.5,
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Employee 999 not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "payroll_data": {
+          "employee_id": "1",
+          "pay_period_start": "2025-10-15",
+          "pay_period_end": "2025-10-01",
+          "hourly_rate": 25.5,
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Pay period start date must be before end date"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "payroll_data": {
+          "employee_id": "1",
+          "pay_period_start": "2025-10-01",
+          "pay_period_end": "2025-10-15",
+          "hourly_rate": -5.0,
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Hourly rate must be positive monetary value"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "payroll_data": {
+          "employee_id": "1",
+          "pay_period_start": "2025-10-01",
+          "pay_period_end": "2025-10-15",
+          "hourly_rate": 25.5
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Finance Officer approval required"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "payroll_id": "999",
+        "payroll_data": {
+          "hours_worked": 40.0,
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Payroll record 999 not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "payroll_id": "1",
+        "payroll_data": {
+          "hours_worked": -10.0,
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Hours worked must be positive"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "payroll_data": {
+          "pay_period_start": "2025-10-01",
+          "pay_period_end": "2025-10-15",
+          "hourly_rate": 25.5,
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid payroll run details: employee_id"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "invalid_action"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Invalid action 'invalid_action'. Must be 'create' or 'update'"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "payroll_data is required for create action"
+        },
+        200
+      ]
+    }
+  ]
+}

@@ -1,0 +1,270 @@
+{
+  "task_file": "tools_regression_tests/interface_1/manage_employee_benefits_tests.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "benefits_data": {
+          "employee_id": "1",
+          "plan_id": "1",
+          "enrollment_date": "2025-01-15",
+          "coverage_level": "employee only"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Employee 1 does not have active status"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "benefits_data": {
+          "employee_id": "2",
+          "plan_id": "2",
+          "enrollment_date": "2025-02-01",
+          "coverage_level": "family coverage",
+          "beneficiary_name": "Jane Doe",
+          "beneficiary_relationship": "spouse"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Benefits plan 2 does not have active status"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "benefits_data": {
+          "employee_id": "3",
+          "plan_id": "3",
+          "enrollment_date": "2025-03-10",
+          "coverage_level": "employee plus children",
+          "status": "pending"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Employee 3 is already enrolled in health_insurance plan"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "enrollment_id": "1",
+        "benefits_data": {
+          "coverage_level": "employee plus spouse",
+          "beneficiary_name": "John Smith",
+          "beneficiary_relationship": "spouse"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "enrollment_id": "1",
+          "message": "Employee benefits enrollment 1 updated successfully",
+          "benefits_data": {
+            "enrollment_id": "1",
+            "employee_id": "2",
+            "plan_id": "14",
+            "enrollment_date": "2024-12-25",
+            "status": "active",
+            "coverage_level": "employee plus spouse",
+            "beneficiary_name": "John Smith",
+            "beneficiary_relationship": "spouse",
+            "created_at": "2025-06-30T15:29:14",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "enrollment_id": "2",
+        "benefits_data": {
+          "status": "terminated"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "enrollment_id": "2",
+          "message": "Employee benefits enrollment 2 updated successfully",
+          "benefits_data": {
+            "enrollment_id": "2",
+            "employee_id": "2",
+            "plan_id": "7",
+            "enrollment_date": "2024-11-16",
+            "status": "terminated",
+            "coverage_level": "employee_only",
+            "beneficiary_name": "Randy Williams",
+            "beneficiary_relationship": "self",
+            "created_at": "2025-02-09T13:37:27",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "benefits_data": {
+          "employee_id": "999",
+          "plan_id": "1",
+          "enrollment_date": "2025-01-15",
+          "coverage_level": "employee only"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Employee 999 not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "benefits_data": {
+          "employee_id": "1",
+          "plan_id": "999",
+          "enrollment_date": "2025-01-15",
+          "coverage_level": "employee only"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Employee 1 does not have active status"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "benefits_data": {
+          "employee_id": "1",
+          "plan_id": "1",
+          "enrollment_date": "2026-01-15",
+          "coverage_level": "employee only"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Employee 1 does not have active status"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "benefits_data": {
+          "employee_id": "1",
+          "plan_id": "1",
+          "enrollment_date": "2025-01-15",
+          "coverage_level": "invalid_level"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Employee 1 does not have active status"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "enrollment_id": "999",
+        "benefits_data": {
+          "coverage_level": "employee plus spouse"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Employee benefits enrollment 999 not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "enrollment_id": "2",
+        "benefits_data": {
+          "status": "active"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Cannot reactivate terminated benefits enrollment"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "benefits_data": {
+          "plan_id": "1",
+          "enrollment_date": "2025-01-15",
+          "coverage_level": "employee only"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid benefits enrollment details: employee_id"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "invalid_action"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Invalid action 'invalid_action'. Must be 'create' or 'update'"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "benefits_data is required for create action"
+        },
+        200
+      ]
+    }
+  ]
+}

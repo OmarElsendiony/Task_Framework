@@ -126,13 +126,13 @@ def extract_file_info(file_path: str) -> Dict[str, Any]:
 
 
 
-def env_interface(environment: str, interface: str):
+def env_interface(environment: str, interface: str, envs_path="envs"):
     """ Endpoint to handle environment and interface selection """
     try:
         data = dict()
         if environment != session.get("environment"):
-            ENVS_PATH = "envs"
-            DATA_PATH = f"{ENVS_PATH}/{environment}/data"
+            # ENVS_PATH = "envs"
+            DATA_PATH = f"{envs_path}/{environment}/data"
             data_files = os.listdir(DATA_PATH)
             # print("Loaded data:")
             for data_file in data_files:
@@ -149,8 +149,8 @@ def env_interface(environment: str, interface: str):
         if environment and interface:
             # last_interface = interface
             # last_environment = environment
-            ENVS_PATH = "envs"
-            TOOLS_PATH = f"{ENVS_PATH}/{environment}/tools"
+            # ENVS_PATH = "envs"
+            TOOLS_PATH = f"{envs_path}/{environment}/tools"
             INTERFACE_PATH = f"{TOOLS_PATH}/interface_{interface}"
             API_files = os.listdir(INTERFACE_PATH)
             invoke_methods = []

@@ -1,0 +1,164 @@
+{
+    "env": "hr_experts",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "create",
+                    "application_data": {
+                        "candidate_id": "1",
+                        "position_id": "1",
+                        "application_date": "2025-09-15",
+                        "recruiter_id": "2"
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "create",
+                    "application_data": {
+                        "candidate_id": "2",
+                        "position_id": "2",
+                        "application_date": "2025-09-20",
+                        "recruiter_id": "3",
+                        "ai_screening_score": 85.5,
+                        "status": "screening"
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "create",
+                    "application_data": {
+                        "candidate_id": "3",
+                        "position_id": "1",
+                        "application_date": "2025-09-22",
+                        "recruiter_id": "2",
+                        "final_decision": "hold"
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "update",
+                    "application_id": "1",
+                    "application_data": {
+                        "status": "interviewing",
+                        "ai_screening_score": 92.0,
+                        "recruiter_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "update",
+                    "application_id": "2",
+                    "application_data": {
+                        "final_decision": "hire",
+                        "status": "offer_made",
+                        "hiring_manager_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "create",
+                    "application_data": {
+                        "candidate_id": "999",
+                        "position_id": "1",
+                        "application_date": "2025-09-15",
+                        "recruiter_id": "2"
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "create",
+                    "application_data": {
+                        "candidate_id": "1",
+                        "position_id": "999",
+                        "application_date": "2025-09-15",
+                        "recruiter_id": "2"
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "create",
+                    "application_data": {
+                        "candidate_id": "1",
+                        "position_id": "1",
+                        "application_date": "2026-01-15",
+                        "recruiter_id": "2"
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "create",
+                    "application_data": {
+                        "candidate_id": "1",
+                        "position_id": "1",
+                        "application_date": "2025-09-15",
+                        "recruiter_id": "2",
+                        "ai_screening_score": 150.0
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "update",
+                    "application_id": "999",
+                    "application_data": {
+                        "status": "interviewing",
+                        "recruiter_approval": true
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "update",
+                    "application_id": "1",
+                    "application_data": {
+                        "status": "interviewing"
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "create",
+                    "application_data": {
+                        "position_id": "1",
+                        "application_date": "2025-09-15",
+                        "recruiter_id": "2"
+                    }
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "invalid_action"
+                }
+            },
+            {
+                "name": "manage_job_application",
+                "arguments": {
+                    "action": "create"
+                }
+            }
+        ]
+    }
+}

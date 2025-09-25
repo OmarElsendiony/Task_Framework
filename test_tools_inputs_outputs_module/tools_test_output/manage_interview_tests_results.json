@@ -1,0 +1,335 @@
+{
+  "task_file": "tools_regression_tests/interface_1/manage_interview_tests.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "interview_data": {
+          "application_id": "1",
+          "interviewer_id": "2",
+          "interview_type": "phone screening",
+          "scheduled_date": "2025-11-15T14:00:00"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "interview_id": "348",
+          "message": "Interview 348 scheduled successfully",
+          "interview_data": {
+            "interview_id": "348",
+            "application_id": "1",
+            "interviewer_id": "2",
+            "interview_type": "phone screening",
+            "scheduled_date": "2025-11-15T14:00:00",
+            "duration_minutes": 60,
+            "status": "scheduled",
+            "overall_rating": null,
+            "technical_score": null,
+            "communication_score": null,
+            "cultural_fit_score": null,
+            "recommendation": null,
+            "created_at": "2025-10-01T12:00:00",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "interview_data": {
+          "application_id": "2",
+          "interviewer_id": "3",
+          "interview_type": "technical",
+          "scheduled_date": "2025-12-20T10:30:00",
+          "duration_minutes": 90
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "interview_id": "349",
+          "message": "Interview 349 scheduled successfully",
+          "interview_data": {
+            "interview_id": "349",
+            "application_id": "2",
+            "interviewer_id": "3",
+            "interview_type": "technical",
+            "scheduled_date": "2025-12-20T10:30:00",
+            "duration_minutes": 90,
+            "status": "scheduled",
+            "overall_rating": null,
+            "technical_score": null,
+            "communication_score": null,
+            "cultural_fit_score": null,
+            "recommendation": null,
+            "created_at": "2025-10-01T12:00:00",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "interview_data": {
+          "application_id": "3",
+          "interviewer_id": "1",
+          "interview_type": "final",
+          "scheduled_date": "2026-01-10T16:00:00",
+          "duration_minutes": 45
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "interview_id": "350",
+          "message": "Interview 350 scheduled successfully",
+          "interview_data": {
+            "interview_id": "350",
+            "application_id": "3",
+            "interviewer_id": "1",
+            "interview_type": "final",
+            "scheduled_date": "2026-01-10T16:00:00",
+            "duration_minutes": 45,
+            "status": "scheduled",
+            "overall_rating": null,
+            "technical_score": null,
+            "communication_score": null,
+            "cultural_fit_score": null,
+            "recommendation": null,
+            "created_at": "2025-10-01T12:00:00",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "interview_id": "1",
+        "interview_data": {
+          "overall_rating": "excellent",
+          "technical_score": 9.0,
+          "communication_score": 8.5,
+          "cultural_fit_score": 9.2,
+          "recommendation": "strong hire"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "interview_id": "1",
+          "message": "Interview 1 outcome recorded successfully",
+          "interview_data": {
+            "interview_id": "1",
+            "application_id": "1",
+            "interviewer_id": "25",
+            "interview_type": "behavioral",
+            "scheduled_date": "2024-03-06T08:27:41",
+            "duration_minutes": 60,
+            "status": "completed",
+            "overall_rating": "excellent",
+            "technical_score": 9.0,
+            "communication_score": 8.5,
+            "cultural_fit_score": 9.2,
+            "recommendation": "strong hire",
+            "created_at": "2024-02-23T00:38:17",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "interview_id": "2",
+        "interview_data": {
+          "overall_rating": "below_average",
+          "recommendation": "no hire"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "interview_id": "2",
+          "message": "Interview 2 outcome recorded successfully",
+          "interview_data": {
+            "interview_id": "2",
+            "application_id": "2",
+            "interviewer_id": "31",
+            "interview_type": "behavioral",
+            "scheduled_date": "2025-01-28T12:30:32",
+            "duration_minutes": 45,
+            "status": "completed",
+            "overall_rating": "below_average",
+            "technical_score": 9.1,
+            "communication_score": 9.7,
+            "cultural_fit_score": 9.4,
+            "recommendation": "no hire",
+            "created_at": "2025-01-26T13:11:34",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "interview_data": {
+          "application_id": "999",
+          "interviewer_id": "2",
+          "interview_type": "phone screening",
+          "scheduled_date": "2025-11-15T14:00:00"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid interview scheduling details - application not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "interview_data": {
+          "application_id": "1",
+          "interviewer_id": "2",
+          "interview_type": "phone screening",
+          "scheduled_date": "2024-01-15T14:00:00"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Scheduled date and time must be in the future"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "interview_data": {
+          "application_id": "1",
+          "interviewer_id": "2",
+          "interview_type": "invalid_type",
+          "scheduled_date": "2025-11-15T14:00:00"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid interview_type. Must be one of: phone screening, technical, behavioral, panel, final"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "interview_data": {
+          "application_id": "1",
+          "interviewer_id": "2",
+          "interview_type": "phone screening",
+          "scheduled_date": "2025-11-15T14:00:00",
+          "duration_minutes": -30
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Duration must be a positive time value"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "interview_id": "999",
+        "interview_data": {
+          "overall_rating": "excellent"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Interview 999 not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "interview_id": "1",
+        "interview_data": {
+          "technical_score": 15.0
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: technical_score must be within acceptable numeric range (0-10)"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "interview_data": {
+          "interviewer_id": "2",
+          "interview_type": "phone screening",
+          "scheduled_date": "2025-11-15T14:00:00"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid interview scheduling details: application_id"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "invalid_action"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Invalid action 'invalid_action'. Must be 'create' or 'update'"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "interview_data is required for create action"
+        },
+        200
+      ]
+    }
+  ]
+}

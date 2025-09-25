@@ -1,0 +1,274 @@
+{
+  "task_file": "tools_regression_tests/interface_1/manage_job_application_tests.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "application_data": {
+          "candidate_id": "1",
+          "position_id": "1",
+          "application_date": "2025-09-15",
+          "recruiter_id": "2"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: User 2 does not have recruiter role"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "application_data": {
+          "candidate_id": "2",
+          "position_id": "2",
+          "application_date": "2025-09-20",
+          "recruiter_id": "3",
+          "ai_screening_score": 85.5,
+          "status": "screening"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: User 3 does not have recruiter role"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "application_data": {
+          "candidate_id": "3",
+          "position_id": "1",
+          "application_date": "2025-09-22",
+          "recruiter_id": "2",
+          "final_decision": "hold"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: User 2 does not have recruiter role"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "application_id": "1",
+        "application_data": {
+          "status": "interviewing",
+          "ai_screening_score": 92.0,
+          "recruiter_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "application_id": "1",
+          "message": "Job application 1 updated successfully",
+          "application_data": {
+            "application_id": "1",
+            "candidate_id": "1",
+            "position_id": "448",
+            "application_date": "2024-02-21",
+            "status": "interviewing",
+            "recruiter_id": "10",
+            "ai_screening_score": 92.0,
+            "final_decision": "hire",
+            "created_at": "2024-02-21T04:20:08",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "application_id": "2",
+        "application_data": {
+          "final_decision": "hire",
+          "status": "offer_made",
+          "hiring_manager_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "application_id": "2",
+          "message": "Job application 2 updated successfully",
+          "application_data": {
+            "application_id": "2",
+            "candidate_id": "1",
+            "position_id": "448",
+            "application_date": "2025-01-20",
+            "status": "offer_made",
+            "recruiter_id": "10",
+            "ai_screening_score": 61.43,
+            "final_decision": "hire",
+            "created_at": "2025-01-20T07:26:05",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "application_data": {
+          "candidate_id": "999",
+          "position_id": "1",
+          "application_date": "2025-09-15",
+          "recruiter_id": "2"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Candidate 999 not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "application_data": {
+          "candidate_id": "1",
+          "position_id": "999",
+          "application_date": "2025-09-15",
+          "recruiter_id": "2"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Position 999 not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "application_data": {
+          "candidate_id": "1",
+          "position_id": "1",
+          "application_date": "2026-01-15",
+          "recruiter_id": "2"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: User 2 does not have recruiter role"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "application_data": {
+          "candidate_id": "1",
+          "position_id": "1",
+          "application_date": "2025-09-15",
+          "recruiter_id": "2",
+          "ai_screening_score": 150.0
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: User 2 does not have recruiter role"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "application_id": "999",
+        "application_data": {
+          "status": "interviewing",
+          "recruiter_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid application status change - application not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "application_id": "1",
+        "application_data": {
+          "status": "interviewing"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Recruiter or Hiring Manager approval required"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "application_data": {
+          "position_id": "1",
+          "application_date": "2025-09-15",
+          "recruiter_id": "2"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid application details: candidate_id"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "invalid_action"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Invalid action 'invalid_action'. Must be 'create' or 'update'"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "application_data is required for create action"
+        },
+        200
+      ]
+    }
+  ]
+}

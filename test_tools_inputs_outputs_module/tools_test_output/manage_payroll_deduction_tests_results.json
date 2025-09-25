@@ -1,0 +1,358 @@
+{
+  "task_file": "tools_regression_tests/interface_1/manage_payroll_deduction_tests.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "1",
+          "deduction_type": "tax",
+          "amount": 150.75,
+          "created_by": "1",
+          "payroll_administrator_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "deduction_id": "1371",
+          "message": "Payroll deduction 1371 created successfully",
+          "deduction_data": {
+            "deduction_id": "1371",
+            "payroll_id": "1",
+            "deduction_type": "tax",
+            "amount": 150.75,
+            "created_by": "1",
+            "created_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "2",
+          "deduction_type": "insurance",
+          "amount": 85.0,
+          "created_by": "2",
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "deduction_id": "1372",
+          "message": "Payroll deduction 1372 created successfully",
+          "deduction_data": {
+            "deduction_id": "1372",
+            "payroll_id": "2",
+            "deduction_type": "insurance",
+            "amount": 85.0,
+            "created_by": "2",
+            "created_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "1",
+          "deduction_type": "retirement",
+          "amount": 200.0,
+          "created_by": "3",
+          "payroll_administrator_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "deduction_id": "1373",
+          "message": "Payroll deduction 1373 created successfully",
+          "deduction_data": {
+            "deduction_id": "1373",
+            "payroll_id": "1",
+            "deduction_type": "retirement",
+            "amount": 200.0,
+            "created_by": "3",
+            "created_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "3",
+          "deduction_type": "equipment",
+          "amount": 50.25,
+          "created_by": "1",
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "deduction_id": "1374",
+          "message": "Payroll deduction 1374 created successfully",
+          "deduction_data": {
+            "deduction_id": "1374",
+            "payroll_id": "3",
+            "deduction_type": "equipment",
+            "amount": 50.25,
+            "created_by": "1",
+            "created_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "deduction_id": "1",
+        "deduction_data": {
+          "amount": 175.0,
+          "payroll_administrator_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "deduction_id": "1",
+          "message": "Payroll deduction 1 updated successfully",
+          "deduction_data": {
+            "deduction_id": "1",
+            "payroll_id": "1",
+            "deduction_type": "retirement",
+            "amount": 175.0,
+            "created_by": "19",
+            "created_at": "2025-03-25T11:50:00",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "deduction_id": "2",
+        "deduction_data": {
+          "deduction_type": "other",
+          "finance_officer_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "deduction_id": "2",
+          "message": "Payroll deduction 2 updated successfully",
+          "deduction_data": {
+            "deduction_id": "2",
+            "payroll_id": "1",
+            "deduction_type": "other",
+            "amount": 146.29,
+            "created_by": "32",
+            "created_at": "2025-03-16T14:30:17",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "999",
+          "deduction_type": "tax",
+          "amount": 150.75,
+          "created_by": "1",
+          "payroll_administrator_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Payroll record 999 not found"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "1",
+          "deduction_type": "tax",
+          "amount": 150.75,
+          "created_by": "999",
+          "payroll_administrator_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Creator 999 not found in user system"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "1",
+          "deduction_type": "invalid_type",
+          "amount": 150.75,
+          "created_by": "1",
+          "payroll_administrator_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid deduction_type. Must be one of: tax, insurance, retirement, garnishment, equipment, other"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "1",
+          "deduction_type": "tax",
+          "amount": -50.0,
+          "created_by": "1",
+          "payroll_administrator_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Deduction amount must be positive monetary value"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "1",
+          "deduction_type": "tax",
+          "amount": 150.75,
+          "created_by": "1"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Payroll Administrator or Finance Officer approval required"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "deduction_id": "999",
+        "deduction_data": {
+          "amount": 175.0,
+          "payroll_administrator_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "deduction_id": "999",
+          "message": "Payroll deduction 999 updated successfully",
+          "deduction_data": {
+            "deduction_id": "999",
+            "payroll_id": "443",
+            "deduction_type": "equipment",
+            "amount": 175.0,
+            "created_by": "34",
+            "created_at": "2025-01-04T12:02:45",
+            "updated_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "deduction_id": "1",
+        "deduction_data": {
+          "amount": 175.0
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Payroll Administrator or Finance Officer approval required for deduction correction"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "deduction_type": "tax",
+          "amount": 150.75,
+          "created_by": "1",
+          "payroll_administrator_approval": true
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: Invalid payroll deduction details: payroll_id"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "invalid_action"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Invalid action 'invalid_action'. Must be 'create' or 'update'"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "create"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "deduction_data is required for create action"
+        },
+        200
+      ]
+    }
+  ]
+}

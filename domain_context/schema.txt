@@ -1,0 +1,393 @@
+// Use DBML to define your database structure
+// HR Management System Database Schema
+// This schema represents a comprehensive database for managing human resources operations,
+// including recruitment, payroll, employee management, compliance, and AI/LLM governance
+
+Table users {
+  user_id string [primary key]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  email varchar(320) [not null, unique]
+  phone_number varchar(20)
+  role enum('hr_director','hr_manager','recruiter','payroll_administrator','hiring_manager','finance_officer','it_administrator','compliance_officer','employee') [not null]
+  status enum('active','inactive','suspended') [not null, default: 'active']
+  // last_login timestamp
+  mfa_enabled boolean [default: true]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table departments {
+  department_id string [primary key]
+  department_name varchar(255) [not null]
+  manager_id string [not null]
+  budget decimal(15,2)
+  status enum('active','inactive') [not null, default: 'active']
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table job_positions {
+  position_id string [primary key]
+  title varchar(255) [not null]
+  department_id string [not null]
+  job_level enum('entry','junior','mid','senior','lead','manager','director','executive') [not null]
+  employment_type enum('full_time','part_time','contract','intern','temporary') [not null]
+  hourly_rate_min  decimal(12,2)
+  hourly_rate_max  decimal(12,2)
+  // required_skills text
+  status enum('open','closed','draft') [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table skills {
+  skill_id string [primary key]
+  skill_name text [not null]
+  status enum('active','inactive') [default: 'active']
+}
+
+Table job_position_skills {
+  position_id string [not null]
+  skill_id string [not null]
+  primary key (position_id, skill_id)
+}
+
+Ref: job_position_skills.position_id > job_positions.position_id
+Ref: job_position_skills.skill_id > skills.skill_id
+
+
+Table employees {
+  employee_id string [primary key]
+  user_id string [not null, unique]
+  position_id string [not null]
+  hire_date date [not null]
+  employment_status enum('active','terminated','on_leave','suspended') [not null, default: 'active']
+  manager_id string
+  date_of_birth date
+  address text
+  hourly_rate int
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table candidates {
+  candidate_id string [primary key]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  email varchar(320) [not null]
+  phone_number varchar(20)
+  address text
+  // resume_file_path varchar(500)
+  // linkedin_profile varchar(500)
+  source enum('job_board','referral','company_website','recruiter','social_media','career_fair') [not null]
+  status enum('new','screening','interviewing','offer','hired','rejected','withdrawn') [not null, default: 'new']
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table job_applications {
+  application_id string [primary key]
+  candidate_id string [not null]
+  position_id string [not null]
+  application_date date [not null]
+  status enum('submitted','under_review','screening','interviewing','offer_made','accepted','rejected','withdrawn') [not null, default: 'submitted']
+  recruiter_id string [not null]
+  // cover_letter text
+  ai_screening_score decimal(5,2)
+  // ai_recommendations text
+  final_decision enum('hire','reject','hold') 
+  // decision_reason text
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table interviews {
+  interview_id string [primary key]
+  application_id string [not null]
+  interviewer_id string [not null]
+  interview_type enum('phone_screening','technical','behavioral','panel','final') [not null]
+  scheduled_date timestamp [not null]
+  duration_minutes integer [default: 60]
+  status enum('scheduled','completed','cancelled','no_show') [not null, default: 'scheduled']
+  overall_rating enum('excellent','good','average','below_average','poor')
+  technical_score decimal(3,1)
+  communication_score decimal(3,1)
+  cultural_fit_score decimal(3,1)
+  // notes text
+  recommendation enum('strong_hire','hire','no_hire','strong_no_hire')
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table payroll_records {
+  payroll_id string [primary key]
+  employee_id string [not null]
+  pay_period_start date [not null]
+  pay_period_end date [not null]
+  hours_worked decimal(6,2)
+  // overtime_hours decimal(6,2)
+  hourly_rate decimal(12,2) [not null]
+  // overtime_pay decimal(12,2)
+  // bonus decimal(12,2)
+  // gross_pay decimal(12,2) [not null]
+  // total_deductions decimal(12,2) [not null]   // 👈 single field
+  // net_pay decimal(12,2) [not null]
+  payment_date date
+  status enum('draft','approved','paid','cancelled') [not null, default: 'draft']
+  approved_by string
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table payroll_deductions {
+  deduction_id string [primary key]
+  payroll_id string [not null]
+  deduction_type enum('tax','insurance','retirement','garnishment','equipment','other') [not null]
+  // description varchar(255) [not null]
+  amount decimal(10,2) [not null]
+  // is_pre_tax boolean [default: false]
+  created_by string [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
+
+Table benefits_plans {
+  plan_id string [primary key]
+  plan_name varchar(255) [not null]
+  plan_type enum('health_insurance','dental','vision','life_insurance','disability','retirement_401k','pto','flexible_spending') [not null]
+  provider varchar(255)
+  // description text
+  employee_cost decimal(10,2)
+  employer_cost decimal(10,2)
+  status enum('active','inactive') [not null, default: 'active']
+  effective_date date [not null]
+  expiration_date date
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table employee_benefits {
+  enrollment_id string [primary key]
+  employee_id string [not null]
+  plan_id string [not null]
+  enrollment_date date [not null]
+  status enum('active','terminated','pending') [not null, default: 'active']
+  // employee_contribution decimal(10,2)
+  coverage_level enum('employee_only','employee_spouse','employee_children','family') [not null]
+  beneficiary_name varchar(255)
+  beneficiary_relationship varchar(100)
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table performance_reviews {
+  review_id string [primary key]
+  employee_id string [not null]
+  reviewer_id string [not null]
+  review_period_start date [not null]
+  review_period_end date [not null]
+  review_type enum('annual','quarterly','probationary','project_based') [not null]
+  overall_rating enum('exceeds_expectations','meets_expectations','below_expectations','unsatisfactory') [not null]
+  goals_achievement_score decimal(3,1)
+  communication_score decimal(3,1)
+  teamwork_score decimal(3,1)
+  leadership_score decimal(3,1)
+  technical_skills_score decimal(3,1)
+  // comments text
+  // development_goals text
+  status enum('draft','submitted','approved') [not null, default: 'draft']
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+// Table leave_requests {
+//   leave_id string [primary key]
+//   employee_id string [not null]
+//   leave_type enum('annual','sick','fmla','personal','bereavement','jury_duty') [not null]
+//   start_date date [not null]
+//   end_date date [not null]
+//   days_requested decimal(3,1) [not null]
+//   // reason text
+//   status enum('pending','approved','rejected','cancelled') [not null, default: 'pending']
+//   processed_by string
+//   processing_date timestamp
+//   remaining_balance decimal(5,1)
+//   created_at timestamp [not null, default: `NOW()`]
+//   updated_at timestamp [not null, default: `NOW()`]
+// }
+
+Table leave_requests {
+  leave_id string [primary key]
+  employee_id string [not null]
+  leave_type enum('annual','sick','fmla','personal','bereavement','jury_duty') [not null]
+  start_date date [not null]
+  end_date date [not null]
+  days_requested decimal(3,1) [not null]
+  status enum('pending','approved','rejected','cancelled') [not null, default: 'pending']
+  approved_by string
+  approval_date timestamp
+  remaining_balance decimal(5,1) // filled after approval
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+
+
+Table expense_reimbursements {
+  reimbursement_id string [primary key]
+  employee_id string [not null]
+  expense_date date [not null]
+  amount decimal(10,2) [not null]
+  expense_type enum('travel','meals','equipment','training','other') [not null]
+  // description text [not null]
+  receipt_file_path varchar(500)
+  status enum('submitted','approved','rejected','paid') [not null, default: 'submitted']
+  approved_by string
+  payment_date date
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table training_programs {
+  program_id string [primary key]
+  program_name varchar(255) [not null]
+  program_type enum('onboarding','compliance','technical','leadership','safety','diversity','ai_ethics') [not null]
+  // description text
+  duration_hours integer [not null]
+  delivery_method enum('in_person','online','hybrid','self_paced') [not null]
+  mandatory boolean [default: false]
+  status enum('active','inactive','draft') [not null, default: 'active']
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table employee_training {
+  training_record_id string [primary key]
+  employee_id string [not null]
+  program_id string [not null]
+  enrollment_date date [not null]
+  completion_date date
+  status enum('enrolled','in_progress','completed','failed','cancelled') [not null, default: 'enrolled']
+  score decimal(5,2)
+  certificate_issued boolean [default: false]
+  expiry_date date
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table audit_logs {
+  log_id string [primary key]
+  user_id string [not null]
+  action enum('create','read','update','delete','approve','reject') [not null]
+  reference_type string [not null]
+  reference_id string [not null]
+  field_name varchar(100)
+  old_value text
+  new_value text
+  timestamp timestamp [not null, default: `NOW()`]
+}
+
+
+// Table compliance_records {
+//   compliance_id string [primary key]
+//   record_type enum('eeoc_report','flsa_audit','ada_accommodation','fmla_leave','safety_incident','data_breach','ai_bias_test') [not null]
+//   employee_id string
+//   // description text [not null]
+//   compliance_officer_id string [not null]
+//   status enum('open','under_review','resolved','escalated') [not null, default: 'open']
+//   severity enum('low','medium','high','critical') [not null]
+//   due_date date
+//   // resolution_notes text
+//   created_at timestamp [not null, default: `NOW()`]
+//   updated_at timestamp [not null, default: `NOW()`]
+// }
+
+
+Table document_storage {
+  document_id string [primary key]
+  document_name varchar(255) [not null]
+  document_type enum('contract','policy','handbook','form','certificate','report','resume','offer_letter') [not null]
+  employee_id string
+  file_path varchar(500) [not null]
+  // file_size_bytes bigint
+  upload_date timestamp [not null]
+  uploaded_by string [not null]
+  confidentiality_level enum('public','internal','confidential','restricted') [not null, default: 'internal']
+  retention_period_years integer [not null, default: 7]
+  expiry_date date
+  status enum('active','archived','deleted') [not null, default: 'active']
+  created_at timestamp [not null, default: `NOW()`]
+}
+
+// RELATIONSHIPS
+
+// User and Employee relationships
+Ref: employees.user_id > users.user_id
+Ref: employees.manager_id > employees.employee_id
+Ref: employees.position_id > job_positions.position_id
+
+// Department relationships
+Ref: departments.manager_id > employees.employee_id
+Ref: job_positions.department_id > departments.department_id
+
+// Application and Interview relationships
+Ref: job_applications.candidate_id > candidates.candidate_id
+Ref: job_applications.position_id > job_positions.position_id
+Ref: job_applications.recruiter_id > users.user_id
+Ref: interviews.application_id > job_applications.application_id
+Ref: interviews.interviewer_id > users.user_id
+
+// Payroll relationships
+Ref: payroll_records.employee_id > employees.employee_id
+Ref: payroll_records.approved_by > users.user_id
+
+// Benefits relationships
+Ref: employee_benefits.employee_id > employees.employee_id
+Ref: employee_benefits.plan_id > benefits_plans.plan_id
+
+// Performance and Training relationships
+Ref: performance_reviews.employee_id > employees.employee_id
+Ref: performance_reviews.reviewer_id > users.user_id
+Ref: employee_training.employee_id > employees.employee_id
+Ref: employee_training.program_id > training_programs.program_id
+
+Ref: audit_logs.user_id > users.user_id
+
+
+// Compliance and Incident relationships
+// Ref: compliance_records.employee_id > employees.employee_id
+// Ref: compliance_records.compliance_officer_id > users.user_id
+
+// Document relationships
+Ref: document_storage.employee_id > employees.employee_id
+Ref: document_storage.uploaded_by > users.user_id
+
+Table employee_timesheets {
+  timesheet_id string [primary key]
+  employee_id string [not null]
+  work_date date [not null]
+  clock_in_time timestamp
+  clock_out_time timestamp
+  break_duration_minutes integer [default: 0]
+  total_hours decimal(4,2)
+  // overtime_hours decimal(4,2) [default: 0]
+  project_code varchar(50)
+  // notes text
+  approved_by string
+  status enum('draft','submitted','approved','rejected') [not null, default: 'draft']
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+// Additional relationships for new tables
+Ref: employee_timesheets.employee_id > employees.employee_id
+Ref: employee_timesheets.approved_by > users.user_id
+
+Ref: payroll_deductions.payroll_id > payroll_records.payroll_id
+Ref: payroll_deductions.created_by > users.user_id
+
+Ref: leave_requests.employee_id > employees.employee_id
+Ref: leave_requests.approved_by > users.user_id
+
+Ref: expense_reimbursements.employee_id > employees.employee_id
+Ref: expense_reimbursements.approved_by > users.user_id

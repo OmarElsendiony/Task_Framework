@@ -1,0 +1,160 @@
+{
+    "env": "hr_experts",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "create",
+                    "benefits_data": {
+                        "employee_id": "1",
+                        "plan_id": "1",
+                        "enrollment_date": "2025-01-15",
+                        "coverage_level": "employee only"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "create",
+                    "benefits_data": {
+                        "employee_id": "2",
+                        "plan_id": "2",
+                        "enrollment_date": "2025-02-01",
+                        "coverage_level": "family coverage",
+                        "beneficiary_name": "Jane Doe",
+                        "beneficiary_relationship": "spouse"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "create",
+                    "benefits_data": {
+                        "employee_id": "3",
+                        "plan_id": "3",
+                        "enrollment_date": "2025-03-10",
+                        "coverage_level": "employee plus children",
+                        "status": "pending"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "update",
+                    "enrollment_id": "1",
+                    "benefits_data": {
+                        "coverage_level": "employee plus spouse",
+                        "beneficiary_name": "John Smith",
+                        "beneficiary_relationship": "spouse"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "update",
+                    "enrollment_id": "2",
+                    "benefits_data": {
+                        "status": "terminated"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "create",
+                    "benefits_data": {
+                        "employee_id": "999",
+                        "plan_id": "1",
+                        "enrollment_date": "2025-01-15",
+                        "coverage_level": "employee only"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "create",
+                    "benefits_data": {
+                        "employee_id": "1",
+                        "plan_id": "999",
+                        "enrollment_date": "2025-01-15",
+                        "coverage_level": "employee only"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "create",
+                    "benefits_data": {
+                        "employee_id": "1",
+                        "plan_id": "1",
+                        "enrollment_date": "2026-01-15",
+                        "coverage_level": "employee only"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "create",
+                    "benefits_data": {
+                        "employee_id": "1",
+                        "plan_id": "1",
+                        "enrollment_date": "2025-01-15",
+                        "coverage_level": "invalid_level"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "update",
+                    "enrollment_id": "999",
+                    "benefits_data": {
+                        "coverage_level": "employee plus spouse"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "update",
+                    "enrollment_id": "2",
+                    "benefits_data": {
+                        "status": "active"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "create",
+                    "benefits_data": {
+                        "plan_id": "1",
+                        "enrollment_date": "2025-01-15",
+                        "coverage_level": "employee only"
+                    }
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "invalid_action"
+                }
+            },
+            {
+                "name": "manage_employee_benefits",
+                "arguments": {
+                    "action": "create"
+                }
+            }
+        ]
+    }
+}

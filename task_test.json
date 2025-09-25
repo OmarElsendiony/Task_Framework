@@ -1,0 +1,26 @@
+{
+    "env": "fund_finance",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "email": "sarahcampos144@hotmail.com"
+                    }
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "email": "sarahcampos144@hotmail.com"
+                    }
+                }
+            }
+        ]
+    }
+}
