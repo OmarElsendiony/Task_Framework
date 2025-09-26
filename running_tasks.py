@@ -128,21 +128,22 @@ def extract_file_info(file_path: str) -> Dict[str, Any]:
 
 def env_interface(environment: str, interface: str, envs_path="envs"):
     """ Endpoint to handle environment and interface selection """
+    session.clear()
     try:
         data = dict()
-        if environment != session.get("environment"):
-            # ENVS_PATH = "envs"
-            DATA_PATH = f"{envs_path}/{environment}/data"
-            data_files = os.listdir(DATA_PATH)
-            # print("Loaded data:")
-            for data_file in data_files:
-                if data_file.endswith(".json"):
-                    data_file_path = os.path.join(DATA_PATH, data_file)
-                    with open(data_file_path, "r") as file:
-                        data[data_file.split('.')[0]] = json.load(file)
-            session["environment"] = environment
-            session["interface"] = interface
-            session["data"] = data
+        # if environment != session.get("environment"):
+        # ENVS_PATH = "envs"
+        DATA_PATH = f"{envs_path}/{environment}/data"
+        data_files = os.listdir(DATA_PATH)
+        # print("Loaded data:")
+        for data_file in data_files:
+            if data_file.endswith(".json"):
+                data_file_path = os.path.join(DATA_PATH, data_file)
+                with open(data_file_path, "r") as file:
+                    data[data_file.split('.')[0]] = json.load(file)
+        session["environment"] = environment
+        session["interface"] = interface
+        session["data"] = data
             # print("data", g.data)
         
         # print(session["environment"], session["interface"])
