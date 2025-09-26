@@ -199,7 +199,7 @@ def env_interface(environment: str, interface: str, envs_path="envs"):
         print(f"Error processing request: {str(e)}")
         return ({
             'status': 'error',
-            'message': 'Internal server error'
+            'message': f"Error processing request: {str(e)}"
         }), 500
     
 

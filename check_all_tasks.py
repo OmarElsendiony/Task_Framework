@@ -46,8 +46,8 @@ def run_single_task(task_file_path):
             res = execute_api(api_name=action_name, arguments=arguments)
             
             # Check for errors
-            if res and len(res) > 0 and isinstance(res[0], dict) and "error" in res[0].keys():
-                error_msg = f"Error in action '{action_name}': {res[0].get('error', 'Unknown error')}"
+            if res and len(res) > 0 and isinstance(res[0], dict) and ("error" in res[0].keys() or "status" in res[0].keys() and res[0]["status"] == "error"):
+                error_msg = f"Error in action '{action_name}': {res[0].get('error', res[0].get('message'))}"
                 # print(f"  ERROR: {error_msg}")
                 return False, error_msg
         
