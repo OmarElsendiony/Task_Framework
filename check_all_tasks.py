@@ -4,10 +4,10 @@ import glob
 from running_tasks import *
 
 
-def find_all_task_files(base_path="week_11"):
+def find_all_task_files(base_path="week_10"):
     """
     Find all task.json files in the directory structure.
-    Pattern: week_11/*/dhanraj-*-*/task.json
+    Pattern: week_11/*/philip-*-*/task.json
     """
     pattern = os.path.join(base_path, "**", "task.json")
     task_files = glob.glob(pattern, recursive=True)
@@ -89,8 +89,13 @@ def run_all_tasks(base_path="week_11"):
     failed_tasks = []
     
     # Process each task file
-    for task_file in task_files:
-        success, error_message = run_single_task(task_file)
+    for task_number, task_file in enumerate(task_files):
+        try:
+            success, error_message = run_single_task(task_file)
+        except Exception as e:
+            error_message = f"Unexpected error: {str(e)}"
+            success = False
+            
         
         if success:
             successful_tasks.append(task_file)
@@ -99,6 +104,8 @@ def run_all_tasks(base_path="week_11"):
                 'file': task_file,
                 'error': error_message
             })
+        if (task_number + 1) % 10 == 0:
+            print(f"Processed {task_number + 1}/{len(task_files)} tasks...")
         # print()  # Add spacing between tasks
     
     # Write error log
@@ -144,4 +151,4 @@ def run_all_tasks(base_path="week_11"):
 
 
 if __name__ == "__main__":
-    run_all_tasks("week_11")
+    run_all_tasks("week_10")

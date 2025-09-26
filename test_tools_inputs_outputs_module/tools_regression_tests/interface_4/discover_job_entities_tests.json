@@ -1,0 +1,94 @@
+{
+    "env": "hr_experts",
+    "interface_num": 4,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_job_entities",
+                "arguments": {
+                    "entity_type": "job_positions"
+                }
+            },
+            {
+                "name": "discover_job_entities",
+                "arguments": {
+                    "entity_type": "skills"
+                }
+            },
+            {
+                "name": "discover_job_entities",
+                "arguments": {
+                    "entity_type": "job_position_skills"
+                }
+            },
+            {
+                "name": "discover_job_entities",
+                "arguments": {
+                    "entity_type": "job_positions",
+                    "filters": {
+                        "title": "Senior Software Engineer"
+                    }
+                }
+            },
+            {
+                "name": "discover_job_entities",
+                "arguments": {
+                    "entity_type": "job_positions",
+                    "filters": {
+                        "position_id": "POS001",
+                        "title": "Data Scientist",
+                        "department_id": "DEPT002",
+                        "job_level": "senior",
+                        "employment_type": "full_time",
+                        "hourly_rate_min": 75.00,
+                        "hourly_rate_max": 95.00,
+                        "status": "open"
+                    }
+                }
+            },
+            {
+                "name": "discover_job_entities",
+                "arguments": {
+                    "entity_type": "skills",
+                    "filters": {
+                        "skill_name": "Python Programming",
+                        "status": "active"
+                    }
+                }
+            },
+            {
+                "name": "discover_job_entities",
+                "arguments": {
+                    "entity_type": "job_position_skills",
+                    "filters": {
+                        "position_id": "POS001",
+                        "skill_id": "SKILL123"
+                    }
+                }
+            },
+            {
+                "name": "discover_job_entities",
+                "arguments": {
+                    "entity_type": "invalid_type"
+                }
+            },
+            {
+                "name": "discover_job_entities",
+                "arguments": {
+                    "entity_type": "job_positions",
+                    "filters": {
+                        "job_level": "executive",
+                        "employment_type": "contract"
+                    }
+                }
+            },
+            {
+                "name": "discover_job_entities",
+                "arguments": {
+                    "entity_type": "skills",
+                    "filters": {}
+                }
+            }
+        ]
+    }
+}

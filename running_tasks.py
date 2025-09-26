@@ -291,12 +291,12 @@ def execute_api(api_name: str, arguments: Dict[str, Any]):
             # result = getattr(tools_instance, api_name)(data=session["data"], **arguments)
             result = execute_api_utility(api_name, arguments)
             # print(f"Result from API {api_name}: {result}")
-            if not session.get("actions"):
-                session["actions"] = []
-            session["actions"].append({
-                'api_name': api_name,
-                'arguments': arguments
-            })
+            # if not session.get("actions"):
+            #     session["actions"] = []
+            # session["actions"].append({
+            #     'api_name': api_name,
+            #     'arguments': arguments
+            # })
             return (json.loads(result) if isinstance(result, str) else result
         ), 200
         except Exception as e:

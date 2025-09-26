@@ -1,12 +1,12 @@
 import shutil
 import os
 
-prompt = """Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide diverse tests with different number of parameters (if applicable). You have to provide edge cases and normal cases. You have to provide invalid cases. You have to provide empty cases if applicable. However, you have to follow the format that I provide to you below.
+prompt = """Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide diverse tests with different number of parameters (if applicable). You have to provide edge cases and normal cases. Try to use all of the fields in one of the cases. You have to provide invalid cases. You have to provide empty cases if applicable. However, you have to follow the format that I provide to you below.
 
 # Format:
 {{
-    "env": "environment_name",
-    "interface_num": interface_number,
+    "env": "{environment_name}",
+    "interface_num": {interface_number},
     "task": {{
         "actions": [
             {{
@@ -68,8 +68,8 @@ def main():
         shutil.rmtree('tests_prompt/', ignore_errors=True)
 
     os.makedirs("tests_prompt/", exist_ok=True)
-    all_codes = []
     for interface in range(5):
+        all_codes = []
         path_interface = f"../envs/{env}/tools/interface_{interface}/"
         if not os.path.exists(path_interface):
             continue

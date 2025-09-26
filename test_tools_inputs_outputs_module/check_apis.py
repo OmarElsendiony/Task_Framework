@@ -92,57 +92,6 @@ def run_all_tasks(base_path="tools_regression_tests"):
                 "results": results
             }, f, indent=2)
         
-        
-        # if success:
-        #     successful_tasks.append(task_file)
-        # else:
-        #     failed_tasks.append({
-        #         'file': task_file,
-        #         'error': error_message
-        #     })
-        # print()  # Add spacing between tasks
-    
-    # Write error log
-    # if failed_tasks:
-    #     error_log_file = "task_errors.log"
-    #     with open(error_log_file, 'w') as f:
-    #         f.write(f"Task Execution Error Log\n")
-    #         # f.write(f"Generated: {json.dumps(task_data.get('timestamp', 'unknown'))}\n")
-    #         f.write(f"Total tasks processed: {len(task_files)}\n")
-    #         f.write(f"Failed tasks: {len(failed_tasks)}\n")
-    #         f.write(f"Successful tasks: {len(successful_tasks)}\n\n")
-            
-    #         f.write("FAILED TASKS:\n")
-    #         f.write("=" * 50 + "\n")
-    #         for failed_task in failed_tasks:
-    #             f.write(f"File: {failed_task['file']}\n")
-    #             f.write(f"Error: {failed_task['error']}\n")
-    #             f.write("-" * 30 + "\n")
-            
-    #         f.write("\nSUCCESSFUL TASKS:\n")
-    #         f.write("=" * 50 + "\n")
-    #         for successful_task in successful_tasks:
-    #             f.write(f"{successful_task}\n")
-    
-    # Print summary
-    # print("=" * 60)
-    # print("EXECUTION SUMMARY")
-    # print("=" * 60)
-    # print(f"Total tasks processed: {len(task_files)}")
-    # print(f"Successful: {len(successful_tasks)}")
-    # print(f"Failed: {len(failed_tasks)}")
-    
-    # if failed_tasks:
-    #     print(f"\nError log written to: task_errors.log")
-    #     print("\nFailed tasks:")
-    #     for failed_task in failed_tasks:
-    #         print(f"  - {failed_task['file']}")
-    
-    # if successful_tasks:
-    #     print(f"\nSuccessful tasks:")
-    #     for successful_task in successful_tasks:
-    #         print(f"  - {successful_task}")
-
 
 if __name__ == "__main__":
     if os.path.exists("tools_test_output/"):

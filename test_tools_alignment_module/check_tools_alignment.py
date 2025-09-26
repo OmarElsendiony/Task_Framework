@@ -36,8 +36,8 @@ def main():
         shutil.rmtree('/folder_name', ignore_errors=True)
 
     os.makedirs("alignment_tests/", exist_ok=True)
-    all_codes = []
     for interface in range(5):
+        all_codes = []
         path_interface = f"../envs/{env}/tools/interface_{interface}/"
         if not os.path.exists(path_interface):
             continue

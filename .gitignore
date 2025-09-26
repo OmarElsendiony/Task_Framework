@@ -210,5 +210,5 @@ __marimo__/
 flask_session/
 envs/
 
-week_11/
+week_*/
 test_tools_alignment_module/alignment_tests/

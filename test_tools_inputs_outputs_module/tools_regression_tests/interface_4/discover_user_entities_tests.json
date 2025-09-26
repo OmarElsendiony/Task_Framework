@@ -1,0 +1,109 @@
+{
+    "env": "hr_experts",
+    "interface_num": 4,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users"
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "status": "active"
+                    }
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "role": "hr_manager"
+                    }
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "email": "sarah.johnson@company.com"
+                    }
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "user_id": "USER001",
+                        "first_name": "Sarah",
+                        "last_name": "Johnson",
+                        "email": "sarah.johnson@company.com",
+                        "phone_number": "+1-555-0199",
+                        "role": "hr_director",
+                        "status": "active",
+                        "mfa_enabled": true
+                    }
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "role": "recruiter",
+                        "status": "active"
+                    }
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "mfa_enabled": false
+                    }
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "invalid_users"
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "status": "suspended",
+                        "role": "employee"
+                    }
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {}
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "role": "compliance_officer",
+                        "mfa_enabled": true
+                    }
+                }
+            }
+        ]
+    }
+}

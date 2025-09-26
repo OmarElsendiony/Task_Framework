@@ -1,0 +1,102 @@
+{
+    "env": "hr_experts",
+    "interface_num": 4,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_timesheet_entities",
+                "arguments": {
+                    "entity_type": "employee_timesheets"
+                }
+            },
+            {
+                "name": "discover_timesheet_entities",
+                "arguments": {
+                    "entity_type": "employee_timesheets",
+                    "filters": {
+                        "employee_id": "EMP001"
+                    }
+                }
+            },
+            {
+                "name": "discover_timesheet_entities",
+                "arguments": {
+                    "entity_type": "employee_timesheets",
+                    "filters": {
+                        "status": "submitted",
+                        "work_date": "2024-03-15"
+                    }
+                }
+            },
+            {
+                "name": "discover_timesheet_entities",
+                "arguments": {
+                    "entity_type": "employee_timesheets",
+                    "filters": {
+                        "timesheet_id": "TS001",
+                        "employee_id": "EMP001",
+                        "work_date": "2024-03-15",
+                        "clock_in_time": "2024-03-15T08:00:00Z",
+                        "clock_out_time": "2024-03-15T17:00:00Z",
+                        "break_duration_minutes": 60,
+                        "total_hours": 8.0,
+                        "project_code": "PROJ001",
+                        "approved_by": "USER999",
+                        "status": "approved"
+                    }
+                }
+            },
+            {
+                "name": "discover_timesheet_entities",
+                "arguments": {
+                    "entity_type": "employee_timesheets",
+                    "filters": {
+                        "status": "draft"
+                    }
+                }
+            },
+            {
+                "name": "discover_timesheet_entities",
+                "arguments": {
+                    "entity_type": "employee_timesheets",
+                    "filters": {
+                        "approved_by": "USER555",
+                        "status": "approved"
+                    }
+                }
+            },
+            {
+                "name": "discover_timesheet_entities",
+                "arguments": {
+                    "entity_type": "invalid_timesheets"
+                }
+            },
+            {
+                "name": "discover_timesheet_entities",
+                "arguments": {
+                    "entity_type": "employee_timesheets",
+                    "filters": {
+                        "project_code": "PROJ002",
+                        "total_hours": 8.5
+                    }
+                }
+            },
+            {
+                "name": "discover_timesheet_entities",
+                "arguments": {
+                    "entity_type": "employee_timesheets",
+                    "filters": {}
+                }
+            },
+            {
+                "name": "discover_timesheet_entities",
+                "arguments": {
+                    "entity_type": "employee_timesheets",
+                    "filters": {
+                        "status": "rejected"
+                    }
+                }
+            }
+        ]
+    }
+}

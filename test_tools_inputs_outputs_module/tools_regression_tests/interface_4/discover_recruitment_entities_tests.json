@@ -1,0 +1,134 @@
+{
+    "env": "hr_experts",
+    "interface_num": 4,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "candidates"
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "job_applications"
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "interviews"
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "candidates",
+                    "filters": {
+                        "status": "new"
+                    }
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "candidates",
+                    "filters": {
+                        "candidate_id": "CAND001",
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "email": "john.doe@email.com",
+                        "phone_number": "+1-555-0123",
+                        "address": "456 Oak Ave, City, State",
+                        "source": "job_board",
+                        "status": "screening"
+                    }
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "job_applications",
+                    "filters": {
+                        "status": "under_review",
+                        "recruiter_id": "USER789"
+                    }
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "job_applications",
+                    "filters": {
+                        "application_id": "APP001",
+                        "candidate_id": "CAND001",
+                        "position_id": "POS001",
+                        "application_date": "2024-03-01",
+                        "status": "interviewing",
+                        "recruiter_id": "USER789",
+                        "ai_screening_score": 85.5,
+                        "final_decision": "hire",
+                        "created_at": "2024-03-01T12:00:00Z",
+                        "updated_at": "2024-03-10T09:15:00Z"
+                    }
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "interviews",
+                    "filters": {
+                        "interview_type": "technical",
+                        "status": "completed"
+                    }
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "interviews",
+                    "filters": {
+                        "interview_id": "INT001",
+                        "application_id": "APP001",
+                        "interviewer_id": "USER555",
+                        "interview_type": "behavioral",
+                        "scheduled_date": "2024-03-15T14:00:00Z",
+                        "duration_minutes": 90,
+                        "status": "completed",
+                        "overall_rating": "excellent",
+                        "technical_score": 9.5,
+                        "communication_score": 8.8,
+                        "cultural_fit_score": 9.2,
+                        "recommendation": "strong_hire",
+                        "created_at": "2024-03-10T10:00:00Z",
+                        "updated_at": "2024-03-15T15:30:00Z"
+                    }
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "invalid_entity"
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "candidates",
+                    "filters": {
+                        "source": "referral",
+                        "status": "hired"
+                    }
+                }
+            },
+            {
+                "name": "discover_recruitment_entities",
+                "arguments": {
+                    "entity_type": "job_applications",
+                    "filters": {}
+                }
+            }
+        ]
+    }
+}

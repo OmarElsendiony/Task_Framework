@@ -3,7 +3,7 @@ Assume you are an experienced tester. I am going to give you python functions an
 # Format:
 {
     "env": "hr_experts",
-    "interface_num": 3,
+    "interface_num": 4,
     "task": {
         "actions": [
             {
@@ -35,38 +35,46 @@ import json
 from typing import Any, Dict, List
 from tau_bench.envs.tool import Tool
 
-
-class DiscoverJobApplication(Tool):
+class DiscoverDepartmentEntities(Tool):
     @staticmethod
-    def invoke(data: Dict[str, Any], filters: Dict[str, Any] = None) -> str:
+    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
         """
-        Discover job application records.
+        Discover department entities.
+        
+        Supported entities:
+        - departments: Department records by department_id, department_name, manager_id, budget, status, created_at, updated_at
         """
+        if entity_type not in ["departments"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'departments'"
+            })
+        
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": "Invalid data format for job applications"
+                "error": f"Invalid data format for {entity_type}"
             })
         
         results = []
-        applications = data.get("job_applications", {})
+        entities = data.get("departments", {})
         
-        for app_id, app_data in applications.items():
+        for entity_id, entity_data in entities.items():
             if filters:
                 match = True
                 for filter_key, filter_value in filters.items():
-                    app_value = app_data.get(filter_key)
-                    if app_value != filter_value:
+                    entity_value = entity_data.get(filter_key)
+                    if entity_value != filter_value:
                         match = False
                         break
                 if match:
-                    results.append({**app_data, "application_id": app_id})
+                    results.append({**entity_data, "department_id": entity_id})
             else:
-                results.append({**app_data, "application_id": app_id})
+                results.append({**entity_data, "department_id": entity_id})
         
         return json.dumps({
             "success": True,
-            "entity_type": "job_applications",
+            "entity_type": entity_type,
             "count": len(results),
             "results": results
         })
@@ -76,16 +84,21 @@ class DiscoverJobApplication(Tool):
         return {
             "type": "function",
             "function": {
-                "name": "discover_job_application",
-                "description": "Discover job application records. Filterable by application_id (string), candidate_id (string), position_id (string), application_date (date), status (enum: 'submitted', 'under_review', 'screening', 'interviewing', 'offer_made', 'accepted', 'rejected', 'withdrawn'), recruiter_id (string), ai_screening_score (decimal), final_decision (enum: 'hire', 'reject', 'hold'), created_at (timestamp), updated_at (timestamp).",
+                "name": "discover_department_entities",
+                "description": "Discover department entities. Entity types: 'departments' (department records; filterable by department_id (string), department_name (string), manager_id (string), budget (decimal), status (enum: 'active', 'inactive'), created_at (timestamp), updated_at (timestamp)).",
                 "parameters": {
                     "type": "object",
                     "properties": {
+                        "entity_type": {
+                            "type": "string",
+                            "description": "Type of entity to discover: 'departments'"
+                        },
                         "filters": {
                             "type": "object",
-                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False."
+                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False. For departments, filters are: department_id (string), department_name (string), manager_id (string), budget (decimal), status (enum: 'active', 'inactive'), created_at (timestamp), updated_at (timestamp)"
                         }
-                    }
+                    },
+                    "required": ["entity_type"]
                 }
             }
         }
@@ -96,39 +109,66 @@ import json
 from typing import Any, Dict, List
 from tau_bench.envs.tool import Tool
 
-
-
-class DiscoverPayrollRecord(Tool):
+class DiscoverJobEntities(Tool):
     @staticmethod
-    def invoke(data: Dict[str, Any], filters: Dict[str, Any] = None) -> str:
+    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
         """
-        Discover payroll record records.
+        Discover job entities.
+        
+        Supported entities:
+        - job_positions: Job position records by position_id, title, department_id, job_level, employment_type, hourly_rate_min, hourly_rate_max, status, created_at, updated_at
+        - skills: Skill records by skill_id, skill_name, status
+        - job_position_skills: Job position skill relationships by position_id, skill_id
         """
+        if entity_type not in ["job_positions", "skills", "job_position_skills"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be one of: 'job_positions', 'skills', 'job_position_skills'"
+            })
+        
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": "Invalid data format for payroll records"
+                "error": f"Invalid data format for {entity_type}"
             })
         
         results = []
-        payroll_records = data.get("payroll_records", {})
+        entities = data.get(entity_type, {})
         
-        for payroll_id, payroll_data in payroll_records.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    payroll_value = payroll_data.get(filter_key)
-                    if payroll_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**payroll_data, "payroll_id": payroll_id})
-            else:
-                results.append({**payroll_data, "payroll_id": payroll_id})
+        if entity_type == "job_position_skills":
+            # Special handling for many-to-many relationship table
+            for relationship in entities.values():
+                if filters:
+                    match = True
+                    for filter_key, filter_value in filters.items():
+                        entity_value = relationship.get(filter_key)
+                        if entity_value != filter_value:
+                            match = False
+                            break
+                    if match:
+                        results.append(relationship)
+                else:
+                    results.append(relationship)
+        else:
+            # Handle regular entities with primary keys
+            id_field = "position_id" if entity_type == "job_positions" else "skill_id"
+            
+            for entity_id, entity_data in entities.items():
+                if filters:
+                    match = True
+                    for filter_key, filter_value in filters.items():
+                        entity_value = entity_data.get(filter_key)
+                        if entity_value != filter_value:
+                            match = False
+                            break
+                    if match:
+                        results.append({**entity_data, id_field: entity_id})
+                else:
+                    results.append({**entity_data, id_field: entity_id})
         
         return json.dumps({
             "success": True,
-            "entity_type": "payroll_records",
+            "entity_type": entity_type,
             "count": len(results),
             "results": results
         })
@@ -138,16 +178,257 @@ class DiscoverPayrollRecord(Tool):
         return {
             "type": "function",
             "function": {
-                "name": "discover_payroll_record",
-                "description": "Discover payroll record records. Filterable by payroll_id (string), employee_id (string), pay_period_start (date), pay_period_end (date), hours_worked (decimal), hourly_rate (decimal), payment_date (date), status (enum: 'draft', 'approved', 'paid', 'cancelled'), approved_by (string), created_at (timestamp), updated_at (timestamp).",
+                "name": "discover_job_entities",
+                "description": "Discover job entities. Entity types: 'job_positions' (job position records; filterable by position_id (string), title (string), department_id (string), job_level (enum: 'entry', 'junior', 'mid', 'senior', 'lead', 'manager', 'director', 'executive'), employment_type (enum: 'full_time', 'part_time', 'contract', 'intern', 'temporary'), hourly_rate_min (decimal), hourly_rate_max (decimal), status (enum: 'open', 'closed', 'draft'), created_at (timestamp), updated_at (timestamp)), 'skills' (skill records; filterable by skill_id (string), skill_name (string), status (enum: 'active', 'inactive')), 'job_position_skills' (job position skill relationships; filterable by position_id (string), skill_id (string)).",
                 "parameters": {
                     "type": "object",
                     "properties": {
+                        "entity_type": {
+                            "type": "string",
+                            "description": "Type of entity to discover: 'job_positions', 'skills', or 'job_position_skills'"
+                        },
                         "filters": {
                             "type": "object",
-                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False."
+                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False. For job_positions: position_id (string), title (string), department_id (string), job_level (enum: 'entry', 'junior', 'mid', 'senior', 'lead', 'manager', 'director', 'executive'), employment_type (enum: 'full_time', 'part_time', 'contract', 'intern', 'temporary'), hourly_rate_min (decimal), hourly_rate_max (decimal), status (enum: 'open', 'closed', 'draft'), created_at (timestamp), updated_at (timestamp). For skills: skill_id (string), skill_name (string), status (enum: 'active', 'inactive'). For job_position_skills: position_id (string), skill_id (string)"
                         }
-                    }
+                    },
+                    "required": ["entity_type"]
+                }
+            }
+        }
+
+
+# -----------------
+
+import json
+from typing import Any, Dict, List
+from tau_bench.envs.tool import Tool
+
+
+class DiscoverEmployeeEntities(Tool):
+    @staticmethod
+    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+        """
+        Discover employee entities.
+        
+        Supported entities:
+        - employees: Employee records by employee_id, user_id, position_id, hire_date, employment_status, manager_id, date_of_birth, address, hourly_rate, created_at, updated_at
+        """
+        if entity_type not in ["employees"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'employees'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid data format for {entity_type}"
+            })
+        
+        results = []
+        entities = data.get("employees", {})
+        
+        for entity_id, entity_data in entities.items():
+            if filters:
+                match = True
+                for filter_key, filter_value in filters.items():
+                    entity_value = entity_data.get(filter_key)
+                    if entity_value != filter_value:
+                        match = False
+                        break
+                if match:
+                    results.append({**entity_data, "employee_id": entity_id})
+            else:
+                results.append({**entity_data, "employee_id": entity_id})
+        
+        return json.dumps({
+            "success": True,
+            "entity_type": entity_type,
+            "count": len(results),
+            "results": results
+        })
+    
+    @staticmethod
+    def get_info() -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": "discover_employee_entities",
+                "description": "Discover employee entities. Entity types: 'employees' (employee records; filterable by employee_id (string), user_id (string), position_id (string), hire_date (date), employment_status (enum: 'active', 'terminated', 'on_leave', 'suspended'), manager_id (string), date_of_birth (date), address (string), hourly_rate (integer), created_at (timestamp), updated_at (timestamp)).",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "entity_type": {
+                            "type": "string",
+                            "description": "Type of entity to discover: 'employees'"
+                        },
+                        "filters": {
+                            "type": "object",
+                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False. For employees, filters are: employee_id (string), user_id (string), position_id (string), hire_date (date), employment_status (enum: 'active', 'terminated', 'on_leave', 'suspended'), manager_id (string), date_of_birth (date), address (string), hourly_rate (integer), created_at (timestamp), updated_at (timestamp)"
+                        }
+                    },
+                    "required": ["entity_type"]
+                }
+            }
+        }
+
+
+# -----------------
+
+import json
+from typing import Any, Dict, List
+from tau_bench.envs.tool import Tool
+
+class DiscoverRecruitmentEntities(Tool):
+    @staticmethod
+    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+        """
+        Discover recruitment entities.
+        
+        Supported entities:
+        - candidates: Candidate records by candidate_id, first_name, last_name, email, phone_number, address, source, status, created_at, updated_at
+        - job_applications: Job application records by application_id, candidate_id, position_id, application_date, status, recruiter_id, ai_screening_score, final_decision, created_at, updated_at
+        - interviews: Interview records by interview_id, application_id, interviewer_id, interview_type, scheduled_date, duration_minutes, status, overall_rating, technical_score, communication_score, cultural_fit_score, recommendation, created_at, updated_at
+        """
+        if entity_type not in ["candidates", "job_applications", "interviews"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be one of: 'candidates', 'job_applications', 'interviews'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid data format for {entity_type}"
+            })
+        
+        results = []
+        entities = data.get(entity_type, {})
+        
+        # Determine ID field based on entity type
+        id_field_map = {
+            "candidates": "candidate_id",
+            "job_applications": "application_id", 
+            "interviews": "interview_id"
+        }
+        id_field = id_field_map[entity_type]
+        
+        for entity_id, entity_data in entities.items():
+            if filters:
+                match = True
+                for filter_key, filter_value in filters.items():
+                    entity_value = entity_data.get(filter_key)
+                    if entity_value != filter_value:
+                        match = False
+                        break
+                if match:
+                    results.append({**entity_data, id_field: entity_id})
+            else:
+                results.append({**entity_data, id_field: entity_id})
+        
+        return json.dumps({
+            "success": True,
+            "entity_type": entity_type,
+            "count": len(results),
+            "results": results
+        })
+    
+    @staticmethod
+    def get_info() -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": "discover_recruitment_entities",
+                "description": "Discover recruitment entities. Entity types: 'candidates' (candidate records; filterable by candidate_id (string), first_name (string), last_name (string), email (string), phone_number (string), address (string), source (enum: 'job_board', 'referral', 'company_website', 'recruiter', 'social_media', 'career_fair'), status (enum: 'new', 'screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn'), created_at (timestamp), updated_at (timestamp)), 'job_applications' (job application records; filterable by application_id (string), candidate_id (string), position_id (string), application_date (date), status (enum: 'submitted', 'under_review', 'screening', 'interviewing', 'offer_made', 'accepted', 'rejected', 'withdrawn'), recruiter_id (string), ai_screening_score (decimal), final_decision (enum: 'hire', 'reject', 'hold'), created_at (timestamp), updated_at (timestamp)), 'interviews' (interview records; filterable by interview_id (string), application_id (string), interviewer_id (string), interview_type (enum: 'phone_screening', 'technical', 'behavioral', 'panel', 'final'), scheduled_date (timestamp), duration_minutes (integer), status (enum: 'scheduled', 'completed', 'cancelled', 'no_show'), overall_rating (enum: 'excellent', 'good', 'average', 'below_average', 'poor'), technical_score (decimal), communication_score (decimal), cultural_fit_score (decimal), recommendation (enum: 'strong_hire', 'hire', 'no_hire', 'strong_no_hire'), created_at (timestamp), updated_at (timestamp)).",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "entity_type": {
+                            "type": "string",
+                            "description": "Type of entity to discover: 'candidates', 'job_applications', or 'interviews'"
+                        },
+                        "filters": {
+                            "type": "object",
+                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False. For candidates: candidate_id (string), first_name (string), last_name (string), email (string), phone_number (string), address (string), source (enum: 'job_board', 'referral', 'company_website', 'recruiter', 'social_media', 'career_fair'), status (enum: 'new', 'screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn'), created_at (timestamp), updated_at (timestamp). For job_applications: application_id (string), candidate_id (string), position_id (string), application_date (date), status (enum: 'submitted', 'under_review', 'screening', 'interviewing', 'offer_made', 'accepted', 'rejected', 'withdrawn'), recruiter_id (string), ai_screening_score (decimal), final_decision (enum: 'hire', 'reject', 'hold'), created_at (timestamp), updated_at (timestamp). For interviews: interview_id (string), application_id (string), interviewer_id (string), interview_type (enum: 'phone_screening', 'technical', 'behavioral', 'panel', 'final'), scheduled_date (timestamp), duration_minutes (integer), status (enum: 'scheduled', 'completed', 'cancelled', 'no_show'), overall_rating (enum: 'excellent', 'good', 'average', 'below_average', 'poor'), technical_score (decimal), communication_score (decimal), cultural_fit_score (decimal), recommendation (enum: 'strong_hire', 'hire', 'no_hire', 'strong_no_hire'), created_at (timestamp), updated_at (timestamp)"
+                        }
+                    },
+                    "required": ["entity_type"]
+                }
+            }
+        }
+
+
+# -----------------
+
+import json
+from typing import Any, Dict, List
+from tau_bench.envs.tool import Tool
+
+class DiscoverTimesheetEntities(Tool):
+    @staticmethod
+    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+        """
+        Discover timesheet entities.
+        
+        Supported entities:
+        - employee_timesheets: Employee timesheet records by timesheet_id, employee_id, work_date, clock_in_time, clock_out_time, break_duration_minutes, total_hours, project_code, approved_by, status, created_at, updated_at
+        """
+        if entity_type not in ["employee_timesheets"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'employee_timesheets'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid data format for {entity_type}"
+            })
+        
+        results = []
+        entities = data.get("employee_timesheets", {})
+        
+        for entity_id, entity_data in entities.items():
+            if filters:
+                match = True
+                for filter_key, filter_value in filters.items():
+                    entity_value = entity_data.get(filter_key)
+                    if entity_value != filter_value:
+                        match = False
+                        break
+                if match:
+                    results.append({**entity_data, "timesheet_id": entity_id})
+            else:
+                results.append({**entity_data, "timesheet_id": entity_id})
+        
+        return json.dumps({
+            "success": True,
+            "entity_type": entity_type,
+            "count": len(results),
+            "results": results
+        })
+    
+    @staticmethod
+    def get_info() -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": "discover_timesheet_entities",
+                "description": "Discover timesheet entities. Entity types: 'employee_timesheets' (employee timesheet records; filterable by timesheet_id (string), employee_id (string), work_date (date), clock_in_time (timestamp), clock_out_time (timestamp), break_duration_minutes (integer), total_hours (decimal), project_code (string), approved_by (string), status (enum: 'draft', 'submitted', 'approved', 'rejected'), created_at (timestamp), updated_at (timestamp)).",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "entity_type": {
+                            "type": "string",
+                            "description": "Type of entity to discover: 'employee_timesheets'"
+                        },
+                        "filters": {
+                            "type": "object",
+                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False. For employee_timesheets, filters are: timesheet_id (string), employee_id (string), work_date (date), clock_in_time (timestamp), clock_out_time (timestamp), break_duration_minutes (integer), total_hours (decimal), project_code (string), approved_by (string), status (enum: 'draft', 'submitted', 'approved', 'rejected'), created_at (timestamp), updated_at (timestamp)"
+                        }
+                    },
+                    "required": ["entity_type"]
                 }
             }
         }
@@ -158,37 +439,46 @@ import json
 from typing import Any, Dict, List
 from tau_bench.envs.tool import Tool
 
-class DiscoverEmployeeBenefits(Tool):
+class DiscoverUserEntities(Tool):
     @staticmethod
-    def invoke(data: Dict[str, Any], filters: Dict[str, Any] = None) -> str:
+    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
         """
-        Discover employee benefits records.
+        Discover user entities.
+        
+        Supported entities:
+        - users: User records by user_id, first_name, last_name, email, phone_number, role, status, mfa_enabled, created_at, updated_at
         """
+        if entity_type not in ["users"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'users'"
+            })
+        
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": "Invalid data format for employee benefits"
+                "error": f"Invalid data format for {entity_type}"
             })
         
         results = []
-        employee_benefits = data.get("employee_benefits", {})
+        entities = data.get("users", {})
         
-        for enrollment_id, benefits_data in employee_benefits.items():
+        for entity_id, entity_data in entities.items():
             if filters:
                 match = True
                 for filter_key, filter_value in filters.items():
-                    benefits_value = benefits_data.get(filter_key)
-                    if benefits_value != filter_value:
+                    entity_value = entity_data.get(filter_key)
+                    if entity_value != filter_value:
                         match = False
                         break
                 if match:
-                    results.append({**benefits_data, "enrollment_id": enrollment_id})
+                    results.append({**entity_data, "user_id": entity_id})
             else:
-                results.append({**benefits_data, "enrollment_id": enrollment_id})
+                results.append({**entity_data, "user_id": entity_id})
         
         return json.dumps({
             "success": True,
-            "entity_type": "employee_benefits",
+            "entity_type": entity_type,
             "count": len(results),
             "results": results
         })
@@ -198,260 +488,26 @@ class DiscoverEmployeeBenefits(Tool):
         return {
             "type": "function",
             "function": {
-                "name": "discover_employee_benefits",
-                "description": "Discover employee benefits records. Filterable by enrollment_id (string), employee_id (string), plan_id (string), enrollment_date (date), status (enum: 'active', 'terminated', 'pending'), coverage_level (enum: 'employee_only', 'employee_spouse', 'employee_children', 'family'), beneficiary_name (string), beneficiary_relationship (string), created_at (timestamp), updated_at (timestamp).",
+                "name": "discover_user_entities",
+                "description": "Discover user entities. Entity types: 'users' (user records; filterable by user_id (string), first_name (string), last_name (string), email (string), phone_number (string), role (enum: 'hr_director', 'hr_manager', 'recruiter', 'payroll_administrator', 'hiring_manager', 'finance_officer', 'it_administrator', 'compliance_officer', 'employee'), status (enum: 'active', 'inactive', 'suspended'), mfa_enabled (boolean), created_at (timestamp), updated_at (timestamp)).",
                 "parameters": {
                     "type": "object",
                     "properties": {
+                        "entity_type": {
+                            "type": "string",
+                            "description": "Type of entity to discover: 'users'"
+                        },
                         "filters": {
                             "type": "object",
-                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False."
+                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False. For users, filters are: user_id (string), first_name (string), last_name (string), email (string), phone_number (string), role (enum: 'hr_director', 'hr_manager', 'recruiter', 'payroll_administrator', 'hiring_manager', 'finance_officer', 'it_administrator', 'compliance_officer', 'employee'), status (enum: 'active', 'inactive', 'suspended'), mfa_enabled (boolean), created_at (timestamp), updated_at (timestamp)"
                         }
-                    }
+                    },
+                    "required": ["entity_type"]
                 }
             }
         }
 
-# -----------------
 
-import json
-from typing import Any, Dict, List
-from tau_bench.envs.tool import Tool
-
-class DiscoverPayrollDeduction(Tool):
-    @staticmethod
-    def invoke(data: Dict[str, Any], filters: Dict[str, Any] = None) -> str:
-        """
-        Discover payroll deduction records.
-        """
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid data format for payroll deductions"
-            })
-        
-        results = []
-        payroll_deductions = data.get("payroll_deductions", {})
-        
-        for deduction_id, deduction_data in payroll_deductions.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    deduction_value = deduction_data.get(filter_key)
-                    if deduction_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**deduction_data, "deduction_id": deduction_id})
-            else:
-                results.append({**deduction_data, "deduction_id": deduction_id})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": "payroll_deductions",
-            "count": len(results),
-            "results": results
-        })
-    
-    @staticmethod
-    def get_info() -> Dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": "discover_payroll_deduction",
-                "description": "Discover payroll deduction records. Filterable by deduction_id (string), payroll_id (string), deduction_type (enum: 'tax', 'insurance', 'retirement', 'garnishment', 'equipment', 'other'), amount (decimal), created_by (string), created_at (timestamp).",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False."
-                        }
-                    }
-                }
-            }
-        }
-
-# -----------------
-
-import json
-from typing import Any, Dict, List
-from tau_bench.envs.tool import Tool
-
-class DiscoverBenefitsPlan(Tool):
-    @staticmethod
-    def invoke(data: Dict[str, Any], filters: Dict[str, Any] = None) -> str:
-        """
-        Discover benefits plan records.
-        """
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid data format for benefits plans"
-            })
-        
-        results = []
-        benefits_plans = data.get("benefits_plans", {})
-        
-        for plan_id, plan_data in benefits_plans.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    plan_value = plan_data.get(filter_key)
-                    if plan_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**plan_data, "plan_id": plan_id})
-            else:
-                results.append({**plan_data, "plan_id": plan_id})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": "benefits_plans",
-            "count": len(results),
-            "results": results
-        })
-    
-    @staticmethod
-    def get_info() -> Dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": "discover_benefits_plan",
-                "description": "Discover benefits plan records. Filterable by plan_id (string), plan_name (string), plan_type (enum: 'health_insurance', 'dental', 'vision', 'life_insurance', 'disability', 'retirement_401k', 'pto', 'flexible_spending'), provider (string), employee_cost (decimal), employer_cost (decimal), status (enum: 'active', 'inactive'), effective_date (date), expiration_date (date), created_at (timestamp), updated_at (timestamp).",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False."
-                        }
-                    }
-                }
-            }
-        }
-
-# -----------------
-
-import json
-from typing import Any, Dict, List
-from tau_bench.envs.tool import Tool
-
-class DiscoverPerformanceReview(Tool):
-    @staticmethod
-    def invoke(data: Dict[str, Any], filters: Dict[str, Any] = None) -> str:
-        """
-        Discover performance review records.
-        """
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid data format for performance reviews"
-            })
-        
-        results = []
-        performance_reviews = data.get("performance_reviews", {})
-        
-        for review_id, review_data in performance_reviews.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    review_value = review_data.get(filter_key)
-                    if review_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**review_data, "review_id": review_id})
-            else:
-                results.append({**review_data, "review_id": review_id})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": "performance_reviews",
-            "count": len(results),
-            "results": results
-        })
-    
-    @staticmethod
-    def get_info() -> Dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": "discover_performance_review",
-                "description": "Discover performance review records. Filterable by review_id (string), employee_id (string), reviewer_id (string), review_period_start (date), review_period_end (date), review_type (enum: 'annual', 'quarterly', 'probationary', 'project_based'), overall_rating (enum: 'exceeds_expectations', 'meets_expectations', 'below_expectations', 'unsatisfactory'), status (enum: 'draft', 'submitted', 'approved'), created_at (timestamp), updated_at (timestamp).",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False."
-                        }
-                    }
-                }
-            }
-        }
-
-# -----------------
-
-
-import json
-from typing import Any, Dict, List
-from tau_bench.envs.tool import Tool
-
-class DiscoverInterview(Tool):
-    @staticmethod
-    def invoke(data: Dict[str, Any], filters: Dict[str, Any] = None) -> str:
-        """
-        Discover interview records.
-        """
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid data format for interviews"
-            })
-        
-        results = []
-        interviews = data.get("interviews", {})
-        
-        for interview_id, interview_data in interviews.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    interview_value = interview_data.get(filter_key)
-                    if interview_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**interview_data, "interview_id": interview_id})
-            else:
-                results.append({**interview_data, "interview_id": interview_id})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": "interviews",
-            "count": len(results),
-            "results": results
-        })
-    
-    @staticmethod
-    def get_info() -> Dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": "discover_interview",
-                "description": "Discover interview records. Filterable by interview_id (string), application_id (string), interviewer_id (string), interview_type (enum: 'phone_screening', 'technical', 'behavioral', 'panel', 'final'), scheduled_date (timestamp), duration_minutes (integer), status (enum: 'scheduled', 'completed', 'cancelled', 'no_show'), overall_rating (enum: 'excellent', 'good', 'average', 'below_average', 'poor'), recommendation (enum: 'strong_hire', 'hire', 'no_hire', 'strong_no_hire'), created_at (timestamp), updated_at (timestamp).",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters as JSON object with key-value pairs. SYNTAX: {\"key\": \"value\"} for single filter, {\"key1\": \"value1\", \"key2\": \"value2\"} for multiple filters (AND logic). RULES: Exact matches only, dates as YYYY-MM-DD and booleans as True/False."
-                        }
-                    }
-                }
-            }
-        }
 
 # Policy:
 HR Payroll Policy & SOPs
@@ -1292,4 +1348,4 @@ Ref: expense_reimbursements.employee_id > employees.employee_id
 Ref: expense_reimbursements.approved_by > users.user_id
 
 
-You have to provide the json file for each function separately including all the tests for that function in the actions part. You are going to provide the bash script that will create and populate those json files in a folder named tools_regression_tests/interface_3/.
+You have to provide the json file for each function separately including all the tests for that function in the actions part. You are going to provide the bash script that will create and populate those json files in a folder named tools_regression_tests/interface_4/.
