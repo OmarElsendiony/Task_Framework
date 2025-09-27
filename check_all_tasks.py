@@ -64,6 +64,7 @@ def run_single_task(task_file_path):
         return False, error_msg
     except Exception as e:
         error_msg = f"Unexpected error processing {task_file_path}: {str(e)}"
+        print(f"ERROR in file {task_file_path}: {e}")  # ADD THIS LINE
         # print(f"  ERROR: {error_msg}")
         return False, error_msg
 

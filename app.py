@@ -250,8 +250,6 @@ def env_interface():
 @app.route('/execute_api', strict_slashes=False, methods=["GET", "POST"])
 def execute_api():
     # global data, last_environment, last_interface  # Add global declaration
-
-
     passed_data = request.get_json()
     api_name = passed_data.get('api_name')
     api_name = api_name + "_invoke" if api_name else None
