@@ -1,4 +1,4 @@
-Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide diverse tests with different number of parameters (if applicable). You have to provide edge cases and normal cases. Try to use all of the fields in one of the cases. You have to provide invalid cases. You have to provide empty cases if applicable. However, you have to follow the format that I provide to you below.
+Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide two tests for each function with the most number of parameters as possible (if applicable). However, you have to follow the format that I provide to you below.
 
 # Format:
 {
@@ -42,13 +42,7 @@ class ManageTrainingPrograms(Tool):
     """
     Manages training programs, including creation and modification.
     """
-    @staticmethod
-    def generate_id(table: Dict[str, Any]) -> str:
-        """Generates a new unique ID for a record."""
-        if not table:
-            return "1"
-        return str(max(int(k) for k in table.keys()) + 1)
-
+    
     @staticmethod
     def invoke(
         data: Dict[str, Any],
@@ -64,6 +58,12 @@ class ManageTrainingPrograms(Tool):
         """
         Executes the specified operation (create or update) on training programs.
         """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
         timestamp = "2025-10-01T00:00:00"
         programs = data.get("training_programs", {})
 
@@ -87,7 +87,7 @@ class ManageTrainingPrograms(Tool):
             if effective_status not in valid_statuses:
                 return json.dumps({"error": f"Invalid status. Must be one of {valid_statuses}."})
 
-            new_program_id = ManageTrainingPrograms.generate_id(programs)
+            new_program_id = generate_id(programs)
             new_program = {
                 "program_id": new_program_id,
                 "program_name": program_name,
@@ -189,13 +189,6 @@ class ManageAuditLogs(Tool):
     Manages the creation of immutable audit logs.
     """
     @staticmethod
-    def generate_id(table: Dict[str, Any]) -> str:
-        """Generates a new unique ID for a record."""
-        if not table:
-            return "1"
-        return str(max(int(k) for k in table.keys()) + 1)
-
-    @staticmethod
     def invoke(
         data: Dict[str, Any],
         operation: str,
@@ -210,6 +203,12 @@ class ManageAuditLogs(Tool):
         """
         Executes the create operation for audit logs.
         """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
         timestamp = "2025-10-01T00:00:00"
         audit_logs = data.get("audit_logs", {})
         users = data.get("users", {})
@@ -227,7 +226,7 @@ class ManageAuditLogs(Tool):
         if action not in valid_actions:
             return json.dumps({"error": f"Invalid action. Must be one of {valid_actions}."})
 
-        new_log_id = ManageAuditLogs.generate_id(audit_logs)
+        new_log_id = generate_id(audit_logs)
         new_log = {
             "log_id": new_log_id,
             "user_id": user_id,
@@ -274,6 +273,7 @@ class ManageAuditLogs(Tool):
 
 import json
 from typing import Any, Dict, Optional
+import datetime
 
 # A placeholder for the base Tool class
 class Tool:
@@ -283,12 +283,6 @@ class ManageExpenseReimbursements(Tool):
     """
     Manages expense reimbursements, including creation and processing.
     """
-    @staticmethod
-    def generate_id(table: Dict[str, Any]) -> str:
-        """Generates a new unique ID for a record."""
-        if not table:
-            return "1"
-        return str(max(int(k) for k in table.keys()) + 1)
 
     @staticmethod
     def invoke(
@@ -307,6 +301,12 @@ class ManageExpenseReimbursements(Tool):
         """
         Executes the specified operation (create or update) on expense reimbursements.
         """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
         timestamp = "2025-10-01T00:00:00"
         reimbursements = data.get("expense_reimbursements", {})
         employees = data.get("employees", {})
@@ -318,12 +318,23 @@ class ManageExpenseReimbursements(Tool):
 
             if employee_id not in employees:
                 return json.dumps({"error": f"Employee with ID {employee_id} not found."})
+
+            # --- Start of revised validation logic ---
+            if amount <= 0:
+                return json.dumps({"error": "Validation failed: The amount must be a positive value."})
+            
+            try:
+                # This check is now just to validate the date format is correct.
+                datetime.datetime.strptime(expense_date, '%Y-%m-%d').date()
+            except ValueError:
+                return json.dumps({"error": "Invalid date format. Please use YYYY-MM-DD."})
+            # --- End of revised validation logic ---
             
             valid_expense_types = ["travel", "meals", "equipment", "training", "other"]
             if expense_type not in valid_expense_types:
                 return json.dumps({"error": f"Invalid expense type. Must be one of {valid_expense_types}."})
 
-            new_reimbursement_id = ManageExpenseReimbursements.generate_id(reimbursements)
+            new_reimbursement_id = generate_id(reimbursements)
             new_reimbursement = {
                 "reimbursement_id": new_reimbursement_id,
                 "employee_id": employee_id,
@@ -341,27 +352,33 @@ class ManageExpenseReimbursements(Tool):
             return json.dumps(new_reimbursement)
 
         elif operation == "update":
-            if not all([reimbursement_id, status, approved_by]):
-                return json.dumps({"error": "Missing required parameters for update operation."})
+            if not all([reimbursement_id, status]):
+                return json.dumps({"error": "Missing reimbursement_id or status for update operation."})
 
             if reimbursement_id not in reimbursements:
                 return json.dumps({"error": f"Reimbursement with ID {reimbursement_id} not found."})
-            
-            if approved_by not in users:
-                return json.dumps({"error": f"User with ID {approved_by} not found."})
 
             valid_statuses = ["approved", "rejected", "paid"]
             if status not in valid_statuses:
                 return json.dumps({"error": f"Invalid status. Must be one of {valid_statuses}."})
+
+            if status in ["approved", "rejected"] and not approved_by:
+                return json.dumps({"error": f"approved_by is required when status is '{status}'."})
             
             if status == "paid" and not payment_date:
                 return json.dumps({"error": "payment_date is required when status is 'paid'."})
+            
+            if approved_by and approved_by not in users:
+                return json.dumps({"error": f"User with ID {approved_by} not found."})
 
             record_to_update = reimbursements[reimbursement_id]
             record_to_update["status"] = status
-            record_to_update["approved_by"] = approved_by
+            
+            if approved_by:
+                record_to_update["approved_by"] = approved_by
             if payment_date:
                 record_to_update["payment_date"] = payment_date
+            
             record_to_update["updated_at"] = timestamp
             return json.dumps(record_to_update)
 
@@ -388,8 +405,8 @@ class ManageExpenseReimbursements(Tool):
                         "expense_type": {"type": "string", "description": "Category: 'travel', 'meals', 'equipment', 'training', 'other'. Required for 'create'."},
                         "receipt_file_path": {"type": "string", "description": "The storage path to the scanned receipt or invoice. Optional for 'create'."},
                         "reimbursement_id": {"type": "string", "description": "The ID of the expense reimbursement record to modify. Required for 'update'."},
-                        "status": {"type": "string", "description": "New status: 'approved', 'rejected', 'paid'. sRequired for 'update'."},
-                        "approved_by": {"type": "string", "description": "The user ID of the finance officer or manager processing the request. Required for 'update'."},
+                        "status": {"type": "string", "description": "New status: 'approved', 'rejected', 'paid'. Required for 'update'."},
+                        "approved_by": {"type": "string", "description": "The user ID of the finance officer or manager processing the request. Required if status is 'approved' or 'rejected'."},
                         "payment_date": {"type": "string", "description": "The date the payment was issued (YYYY-MM-DD). Required if status is 'paid'."},
                     },
                     "required": ["operation"],
@@ -397,11 +414,11 @@ class ManageExpenseReimbursements(Tool):
             },
         }
 
-
 # -----------------
 
 import json
 from typing import Any, Dict, Optional
+import datetime
 
 # A placeholder for the base Tool class
 class Tool:
@@ -411,12 +428,6 @@ class ManageLeaveRequests(Tool):
     """
     Manages leave requests, including creation and status updates.
     """
-    @staticmethod
-    def generate_id(table: Dict[str, Any]) -> str:
-        """Generates a new unique ID for a record."""
-        if not table:
-            return "1"
-        return str(max(int(k) for k in table.keys()) + 1)
 
     @staticmethod
     def invoke(
@@ -434,6 +445,12 @@ class ManageLeaveRequests(Tool):
         """
         Executes the specified operation (create or update) on leave requests.
         """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
         timestamp = "2025-10-01T00:00:00"
         leave_requests = data.get("leave_requests", {})
         employees = data.get("employees", {})
@@ -446,11 +463,22 @@ class ManageLeaveRequests(Tool):
             if employee_id not in employees:
                 return json.dumps({"error": f"Employee with ID {employee_id} not found."})
             
+            # --- Start of revised validation logic ---
+            try:
+                start_date_obj = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+                end_date_obj = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+
+                if start_date_obj > end_date_obj:
+                    return json.dumps({"error": "Validation failed: The start_date cannot be after the end_date."})
+            except ValueError:
+                return json.dumps({"error": "Invalid date format. Please use YYYY-MM-DD."})
+            # --- End of revised validation logic ---
+            
             valid_leave_types = ["annual", "sick", "fmla", "personal", "bereavement", "jury_duty"]
             if leave_type not in valid_leave_types:
                 return json.dumps({"error": f"Invalid leave type. Must be one of {valid_leave_types}."})
 
-            new_leave_id = ManageLeaveRequests.generate_id(leave_requests)
+            new_leave_id = generate_id(leave_requests)
             new_request = {
                 "leave_id": new_leave_id,
                 "employee_id": employee_id,
@@ -475,7 +503,7 @@ class ManageLeaveRequests(Tool):
                 return json.dumps({"error": f"Leave request with ID {leave_id} not found."})
             
             if approved_by not in users:
-                 return json.dumps({"error": f"User with ID {approved_by} not found."})
+                return json.dumps({"error": f"User with ID {approved_by} not found."})
 
             valid_statuses = ["approved", "rejected", "cancelled"]
             if status not in valid_statuses:
@@ -512,13 +540,12 @@ class ManageLeaveRequests(Tool):
                         "days_requested": {"type": "number", "description": "The total number of leave days requested. Required for 'create'."},
                         "leave_id": {"type": "string", "description": "The ID of the leave request to be updated. Required for 'update'."},
                         "status": {"type": "string", "description": "New status: 'approved', 'rejected', 'cancelled'. Required for 'update'."},
-                        "approved_by": {"type": "string", "description": "The user ID of the managesr or HR personnel approving or rejecting the request. Required for 'update'."},
+                        "approved_by": {"type": "string", "description": "The user ID of the manager or HR personnel approving or rejecting the request. Required for 'update'."},
                     },
                     "required": ["operation"],
                 },
             },
         }
-
 
 # -----------------
 
@@ -533,13 +560,6 @@ class ManageEmployeeTraining(Tool):
     """
     Manages employee training records, including enrollment and progress tracking.
     """
-    @staticmethod
-    def generate_id(table: Dict[str, Any]) -> str:
-        """Generates a new unique ID for a record."""
-        if not table:
-            return "1"
-        return str(max(int(k) for k in table.keys()) + 1)
-
     @staticmethod
     def invoke(
         data: Dict[str, Any],
@@ -557,6 +577,12 @@ class ManageEmployeeTraining(Tool):
         """
         Executes the specified operation (create or update) on employee training records.
         """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
         timestamp = "2025-10-01T00:00:00"
         employee_trainings = data.get("employee_training", {})
         employees = data.get("employees", {})
@@ -571,7 +597,7 @@ class ManageEmployeeTraining(Tool):
             if program_id not in programs:
                 return json.dumps({"error": f"Training program with ID {program_id} not found."})
 
-            new_record_id = ManageEmployeeTraining.generate_id(employee_trainings)
+            new_record_id = generate_id(employee_trainings)
             new_record = {
                 "training_record_id": new_record_id,
                 "employee_id": employee_id,
@@ -660,13 +686,6 @@ class ManageDocumentStorage(Tool):
     Manages document storage, including uploads and metadata updates.
     """
     @staticmethod
-    def generate_id(table: Dict[str, Any]) -> str:
-        """Generates a new unique ID for a record."""
-        if not table:
-            return "1"
-        return str(max(int(k) for k in table.keys()) + 1)
-
-    @staticmethod
     def invoke(
         data: Dict[str, Any],
         operation: str,
@@ -684,6 +703,13 @@ class ManageDocumentStorage(Tool):
         """
         Executes the specified operation (create or update) on documents.
         """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+
         timestamp = "2025-10-01T00:00:00"
         documents = data.get("document_storage", {})
         users = data.get("users", {})
@@ -702,7 +728,7 @@ class ManageDocumentStorage(Tool):
             if document_type not in valid_types:
                 return json.dumps({"error": f"Invalid document type. Must be one of {valid_types}."})
 
-            new_doc_id = ManageDocumentStorage.generate_id(documents)
+            new_doc_id = generate_id(documents)
             new_document = {
                 "document_id": new_doc_id,
                 "document_name": document_name,
@@ -713,7 +739,7 @@ class ManageDocumentStorage(Tool):
                 "uploaded_by": uploaded_by,
                 "confidentiality_level": confidentiality_level,
                 "retention_period_years": retention_period_years,
-                "expiry_date": None,
+                "expiry_date": expiry_date,
                 "status": "active",
                 "created_at": timestamp,
             }

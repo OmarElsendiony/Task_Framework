@@ -69,7 +69,7 @@ def run_single_task(task_file_path):
         return False, error_msg
 
 
-def run_all_tasks(base_path="week_11"):  
+def run_all_tasks(base_path="week_11_new"):  
     """
     Find and run all task.json files, logging errors to a file.
     """
@@ -152,4 +152,4 @@ def run_all_tasks(base_path="week_11"):
 
 
 if __name__ == "__main__":
-    run_all_tasks("week_11")
+    run_all_tasks("week_11_new")

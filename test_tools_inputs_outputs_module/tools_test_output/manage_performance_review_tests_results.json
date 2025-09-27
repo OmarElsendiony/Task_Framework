@@ -7,288 +7,50 @@
         "action": "create",
         "review_data": {
           "employee_id": "1",
-          "reviewer_id": "2",
+          "reviewer_id": "1",
           "review_period_start": "2025-01-01",
           "review_period_end": "2025-12-31",
           "review_type": "annual",
-          "overall_rating": "meets_expectations"
+          "overall_rating": "exceeds_expectations",
+          "goals_achievement_score": 9.5,
+          "communication_score": 8.7,
+          "teamwork_score": 9.2,
+          "leadership_score": 8.9,
+          "technical_skills_score": 9.1,
+          "status": "draft"
         }
       },
       "output": [
         {
           "success": false,
-          "error": "Halt: Employee 1 does not have active status"
+          "error": "Halt: Employee or reviewer not found or inactive"
         },
         200
       ]
     },
     {
       "arguments": {
-        "action": "create",
+        "action": "update",
+        "review_id": "1",
         "review_data": {
           "employee_id": "2",
-          "reviewer_id": "3",
-          "review_period_start": "2025-01-01",
-          "review_period_end": "2025-03-31",
+          "reviewer_id": "2",
+          "review_period_start": "2025-04-01",
+          "review_period_end": "2025-06-30",
           "review_type": "quarterly",
-          "overall_rating": "exceeds_expectations",
-          "goals_achievement_score": 8.5,
-          "communication_score": 9.0,
-          "teamwork_score": 8.0,
-          "leadership_score": 7.5,
-          "technical_skills_score": 9.2
+          "overall_rating": "meets_expectations",
+          "goals_achievement_score": 7.8,
+          "communication_score": 8.2,
+          "teamwork_score": 7.5,
+          "leadership_score": 6.9,
+          "technical_skills_score": 8.4,
+          "status": "submitted"
         }
       },
       "output": [
         {
           "success": false,
-          "error": "Halt: Reviewer 3 does not have active status"
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "create",
-        "review_data": {
-          "employee_id": "3",
-          "reviewer_id": "1",
-          "review_period_start": "2025-06-01",
-          "review_period_end": "2025-08-31",
-          "review_type": "probationary",
-          "overall_rating": "below_expectations"
-        }
-      },
-      "output": [
-        {
-          "success": true,
-          "action": "create",
-          "review_id": "194",
-          "message": "Performance review 194 created successfully",
-          "review_data": {
-            "review_id": "194",
-            "employee_id": "3",
-            "reviewer_id": "1",
-            "review_period_start": "2025-06-01",
-            "review_period_end": "2025-08-31",
-            "review_type": "probationary",
-            "overall_rating": "below_expectations",
-            "goals_achievement_score": null,
-            "communication_score": null,
-            "teamwork_score": null,
-            "leadership_score": null,
-            "technical_skills_score": null,
-            "status": "draft",
-            "created_at": "2025-10-01T12:00:00",
-            "updated_at": "2025-10-01T12:00:00"
-          }
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "update",
-        "review_id": "1",
-        "review_data": {
-          "overall_rating": "exceeds_expectations",
-          "hr_manager_approval": true
-        }
-      },
-      "output": [
-        {
-          "success": true,
-          "action": "update",
-          "review_id": "1",
-          "message": "Performance review 1 updated successfully",
-          "review_data": {
-            "review_id": "1",
-            "employee_id": "2",
-            "reviewer_id": "2",
-            "review_period_start": "2024-09-12",
-            "review_period_end": "2024-12-11",
-            "review_type": "quarterly",
-            "overall_rating": "exceeds_expectations",
-            "goals_achievement_score": 1.0,
-            "communication_score": 1.8,
-            "teamwork_score": 1.6,
-            "leadership_score": 1.2,
-            "technical_skills_score": 2.1,
-            "status": "approved",
-            "created_at": "2024-12-12T18:50:39",
-            "updated_at": "2025-10-01T12:00:00"
-          }
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "update",
-        "review_id": "2",
-        "review_data": {
-          "status": "approved",
-          "hr_manager_approval": true
-        }
-      },
-      "output": [
-        {
-          "success": true,
-          "action": "update",
-          "review_id": "2",
-          "message": "Performance review 2 updated successfully",
-          "review_data": {
-            "review_id": "2",
-            "employee_id": "2",
-            "reviewer_id": "2",
-            "review_period_start": "2024-12-11",
-            "review_period_end": "2024-12-31",
-            "review_type": "project_based",
-            "overall_rating": "exceeds_expectations",
-            "goals_achievement_score": 8.6,
-            "communication_score": 8.9,
-            "teamwork_score": 8.5,
-            "leadership_score": 9.5,
-            "technical_skills_score": 9.2,
-            "status": "approved",
-            "created_at": "2025-01-11T05:42:35",
-            "updated_at": "2025-10-01T12:00:00"
-          }
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "create",
-        "review_data": {
-          "employee_id": "999",
-          "reviewer_id": "2",
-          "review_period_start": "2025-01-01",
-          "review_period_end": "2025-12-31",
-          "review_type": "annual",
-          "overall_rating": "meets_expectations"
-        }
-      },
-      "output": [
-        {
-          "success": false,
-          "error": "Halt: Employee 999 not found"
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "create",
-        "review_data": {
-          "employee_id": "1",
-          "reviewer_id": "2",
-          "review_period_start": "2025-12-31",
-          "review_period_end": "2025-01-01",
-          "review_type": "annual",
-          "overall_rating": "meets_expectations"
-        }
-      },
-      "output": [
-        {
-          "success": false,
-          "error": "Halt: Employee 1 does not have active status"
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "create",
-        "review_data": {
-          "employee_id": "1",
-          "reviewer_id": "2",
-          "review_type": "annual",
-          "overall_rating": "meets_expectations"
-        }
-      },
-      "output": [
-        {
-          "success": false,
-          "error": "Halt: Invalid performance review details: review_period_start, review_period_end"
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "create",
-        "review_data": {
-          "employee_id": "1",
-          "reviewer_id": "2",
-          "review_period_start": "2025-01-01",
-          "review_period_end": "2025-12-31",
-          "review_type": "invalid_type",
-          "overall_rating": "meets_expectations"
-        }
-      },
-      "output": [
-        {
-          "success": false,
-          "error": "Halt: Employee 1 does not have active status"
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "update",
-        "review_id": "999",
-        "review_data": {
-          "overall_rating": "exceeds_expectations",
-          "hr_manager_approval": true
-        }
-      },
-      "output": [
-        {
-          "success": false,
-          "error": "Halt: Performance review 999 not found"
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "update",
-        "review_id": "1",
-        "review_data": {
-          "status": "approved"
-        }
-      },
-      "output": [
-        {
-          "success": false,
-          "error": "Halt: HR Manager approval required"
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "invalid_action"
-      },
-      "output": [
-        {
-          "success": false,
-          "error": "Invalid action 'invalid_action'. Must be 'create' or 'update'"
-        },
-        200
-      ]
-    },
-    {
-      "arguments": {
-        "action": "create"
-      },
-      "output": [
-        {
-          "success": false,
-          "error": "review_data is required for create action"
+          "error": "Halt: Performance review operation failed - invalid status transition from approved to submitted"
         },
         200
       ]

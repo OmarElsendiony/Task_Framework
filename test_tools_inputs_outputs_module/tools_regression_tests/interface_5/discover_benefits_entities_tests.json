@@ -1,0 +1,27 @@
+{
+    "env": "hr_experts",
+    "interface_num": 5,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_benefits_entities",
+                "arguments": {
+                    "entity_type": "benefits_plans",
+                    "filters": {
+                        "plan_type": "health_insurance",
+                        "provider": "Blue Cross Blue Shield"
+                    }
+                }
+            },
+            {
+                "name": "discover_benefits_entities",
+                "arguments": {
+                    "entity_type": "employee_benefits",
+                    "filters": {
+                        "employee_id": "1"
+                    }
+                }
+            }
+        ]
+    }
+}

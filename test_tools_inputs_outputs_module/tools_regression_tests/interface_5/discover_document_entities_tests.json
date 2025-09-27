@@ -1,0 +1,41 @@
+{
+    "env": "hr_experts",
+    "interface_num": 5,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_document_entities",
+                "arguments": {
+                    "entity_type": "document_storage",
+                    "filters": {
+                        "document_id": "doc_001",
+                        "document_name": "Employee Handbook 2025",
+                        "document_type": "handbook",
+                        "employee_id": "emp_001",
+                        "file_path": "/documents/handbooks/employee_handbook_2025.pdf",
+                        "upload_date": "2025-01-01T00:00:00",
+                        "uploaded_by": "hr_admin_001",
+                        "confidentiality_level": "internal",
+                        "retention_period_years": 7,
+                        "expiry_date": "2032-01-01",
+                        "status": "active",
+                        "created_at": "2025-01-01T00:00:00"
+                    }
+                }
+            },
+            {
+                "name": "discover_document_entities",
+                "arguments": {
+                    "entity_type": "document_storage",
+                    "filters": {
+                        "document_type": "contract",
+                        "confidentiality_level": "confidential",
+                        "status": "archived",
+                        "retention_period_years": 10,
+                        "uploaded_by": "legal_001"
+                    }
+                }
+            }
+        ]
+    }
+}

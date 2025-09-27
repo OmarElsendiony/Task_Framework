@@ -1,0 +1,58 @@
+{
+  "task_file": "tools_regression_tests/interface_5/discover_performance_entities_tests.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "entity_type": "performance_reviews",
+        "filters": {
+          "review_id": "review_001",
+          "employee_id": "emp_001",
+          "reviewer_id": "mgr_001",
+          "review_period_start": "2025-01-01",
+          "review_period_end": "2025-12-31",
+          "review_type": "annual",
+          "overall_rating": "exceeds_expectations",
+          "goals_achievement_score": 9.2,
+          "communication_score": 8.7,
+          "teamwork_score": 9.0,
+          "leadership_score": 8.5,
+          "technical_skills_score": 9.3,
+          "status": "approved",
+          "created_at": "2025-01-15T09:00:00",
+          "updated_at": "2025-09-20T14:30:00"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "performance_reviews",
+          "count": 0,
+          "results": []
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "entity_type": "performance_reviews",
+        "filters": {
+          "employee_id": "emp_002",
+          "review_type": "quarterly",
+          "overall_rating": "meets_expectations",
+          "status": "draft",
+          "goals_achievement_score": 7.8
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "performance_reviews",
+          "count": 0,
+          "results": []
+        },
+        200
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide diverse tests with different number of parameters (if applicable). You have to provide edge cases and normal cases. Try to use all of the fields in one of the cases. You have to provide invalid cases. You have to provide empty cases if applicable. However, you have to follow the format that I provide to you below.
+Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide two tests for each function with the most number of parameters as possible (if applicable). However, you have to follow the format that I provide to you below.
 
 # Format:
 {

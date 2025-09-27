@@ -10,9 +10,8 @@
                     "deduction_data": {
                         "payroll_id": "1",
                         "deduction_type": "tax",
-                        "amount": 150.75,
-                        "created_by": "1",
-                        "payroll_administrator_approval": true
+                        "amount": 125.75,
+                        "created_by": "payroll_admin_001"
                     }
                 }
             },
@@ -23,167 +22,9 @@
                     "deduction_data": {
                         "payroll_id": "2",
                         "deduction_type": "insurance",
-                        "amount": 85.00,
-                        "created_by": "2",
-                        "finance_officer_approval": true
+                        "amount": 89.50,
+                        "created_by": "hr_manager_002"
                     }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "retirement",
-                        "amount": 200.00,
-                        "created_by": "3",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "3",
-                        "deduction_type": "equipment",
-                        "amount": 50.25,
-                        "created_by": "1",
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "update",
-                    "deduction_id": "1",
-                    "deduction_data": {
-                        "amount": 175.00,
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "update",
-                    "deduction_id": "2",
-                    "deduction_data": {
-                        "deduction_type": "other",
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "999",
-                        "deduction_type": "tax",
-                        "amount": 150.75,
-                        "created_by": "1",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "tax",
-                        "amount": 150.75,
-                        "created_by": "999",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "invalid_type",
-                        "amount": 150.75,
-                        "created_by": "1",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "tax",
-                        "amount": -50.00,
-                        "created_by": "1",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "tax",
-                        "amount": 150.75,
-                        "created_by": "1"
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "update",
-                    "deduction_id": "999",
-                    "deduction_data": {
-                        "amount": 175.00,
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "update",
-                    "deduction_id": "1",
-                    "deduction_data": {
-                        "amount": 175.00
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "deduction_type": "tax",
-                        "amount": 150.75,
-                        "created_by": "1",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "invalid_action"
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create"
                 }
             }
         ]

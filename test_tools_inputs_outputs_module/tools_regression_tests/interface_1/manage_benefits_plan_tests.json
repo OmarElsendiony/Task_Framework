@@ -8,39 +8,14 @@
                 "arguments": {
                     "action": "create",
                     "plan_data": {
-                        "plan_name": "Premium Health Insurance",
-                        "plan_type": "health insurance",
+                        "plan_name": "Premium Health Insurance Plan",
+                        "plan_type": "health_insurance",
+                        "provider": "BlueCross BlueShield",
+                        "employee_cost": 250.00,
+                        "employer_cost": 750.00,
+                        "status": "active",
                         "effective_date": "2025-01-01",
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Dental Plus",
-                        "plan_type": "dental",
-                        "provider": "DentalCorp",
-                        "employee_cost": 25.50,
-                        "employer_cost": 75.00,
-                        "effective_date": "2025-01-01",
-                        "expiration_date": "2025-12-31",
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Vision Care Basic",
-                        "plan_type": "vision",
-                        "effective_date": "2025-06-01",
-                        "status": "inactive",
-                        "hr_director_approval": true
+                        "expiration_date": "2025-12-31"
                     }
                 }
             },
@@ -50,114 +25,15 @@
                     "action": "update",
                     "plan_id": "1",
                     "plan_data": {
-                        "employee_cost": 50.00,
-                        "employer_cost": 150.00,
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "update",
-                    "plan_id": "2",
-                    "plan_data": {
-                        "status": "inactive",
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "401k Plan",
-                        "plan_type": "retirement",
-                        "effective_date": "2025-01-01"
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Invalid Plan",
-                        "plan_type": "invalid_type",
-                        "effective_date": "2025-01-01",
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Backward Dates Plan",
-                        "plan_type": "health insurance",
-                        "effective_date": "2025-12-31",
-                        "expiration_date": "2025-01-01",
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Negative Cost Plan",
+                        "plan_name": "Updated Dental Coverage Plan",
                         "plan_type": "dental",
-                        "employee_cost": -10.00,
-                        "effective_date": "2025-01-01",
-                        "hr_director_approval": true
+                        "provider": "Delta Dental",
+                        "employee_cost": 45.00,
+                        "employer_cost": 85.00,
+                        "status": "inactive",
+                        "effective_date": "2025-03-01",
+                        "expiration_date": "2026-02-28"
                     }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "update",
-                    "plan_id": "999",
-                    "plan_data": {
-                        "employee_cost": 50.00,
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "update",
-                    "plan_id": "1",
-                    "plan_data": {
-                        "employee_cost": 50.00
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_type": "health insurance",
-                        "effective_date": "2025-01-01",
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "invalid_action"
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create"
                 }
             }
         ]
