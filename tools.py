@@ -71,13 +71,13 @@ class Tools:
         timestamp = "2025-10-01T00:00:00"
         
         new_investor = {
-            "investor_id": str(investor_id),
+            "investor_id": str(investor_id) if investor_id is not None else None,
             "name": legal_name,
             "registration_number": registration_number,
             "date_of_incorporation": date_of_incorporation,
             "country": country_of_incorporation,
             "address": registered_address,
-            "tax_id": tax_id,
+            "tax_id": str(tax_id) if tax_id is not None else None,
             "source_of_funds": source_of_funds,
             "status": "onboarded",
             "contact_email": contact_email,
@@ -135,12 +135,12 @@ class Tools:
         timestamp = "2025-10-01T00:00:00"
         
         new_document = {
-            "document_id": str(document_id),
+            "document_id": str(document_id) if document_id else None,
             "name": name,
             "format": format,
             "uploaded_by": uploaded_by,
             "upload_date": timestamp,
-            "report_id": report_id,
+            "report_id": str(report_id) if report_id else None,
             "size_bytes": size_bytes,
             "confidentiality_level": confidentiality_level,
             "status": status
@@ -243,7 +243,7 @@ class Tools:
             # Create new NAV record
             new_nav = {
                 "nav_id": str(new_nav_id),
-                "fund_id": nav_data["fund_id"],
+                "fund_id": str(nav_data["fund_id"]),
                 "nav_date": nav_data["nav_date"],
                 "nav_value": nav_data["nav_value"],
                 "updated_at": "2025-10-01T12:00:00"
@@ -322,7 +322,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "nav_id": nav_id,
+                "nav_id": str(nav_id) if nav_id is not None else None,
                 "message": f"NAV record {nav_id} updated successfully",
                 "nav_data": updated_nav
             })
@@ -359,9 +359,9 @@ class Tools:
                         match = False
                         break
                 if match:
-                    results.append({**entity_data, "fund_id": entity_id})
+                    results.append({**entity_data, "fund_id": str(entity_id)})
             else:
-                results.append({**entity_data, "fund_id": entity_id})
+                results.append({**entity_data, "fund_id": str(entity_id)})
         
         return json.dumps({
             "success": True,
@@ -453,9 +453,9 @@ class Tools:
             new_holding_id = generate_id(portfolio_holdings)
             
             new_holding = {
-                "holding_id": str(new_holding_id),
-                "portfolio_id": holding_data["portfolio_id"],
-                "fund_id": holding_data["fund_id"],
+                "holding_id": str(new_holding_id) if new_holding_id else None,
+                "portfolio_id": str(holding_data["portfolio_id"]) if holding_data["portfolio_id"] else None,
+                "fund_id": str(holding_data["fund_id"]) if holding_data["fund_id"] else None,
                 "quantity": holding_data["quantity"],
                 "cost_basis": holding_data["cost_basis"],
                 "created_at": "2025-10-01T12:00:00"
@@ -466,7 +466,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "create",
-                "holding_id": str(new_holding_id),
+                "holding_id": str(new_holding_id) if new_holding_id else None,
                 "message": f"Portfolio holding {new_holding_id} created successfully for portfolio {portfolio_id} with fund {fund_id}",
                 "holding_data": new_holding
             })
@@ -532,7 +532,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "holding_id": holding_id,
+                "holding_id": str(holding_id),
                 "message": f"Portfolio holding {holding_id} updated successfully",
                 "holding_data": updated_holding
             })
@@ -684,8 +684,8 @@ class Tools:
             
             # Create new portfolio record
             new_portfolio = {
-                "portfolio_id": str(new_portfolio_id),
-                "investor_id": portfolio_data["investor_id"],
+                "portfolio_id": str(new_portfolio_id) if new_portfolio_id else None ,
+                "investor_id": str(portfolio_data["investor_id"]) if portfolio_data["investor_id"] else None,
                 "status": portfolio_data.get("status", "active"),
                 "created_at": "2025-10-01T12:00:00",
                 "updated_at": "2025-10-01T12:00:00"
@@ -696,7 +696,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "create",
-                "portfolio_id": str(new_portfolio_id),
+                "portfolio_id": str(new_portfolio_id) if new_portfolio_id else None ,
                 "message": f"Portfolio {new_portfolio_id} created successfully for investor {investor_id}",
                 "portfolio_data": new_portfolio
             })
@@ -774,7 +774,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "portfolio_id": portfolio_id,
+                "portfolio_id": str(portfolio_id),
                 "message": f"Portfolio {portfolio_id} updated successfully",
                 "portfolio_data": updated_portfolio
             })
@@ -826,9 +826,9 @@ class Tools:
         timestamp = "2025-10-01T00:00:00"
         
         new_report = {
-            "report_id": report_id,
-            "fund_id": fund_id,
-            "investor_id": investor_id,
+            "report_id": str(report_id) if report_id is not None else None,
+            "fund_id": str(fund_id) if fund_id is not None else None,
+            "investor_id": str(investor_id) if investor_id is not None else None,
             "report_date": report_date,
             "report_type": report_type,
             "generated_by": generated_by,
@@ -983,7 +983,7 @@ class Tools:
             # Create new price record
             new_price = {
                 "price_id": str(new_price_id),
-                "instrument_id": price_data["instrument_id"],
+                "instrument_id": str(price_data["instrument_id"]),
                 "price_date": price_data["price_date"],
                 "open_price": price_data["open_price"],
                 "high_price": price_data["high_price"],
@@ -1079,7 +1079,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "price_id": price_id,
+                "price_id": str(price_id) if price_id is not None else None,
                 "message": f"Instrument price {price_id} updated successfully",
                 "price_data": updated_price
             })
@@ -1116,9 +1116,9 @@ class Tools:
                         match = False
                         break
                 if match:
-                    results.append({**entity_data, "trade_id": entity_id})
+                    results.append({**entity_data, "trade_id": str(entity_id)})
             else:
-                results.append({**entity_data, "trade_id": entity_id})
+                results.append({**entity_data, "trade_id": str(entity_id)})
         
         return json.dumps({
             "success": True,
@@ -1193,9 +1193,7 @@ class Tools:
             })
         
         # If not directly authorized, calculate and check approval code
-        # Generate calculated approval code: action + requester_id (hashed)
-        # import hashlib
-        # calculated_approval_code = hashlib.sha256(f"{action}_{requester_id}".encode()).hexdigest()
+        # Generate calculated approval code: action + requester_id
         calculated_approval_code = f"{action}_{requester_id}"
         
         approvals = data.get("approvals", {})
@@ -1375,7 +1373,7 @@ class Tools:
             # Create new invoice record
             new_invoice = {
                 "invoice_id": str(new_invoice_id),
-                "commitment_id": invoice_data.get("commitment_id"),
+                "commitment_id": str(invoice_data.get("commitment_id")),
                 "invoice_date": invoice_data["invoice_date"],
                 "due_date": invoice_data["due_date"],
                 "amount": invoice_data["amount"],
@@ -1501,7 +1499,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "invoice_id": invoice_id,
+                "invoice_id": str(invoice_id) if invoice_id is not None else None,
                 "message": f"Invoice {invoice_id} updated successfully",
                 "invoice_data": updated_invoice
             })
@@ -1668,12 +1666,12 @@ class Tools:
             
             # Create new fund record
             new_fund = {
-                "fund_id": str(new_fund_id),
+                "fund_id": str(new_fund_id) if new_fund_id is not None else None,
                 "name": fund_data["name"],
                 "fund_type": fund_data["fund_type"],
                 "size": fund_data.get("size"),
                 "base_currency": fund_data.get("base_currency", "USD"),
-                "manager_id": fund_data["manager_id"],
+                "manager_id": str(fund_data["manager_id"]) if fund_data.get("manager_id") is not None else None,
                 "status": fund_data.get("status", "open"),
                 "created_at": "2025-10-01T12:00:00",
                 "updated_at": "2025-10-01T12:00:00"
@@ -1805,7 +1803,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "fund_id": fund_id,
+                "fund_id": str(fund_id),
                 "message": f"Fund {fund_id} updated successfully",
                 "fund_data": updated_fund
             })
@@ -1976,9 +1974,9 @@ class Tools:
             
             # Create new payment record
             new_payment = {
-                "payment_id": str(new_payment_id),
-                "invoice_id": payment_data["invoice_id"],
-                "subscription_id": payment_data["subscription_id"],
+                "payment_id": str(new_payment_id) if new_payment_id else None ,
+                "invoice_id": str(payment_data["invoice_id"]) if payment_data["invoice_id"] else None,
+                "subscription_id": str(payment_data["subscription_id"]) if payment_data["subscription_id"] else None,
                 "payment_date": payment_data["payment_date"],
                 "amount": payment_data["amount"],
                 "payment_method": payment_data["payment_method"],
@@ -1991,7 +1989,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "create",
-                "payment_id": str(new_payment_id),
+                "payment_id": str(new_payment_id) if new_payment_id else None ,
                 "message": f"Payment {new_payment_id} created successfully for invoice {payment_data['invoice_id']}",
                 "payment_data": new_payment
             })
@@ -2090,7 +2088,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "payment_id": payment_id,
+                "payment_id": str(payment_id),
                 "message": f"Payment {payment_id} updated successfully",
                 "payment_data": updated_payment
             })
@@ -2266,7 +2264,7 @@ class Tools:
             new_id = str(generate_id(instruments))
             timestamp = "2025-10-01T00:00:00"
             new_instrument = {
-                "instrument_id": new_id,
+                "instrument_id": str(new_id) if new_id is not None else None,
                 "ticker": ticker,
                 "name": name,
                 "instrument_type": instrument_type,
@@ -2274,7 +2272,7 @@ class Tools:
                 "created_at": timestamp,
                 "updated_at": timestamp
             }
-            instruments[new_id] = new_instrument
+            instruments[str(new_id)] = new_instrument
             return json.dumps(new_instrument)
 
     @staticmethod
@@ -2435,11 +2433,11 @@ class Tools:
             
             # Create new notification record
             new_notification = {
-                "notification_id": str(new_notification_id),
+                "notification_id": str(new_notification_id) if new_notification_id else None,
                 "email": notification_data["email"],
                 "type": notification_data["type"],
                 "class": notification_data["class"],
-                "reference_id": notification_data.get("reference_id"),
+                "reference_id": str(notification_data.get("reference_id")) if notification_data.get("reference_id") else None,
                 "status": notification_data.get("status", "pending"),
                 "sent_at": None,
                 "created_at": "2025-10-01T12:00:00"
@@ -2450,7 +2448,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "create",
-                "notification_id": str(new_notification_id),
+                "notification_id": str(new_notification_id) if new_notification_id else None,
                 "message": f"Notification {new_notification_id} created successfully for {notification_data['email']}",
                 "notification_data": new_notification
             })
@@ -2513,7 +2511,7 @@ class Tools:
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "notification_id": notification_id,
+                "notification_id": str(notification_id),
                 "message": f"Notification {notification_id} updated successfully",
                 "notification_data": updated_notification
             })
@@ -2605,10 +2603,10 @@ class Tools:
 
         return json.dumps({
             "success": True,
-            "investor_id": investor_id,
+            "investor_id": str(investor_id) if investor_id else None,
             "message": f"Investor {investor_id} successfully offboarded",
             "investor_data": {
-                "investor_id": investor.get("investor_id"),
+                "investor_id": str(investor.get("investor_id")) if investor.get("investor_id") else None,
                 "name": investor.get("name"),
                 "status": investor.get("status"),
                 "contact_email": investor.get("contact_email"),
@@ -2697,9 +2695,9 @@ class Tools:
                         match = False
                         break
                 if match:
-                    results.append({**entity_data, "user_id": entity_id})
+                    results.append({**entity_data, "user_id": str(entity_id)})
             else:
-                results.append({**entity_data, "user_id": entity_id})
+                results.append({**entity_data, "user_id": str(entity_id)})
         
         return json.dumps({
             "success": True,
@@ -2740,9 +2738,9 @@ class Tools:
                         match = False
                         break
                 if match:
-                    results.append({**entity_data, "instrument_id": entity_id})
+                    results.append({**entity_data, "instrument_id": str(entity_id)})
             else:
-                results.append({**entity_data, "instrument_id": entity_id})
+                results.append({**entity_data, "instrument_id": str(entity_id)})
         
         return json.dumps({
             "success": True,
@@ -2817,8 +2815,8 @@ class Tools:
         timestamp = "2025-10-01T00:00:00"
         
         new_audit_trail = {
-            "audit_trail_id": str(audit_trail_id),
-            "reference_id": reference_id,
+            "audit_trail_id": str(audit_trail_id) if audit_trail_id is not None else None,
+            "reference_id": str(reference_id) if reference_id is not None else None,
             "reference_type": reference_type,
             "action": action,
             "field_name": field_name,
@@ -2862,9 +2860,9 @@ class Tools:
                         match = False
                         break
                 if match:
-                    results.append({**entity_data, "investor_id": entity_id})
+                    results.append({**entity_data, "investor_id": str(entity_id)})
             else:
-                results.append({**entity_data, "investor_id": entity_id})
+                results.append({**entity_data, "investor_id": str(entity_id)})
         
         return json.dumps({
             "success": True,
@@ -3022,7 +3020,7 @@ class Tools:
             # Generate new subscription ID and create record
             new_subscription_id = generate_id(subscriptions)
             new_subscription = {
-                "subscription_id": str(new_subscription_id), "fund_id": fund_id, "investor_id": investor_id,
+                "subscription_id": str(new_subscription_id) if new_subscription_id else None, "fund_id": str(fund_id) if fund_id else None, "investor_id": str(investor_id) if investor_id else None,
                 "amount": amount, "status": status, "request_assigned_to": request_assigned_to,
                 "request_date": request_date, "approval_date": subscription_data.get("approval_date"),
                 "updated_at": "2025-10-01T00:00:00"
@@ -3075,7 +3073,7 @@ class Tools:
             subscriptions[subscription_id] = updated_subscription
             
             return json.dumps({
-                "success": True, "action": "update", "subscription_id": subscription_id,
+                "success": True, "action": "update", "subscription_id": str(subscription_id),
                 "message": f"Subscription {subscription_id} updated successfully.",
                 "subscription_data": updated_subscription
             })
@@ -3120,7 +3118,7 @@ class Tools:
             subscription["updated_at"] = "2025-10-01T00:00:00"
             
             return json.dumps({
-                "success": True, "action": "cancel", "subscription_id": subscription_id,
+                "success": True, "action": "cancel", "subscription_id": str(subscription_id),
                 "message": f"Subscription {subscription_id} cancelled successfully.",
                 "subscription_data": subscription
             })
@@ -3169,9 +3167,9 @@ class Tools:
         timestamp = "2025-10-01T00:00:00"
         
         new_commitment = {
-            "commitment_id": str(commitment_id),
-            "fund_id": fund_id,
-            "investor_id": investor_id,
+            "commitment_id": str(commitment_id) if commitment_id is not None else None,
+            "fund_id": str(fund_id) if fund_id is not None else None,
+            "investor_id": str(investor_id) if investor_id is not None else None,
             "commitment_amount": commitment_amount,
             "commitment_date": commitment_date,
             "status": status,
@@ -3355,8 +3353,8 @@ class Tools:
         
         new_trade = {
             "trade_id": str(trade_id),
-            "fund_id": fund_id,
-            "instrument_id": instrument_id,
+            "fund_id": str(fund_id),
+            "instrument_id": str(instrument_id),
             "trade_date": trade_date,
             "quantity": quantity,
             "price": price,
@@ -3369,12 +3367,12 @@ class Tools:
         
         return json.dumps({
             "success": True,
-            "trade_id": str(trade_id),
+            "trade_id": str(trade_id) if trade_id is not None else None,
             "message": f"Trade {trade_id} executed successfully",
             "trade_data": {
-                "trade_id": new_trade["trade_id"],
-                "fund_id": new_trade["fund_id"],
-                "instrument_id": new_trade["instrument_id"],
+                "trade_id": str(new_trade["trade_id"]) if new_trade["trade_id"] is not None else None,
+                "fund_id": str(new_trade["fund_id"]) if new_trade["fund_id"] is not None else None,
+                "instrument_id": str(new_trade["instrument_id"]) if new_trade["instrument_id"] is not None else None,
                 "quantity": new_trade["quantity"],
                 "price": new_trade["price"],
                 "side": new_trade["side"],
