@@ -10,7 +10,7 @@ class Tools:
     def create_investor_invoke(data: Dict[str, Any], legal_name: str, source_of_funds: str, 
                contact_email: str, accreditation_status: str,
                compliance_officer_approval: bool,
-               registration_number: Optional[str] = None,
+               registration_number: Optional[int] = None,
                date_of_incorporation: Optional[str] = None,
                country_of_incorporation: Optional[str] = None,
                registered_address: Optional[str] = None,
@@ -1372,8 +1372,8 @@ class Tools:
             
             # Create new invoice record
             new_invoice = {
-                "invoice_id": str(new_invoice_id),
-                "commitment_id": str(invoice_data.get("commitment_id")),
+                "invoice_id": str(new_invoice_id) if new_invoice_id is not None else None,
+                "commitment_id": str(invoice_data.get("commitment_id")) if invoice_data.get("commitment_id") is not None else None,
                 "invoice_date": invoice_data["invoice_date"],
                 "due_date": invoice_data["due_date"],
                 "amount": invoice_data["amount"],

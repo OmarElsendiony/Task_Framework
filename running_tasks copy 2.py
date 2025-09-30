@@ -227,7 +227,7 @@ class Tools:
 def execute_api_utility(api_name, arguments):
     tools_instance = create_tools_class(session.get("imports_set", []), session.get("invoke_methods", []))
     # print('executing ...')
-    # arguments = arguments_processing(arguments)
+    arguments = arguments_processing(arguments)
     # print(dir(tools_instance))
     if hasattr(tools_instance, api_name):
         result = getattr(tools_instance, api_name)(data=session["data"], **arguments)
@@ -279,7 +279,7 @@ def execute_api(api_name: str, arguments: Dict[str, Any]):
             'message': 'API name is required'
         }), 400
     
-    cleaned_arguments = (arguments)
+    cleaned_arguments = arguments_processing(arguments)
     arguments = cleaned_arguments
     
     tools_instance = create_tools_class(session.get("imports_set", []), session.get("invoke_methods", []))
