@@ -18,7 +18,7 @@
       "output": [
         {
           "success": false,
-          "error": "Halt: Candidate, position, or recruiter not found"
+          "error": "User specified is not a recruiter"
         },
         200
       ]

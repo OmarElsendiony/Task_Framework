@@ -274,6 +274,13 @@ def execute_api():
             cleaned_arguments[argument] = argument_value
             continue
 
+        if isinstance(argument_value, str) and (argument_value.startswith('{') or argument_value.startswith('[')):
+            try:
+                cleaned_arguments[argument] = json.loads(argument_value)
+                continue
+            except (json.JSONDecodeError, ValueError):
+                pass  # Fall through to literal_eval
+        
         # Try to evaluate literal (e.g., convert "True" → True, "123" → 123)
         try:
             cleaned_arguments[argument] = ast.literal_eval(argument_value)

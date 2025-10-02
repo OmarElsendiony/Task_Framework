@@ -177,11 +177,11 @@ def env_interface(environment: str, interface: str, envs_path="envs"):
                     except Exception as e:
                         print(f"Error processing {api_file}: {e}")
             
-            with open("tools.py", "w") as new_file:
-                new_file.write('\n'.join(sorted(importsSet)) + "\n\n")
-                new_file.write("class Tools:\n")
-                for invoke_method in invoke_methods:
-                    new_file.write("    @staticmethod\n" + invoke_method + "\n\n")
+            # with open("tools.py", "w") as new_file:
+            #     new_file.write('\n'.join(sorted(importsSet)) + "\n\n")
+            #     new_file.write("class Tools:\n")
+            #     for invoke_method in invoke_methods:
+            #         new_file.write("    @staticmethod\n" + invoke_method + "\n\n")
             
             session["imports_set"] = importsSet
             session["invoke_methods"] = invoke_methods

@@ -1,344 +1,22 @@
-from datetime import datetime
 from typing import Any, Dict
 from typing import Any, Dict, List
 from typing import Any, Dict, Optional
+import datetime
 import json
-import re
 
 class Tools:
     @staticmethod
-    def create_investor_invoke(data: Dict[str, Any], legal_name: str, source_of_funds: str, 
-               contact_email: str, accreditation_status: str,
-               compliance_officer_approval: bool,
-               registration_number: Optional[int] = None,
-               date_of_incorporation: Optional[str] = None,
-               country_of_incorporation: Optional[str] = None,
-               registered_address: Optional[str] = None,
-               tax_id: Optional[str] = None) -> str:
-        
-        def generate_id(table: Dict[str, Any]) -> int:
-            if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
-        
-        investors = data.get("investors", {})
-        
-        # Validate required approvals first
-        if not compliance_officer_approval:
-            return json.dumps({
-                "success": False,
-                "error": "Compliance Officer approval is required for investor onboarding"
-            })
-        
-        # Validate required fields
-        if not legal_name or not legal_name.strip():
-            return json.dumps({
-                "success": False,
-                "error": "Legal name is required"
-            })
-        
-        if not contact_email or not contact_email.strip():
-            return json.dumps({
-                "success": False,
-                "error": "Contact email is required"
-            })
-        
-        # Validate source_of_funds
-        valid_sources = ['retained_earnings', 'shareholder_capital', 'asset_sale', 'loan_facility', 'external_investment', 'government_grant', 'merger_or_acquisition_proceeds', 'royalty_or_licensing_income', 'dividend_income', 'other']
-        if source_of_funds not in valid_sources:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid source_of_funds. Must be one of {valid_sources}"
-            })
-        
-        # Validate accreditation_status
-        valid_accreditation = ["accredited", "non_accredited"]
-        if accreditation_status not in valid_accreditation:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid accreditation_status. Must be one of {valid_accreditation}"
-            })
-        
-        # Check if investor with same email already exists
-        for investor in investors.values():
-            if investor.get("contact_email") == contact_email:
-                return json.dumps({
-                    "success": False,
-                    "error": "An investor with this email already exists"
-                })
-        
-        investor_id = generate_id(investors)
-        timestamp = "2025-10-01T00:00:00"
-        
-        new_investor = {
-            "investor_id": str(investor_id) if investor_id is not None else None,
-            "name": legal_name,
-            "registration_number": registration_number,
-            "date_of_incorporation": date_of_incorporation,
-            "country": country_of_incorporation,
-            "address": registered_address,
-            "tax_id": str(tax_id) if tax_id is not None else None,
-            "source_of_funds": source_of_funds,
-            "status": "onboarded",
-            "contact_email": contact_email,
-            "accreditation_status": accreditation_status,
-            "created_at": timestamp
-        }
-        
-        investors[str(investor_id)] = new_investor
-        
-        return json.dumps(new_investor)
-
-    @staticmethod
-    def upload_document_invoke(data: Dict[str, Any], name: str, format: str, uploaded_by: str,
-               size_bytes: Optional[int] = None, report_id: Optional[str] = None,
-               confidentiality_level: str = "internal", status: str = "available") -> str:
-        
-        def generate_id(table: Dict[str, Any]) -> int:
-            if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
-        
-        documents = data.get("documents", {})
-        users = data.get("users", {})
-        reports = data.get("reports", {})
-        
-        # Validate uploaded_by user exists
-        if str(uploaded_by) not in users:
-            return json.dumps({"error": f"User {uploaded_by} not found"})
-        
-        # Validate format
-        valid_formats = ["pdf", "xlsx", "docx", "csv", "other"]
-        if format not in valid_formats:
-            return json.dumps({"error": f"Invalid format. Must be one of {valid_formats}"})
-        
-        # Validate confidentiality_level
-        valid_confidentiality = ["public", "internal", "confidential", "restricted"]
-        if confidentiality_level not in valid_confidentiality:
-            return json.dumps({"error": f"Invalid confidentiality level. Must be one of {valid_confidentiality}"})
-        
-        # Validate status
-        valid_statuses = ["available", "archived", "deleted"]
-        if status not in valid_statuses:
-            return json.dumps({"error": f"Invalid status. Must be one of {valid_statuses}"})
-        
-        # Validate report_id if provided
-        if report_id and str(report_id) not in reports:
-            return json.dumps({"error": f"Report {report_id} not found"})
-        
-        # Check if document name already exists (file name is unique key)
-        for doc in documents.values():
-            if doc.get("name") == name:
-                return json.dumps({"error": f"Document with name '{name}' already exists"})
-        
-        document_id = generate_id(documents)
-        timestamp = "2025-10-01T00:00:00"
-        
-        new_document = {
-            "document_id": str(document_id) if document_id else None,
-            "name": name,
-            "format": format,
-            "uploaded_by": uploaded_by,
-            "upload_date": timestamp,
-            "report_id": str(report_id) if report_id else None,
-            "size_bytes": size_bytes,
-            "confidentiality_level": confidentiality_level,
-            "status": status
-        }
-        
-        documents[str(document_id)] = new_document
-        return json.dumps(new_document)
-
-    @staticmethod
-    def manage_nav_record_invoke(data: Dict[str, Any], action: str, nav_data: Dict[str, Any] = None, nav_id: str = None) -> str:
+    def discover_department_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
         """
-        Create or update NAV records.
-        
-        Actions:
-        - create: Create new NAV record (requires nav_data with fund_id, nav_date, nav_value, finance_officer_approval)
-        - update: Update existing NAV record (requires nav_id and nav_data with changes, finance_officer_approval, fund_manager_approval)
-        """
-        
-        def generate_id(table: Dict[str, Any]) -> int:
-            if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
-        
-        if action not in ["create", "update"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
-            })
-        
-        # Access nav_records data
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid data format for nav_records"
-            })
-        
-        nav_records = data.get("nav_records", {})
-        
-        if action == "create":
-            if not nav_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "nav_data is required for create action"
-                })
-            
-            # Validate required fields for creation
-            required_fields = ["fund_id", "nav_date", "nav_value", "finance_officer_approval"]
-            missing_fields = [field for field in required_fields if field not in nav_data]
-            if missing_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Missing required fields for NAV creation: {', '.join(missing_fields)}. Finance Officer approval is required."
-                })
-            
-            # Validate that finance_officer_approval is True
-            if not nav_data.get("finance_officer_approval"):
-                return json.dumps({
-                    "success": False,
-                    "error": "Finance Officer approval must be True for NAV creation"
-                })
-            
-            # Validate only allowed fields are present
-            allowed_fields = ["fund_id", "nav_date", "nav_value", "finance_officer_approval"]
-            invalid_fields = [field for field in nav_data.keys() if field not in allowed_fields]
-            if invalid_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid fields for NAV creation: {', '.join(invalid_fields)}"
-                })
-            
-            # Validate NAV value is positive
-            if nav_data["nav_value"] <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "NAV value must be positive - negative or zero values are not allowed"
-                })
-            
-            # Validate that nav_date is not in the future (using current system date)
-            current_date = "2025-10-01"  # Based on policy current date
-            if nav_data["nav_date"] > current_date:
-                return json.dumps({
-                    "success": False,
-                    "error": "Invalid NAV date: cannot create NAV record with future date"
-                })
-            
-            # Check for existing NAV for the same fund and date
-            fund_id = nav_data["fund_id"]
-            nav_date = nav_data["nav_date"]
-            for existing_nav in nav_records.values():
-                if (existing_nav.get("fund_id") == fund_id and 
-                    existing_nav.get("nav_date") == nav_date):
-                    return json.dumps({
-                        "success": False,
-                        "error": f"NAV already exists for fund {fund_id} on date {nav_date}. Only one NAV per fund per date is allowed."
-                    })
-            
-            # Generate new NAV ID using the same pattern as other tools
-            new_nav_id = generate_id(nav_records)
-            
-            # Create new NAV record
-            new_nav = {
-                "nav_id": str(new_nav_id),
-                "fund_id": str(nav_data["fund_id"]),
-                "nav_date": nav_data["nav_date"],
-                "nav_value": nav_data["nav_value"],
-                "updated_at": "2025-10-01T12:00:00"
-            }
-            
-            nav_records[str(new_nav_id)] = new_nav
-            
-            return json.dumps({
-                "success": True,
-                "action": "create",
-                "nav_id": str(new_nav_id),
-                "message": f"NAV record {new_nav_id} created successfully for fund {fund_id} on {nav_date}",
-                "nav_data": new_nav
-            })
-        
-        elif action == "update":
-            if not nav_id:
-                return json.dumps({
-                    "success": False,
-                    "error": "nav_id is required for update action"
-                })
-            
-            if nav_id not in nav_records:
-                return json.dumps({
-                    "success": False,
-                    "error": f"NAV record {nav_id} not found"
-                })
-            
-            if not nav_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "nav_data is required for update action"
-                })
-            
-            # Validate required approvals for updates (both Finance Officer and Fund Manager required)
-            required_approvals = ["finance_officer_approval", "fund_manager_approval"]
-            missing_approvals = [field for field in required_approvals if field not in nav_data]
-            if missing_approvals:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Missing required approvals for NAV update: {', '.join(missing_approvals)}. Both Finance Officer and Fund Manager approvals are required."
-                })
-            
-            # Validate that both approvals are True
-            if not (nav_data.get("finance_officer_approval") and nav_data.get("fund_manager_approval")):
-                return json.dumps({
-                    "success": False,
-                    "error": "Both Finance Officer and Fund Manager approvals must be True for NAV update"
-                })
-            
-            # Validate only allowed fields are present for updates (cannot update fund_id or nav_date)
-            allowed_update_fields = ["nav_value", "finance_officer_approval", "fund_manager_approval"]
-            invalid_fields = [field for field in nav_data.keys() if field not in allowed_update_fields]
-            if invalid_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid fields for NAV update: {', '.join(invalid_fields)}. Cannot update fund_id or nav_date."
-                })
-            
-            # Validate NAV value is positive if provided
-            if "nav_value" in nav_data and nav_data["nav_value"] <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "NAV value must be positive - negative or zero values are not allowed"
-                })
-            
-            # Update NAV record
-            updated_nav = nav_records[nav_id].copy()
-            for key, value in nav_data.items():
-                if key not in ["finance_officer_approval", "fund_manager_approval"]:  # Skip approval codes from being stored
-                    updated_nav[key] = value
-            
-            updated_nav["updated_at"] = "2025-10-01T12:00:00"
-            nav_records[nav_id] = updated_nav
-            
-            return json.dumps({
-                "success": True,
-                "action": "update",
-                "nav_id": str(nav_id) if nav_id is not None else None,
-                "message": f"NAV record {nav_id} updated successfully",
-                "nav_data": updated_nav
-            })
-
-    @staticmethod
-    def discover_fund_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover fund entities.
+        Discover department entities.
         
         Supported entities:
-        - funds: Fund records by fund_id, name, fund_type, manager_id, size, status
+        - departments: Department records by department_id, department_name, manager_id, budget, status, created_at, updated_at
         """
-        if entity_type not in ["funds"]:
+        if entity_type not in ["departments"]:
             return json.dumps({
                 "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'funds'"
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'departments'"
             })
         
         if not isinstance(data, dict):
@@ -348,7 +26,7 @@ class Tools:
             })
         
         results = []
-        entities = data.get("funds", {})
+        entities = data.get("departments", {})
         
         for entity_id, entity_data in entities.items():
             if filters:
@@ -359,9 +37,9 @@ class Tools:
                         match = False
                         break
                 if match:
-                    results.append({**entity_data, "fund_id": str(entity_id)})
+                    results.append({**entity_data, "department_id": entity_id})
             else:
-                results.append({**entity_data, "fund_id": str(entity_id)})
+                results.append({**entity_data, "department_id": entity_id})
         
         return json.dumps({
             "success": True,
@@ -371,185 +49,18 @@ class Tools:
         })
 
     @staticmethod
-    def manage_portfolio_holdings_invoke(data: Dict[str, Any], action: str, holding_data: Dict[str, Any] = None, holding_id: str = None) -> str:
+    def discover_payroll_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
         """
-        Create or update portfolio holdings records.
-        
-        Actions:
-        - create: Create new holding (requires holding_data with portfolio_id, fund_id, quantity, cost_basis, fund_manager_approval)
-        - update: Update existing holding (requires holding_id and holding_data with changes like quantity, cost_basis, fund_manager_approval)
-        """
-        
-        def generate_id(table: Dict[str, Any]) -> int:
-            if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
-        
-        if action not in ["create", "update"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
-            })
-        
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid data format for portfolio_holdings"
-            })
-        
-        portfolio_holdings = data.get("portfolio_holdings", {})
-        
-        if action == "create":
-            if not holding_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "holding_data is required for create action"
-                })
-            
-            required_fields = ["portfolio_id", "fund_id", "quantity", "cost_basis", "fund_manager_approval"]
-            missing_fields = [field for field in required_fields if field not in holding_data]
-            if missing_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Missing required fields for holding creation: {', '.join(missing_fields)}. Fund Manager approval is required."
-                })
-            
-            if not holding_data.get("fund_manager_approval"):
-                return json.dumps({
-                    "success": False,
-                    "error": "Fund Manager approval is required for holding creation"
-                })
-            
-            allowed_fields = ["portfolio_id", "fund_id", "quantity", "cost_basis", "fund_manager_approval"]
-            invalid_fields = [field for field in holding_data.keys() if field not in allowed_fields]
-            if invalid_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid fields for holding creation: {', '.join(invalid_fields)}"
-                })
-            
-            if holding_data["quantity"] <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "Quantity must be positive"
-                })
-            
-            if holding_data["cost_basis"] <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "Cost basis must be positive"
-                })
-            
-            portfolio_id = holding_data["portfolio_id"]
-            fund_id = holding_data["fund_id"]
-            for existing_holding in portfolio_holdings.values():
-                if (existing_holding.get("portfolio_id") == portfolio_id and 
-                    existing_holding.get("fund_id") == fund_id):
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Fund {fund_id} already exists in portfolio {portfolio_id}. Only one holding per fund per portfolio is allowed."
-                    })
-            
-            new_holding_id = generate_id(portfolio_holdings)
-            
-            new_holding = {
-                "holding_id": str(new_holding_id) if new_holding_id else None,
-                "portfolio_id": str(holding_data["portfolio_id"]) if holding_data["portfolio_id"] else None,
-                "fund_id": str(holding_data["fund_id"]) if holding_data["fund_id"] else None,
-                "quantity": holding_data["quantity"],
-                "cost_basis": holding_data["cost_basis"],
-                "created_at": "2025-10-01T12:00:00"
-            }
-            
-            portfolio_holdings[str(new_holding_id)] = new_holding
-            
-            return json.dumps({
-                "success": True,
-                "action": "create",
-                "holding_id": str(new_holding_id) if new_holding_id else None,
-                "message": f"Portfolio holding {new_holding_id} created successfully for portfolio {portfolio_id} with fund {fund_id}",
-                "holding_data": new_holding
-            })
-        
-        elif action == "update":
-            if not holding_id:
-                return json.dumps({
-                    "success": False,
-                    "error": "holding_id is required for update action"
-                })
-            
-            if holding_id not in portfolio_holdings:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Portfolio holding record {holding_id} not found"
-                })
-            
-            if not holding_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "holding_data is required for update action"
-                })
-            
-            if "fund_manager_approval" not in holding_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "Fund Manager approval is required for holding update"
-                })
-            
-            if not holding_data.get("fund_manager_approval"):
-                return json.dumps({
-                    "success": False,
-                    "error": "Fund Manager approval must be True for holding update"
-                })
-            
-            allowed_update_fields = ["quantity", "cost_basis", "fund_manager_approval"]
-            invalid_fields = [field for field in holding_data.keys() if field not in allowed_update_fields]
-            if invalid_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid fields for holding update: {', '.join(invalid_fields)}. Cannot update portfolio_id or fund_id."
-                })
-            
-            if "quantity" in holding_data and holding_data["quantity"] <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "Quantity must be positive"
-                })
-            
-            if "cost_basis" in holding_data and holding_data["cost_basis"] <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "Cost basis must be positive"
-                })
-            
-            updated_holding = portfolio_holdings[holding_id].copy()
-            for key, value in holding_data.items():
-                if key != "fund_manager_approval":
-                    updated_holding[key] = value
-            
-            portfolio_holdings[holding_id] = updated_holding
-            
-            return json.dumps({
-                "success": True,
-                "action": "update",
-                "holding_id": str(holding_id),
-                "message": f"Portfolio holding {holding_id} updated successfully",
-                "holding_data": updated_holding
-            })
-
-    @staticmethod
-    def discover_system_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover system entities: notifications and audit trails.
+        Discover payroll entities.
         
         Supported entities:
-        - notifications: Notification records by notification_id, email, type, class, reference_id, status, sent_at
-        - audit_trails: Audit trail records by audit_trail_id, reference_id, reference_type, action, user_id, field_name, old_value, new_value
+        - payroll_records: Payroll records by payroll_id, employee_id, pay_period_start, pay_period_end, hours_worked, hourly_rate, payment_date, status, approved_by, created_at, updated_at
+        - payroll_deductions: Payroll deductions by deduction_id, payroll_id, deduction_type, amount, created_by, created_at
         """
-        if entity_type not in ["notifications", "audit_trails"]:
+        if entity_type not in ["payroll_records", "payroll_deductions"]:
             return json.dumps({
                 "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'notifications' or 'audit_trails'"
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'payroll_records' or 'payroll_deductions'"
             })
         
         if not isinstance(data, dict):
@@ -559,13 +70,9 @@ class Tools:
             })
         
         results = []
-        
-        id_field = {
-            "notifications": "notification_id",
-            "audit_trails": "audit_trail_id"
-        }[entity_type]
-        
         entities = data.get(entity_type, {})
+        
+        id_field = "payroll_id" if entity_type == "payroll_records" else "deduction_id"
         
         for entity_id, entity_data in entities.items():
             if filters:
@@ -586,6 +93,134 @@ class Tools:
             "count": len(results),
             "results": results
         })
+
+    @staticmethod
+    def discover_performance_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+        """
+        Discover performance entities.
+        
+        Supported entities:
+        - performance_reviews: Performance reviews by review_id, employee_id, reviewer_id, review_period_start, review_period_end, review_type, overall_rating, goals_achievement_score, communication_score, teamwork_score, leadership_score, technical_skills_score, status, created_at, updated_at
+        """
+        if entity_type not in ["performance_reviews"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'performance_reviews'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid data format for {entity_type}"
+            })
+        
+        results = []
+        entities = data.get("performance_reviews", {})
+        
+        for entity_id, entity_data in entities.items():
+            if filters:
+                match = True
+                for filter_key, filter_value in filters.items():
+                    entity_value = entity_data.get(filter_key)
+                    if entity_value != filter_value:
+                        match = False
+                        break
+                if match:
+                    results.append({**entity_data, "review_id": entity_id})
+            else:
+                results.append({**entity_data, "review_id": entity_id})
+        
+        return json.dumps({
+            "success": True,
+            "entity_type": entity_type,
+            "count": len(results),
+            "results": results
+        })
+
+    @staticmethod
+    def manage_training_programs_invoke(
+        data: Dict[str, Any],
+        operation: str,
+        program_id: Optional[str] = None,
+        program_name: Optional[str] = None,
+        program_type: Optional[str] = None,
+        duration_hours: Optional[int] = None,
+        delivery_method: Optional[str] = None,
+        mandatory: Optional[bool] = None, # Corrected: Default changed from False to None
+        status: Optional[str] = None,     # Corrected: Default changed from "active" to None
+    ) -> str:
+        """
+        Executes the specified operation (create or update) on training programs.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        timestamp = "2025-10-01T12:00:00"
+        training_programs = data.get("training_programs", {})
+
+        if operation == "create":
+            # For 'create', set defaults if not provided
+            effective_mandatory = mandatory if mandatory is not None else False
+            effective_status = status if status is not None else "active"
+
+            if not all([program_name, program_type, duration_hours, delivery_method]):
+                return json.dumps({"error": "Missing required parameters for create operation."})
+
+            valid_types = ["onboarding", "compliance", "technical", "leadership", "safety", "diversity", "ai_ethics"]
+            if program_type not in valid_types:
+                return json.dumps({"error": f"Invalid program type. Must be one of {valid_types}."})
+
+            valid_methods = ["in_person", "online", "hybrid", "self_paced"]
+            if delivery_method not in valid_methods:
+                return json.dumps({"error": f"Invalid delivery method. Must be one of {valid_methods}."})
+            
+            valid_statuses = ["active", "inactive", "draft"]
+            if effective_status not in valid_statuses:
+                return json.dumps({"error": f"Invalid status. Must be one of {valid_statuses}."})
+
+            new_program_id = generate_id(training_programs)
+            new_program = {
+                "program_id": new_program_id,
+                "program_name": program_name,
+                "program_type": program_type,
+                "duration_hours": duration_hours,
+                "delivery_method": delivery_method,
+                "mandatory": effective_mandatory,
+                "status": effective_status,
+                "created_at": timestamp,
+                "updated_at": timestamp,
+            }
+            training_programs[new_program_id] = new_program
+            return json.dumps(new_program)
+
+        elif operation == "update":
+            if not program_id:
+                return json.dumps({"error": "program_id is required for update operation."})
+            if program_id not in training_programs:
+                return json.dumps({"error": f"Training program with ID {program_id} not found."})
+
+            program_to_update = training_programs[program_id]
+            if program_name is not None:
+                program_to_update["program_name"] = program_name
+            if program_type is not None:
+                program_to_update["program_type"] = program_type
+            if duration_hours is not None:
+                program_to_update["duration_hours"] = duration_hours
+            if delivery_method is not None:
+                program_to_update["delivery_method"] = delivery_method
+            if mandatory is not None:
+                program_to_update["mandatory"] = mandatory
+            if status is not None:
+                program_to_update["status"] = status
+            
+            program_to_update["updated_at"] = timestamp
+            return json.dumps(program_to_update)
+
+        else:
+            return json.dumps({"error": "Invalid operation. Must be 'create' or 'update'."})
 
     @staticmethod
     def transfer_to_human_invoke(
@@ -595,13 +230,1997 @@ class Tools:
         return "Transfer successful"
 
     @staticmethod
-    def manage_portfolio_invoke(data: Dict[str, Any], action: str, portfolio_data: Dict[str, Any] = None, portfolio_id: str = None) -> str:
+    def discover_job_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
         """
-        Create or update portfolio records.
+        Discover job entities.
+        
+        Supported entities:
+        - job_positions: Job position records by position_id, title, department_id, job_level, employment_type, hourly_rate_min, hourly_rate_max, status, created_at, updated_at
+        - skills: Skill records by skill_id, skill_name, status
+        - job_position_skills: Job position skill relationships by position_id, skill_id
+        """
+        if entity_type not in ["job_positions", "skills", "job_position_skills"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be one of: 'job_positions', 'skills', 'job_position_skills'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid data format for {entity_type}"
+            })
+        
+        results = []
+        entities = data.get(entity_type, {})
+        
+        if entity_type == "job_position_skills":
+            # Special handling for many-to-many relationship table
+            for relationship in entities.values():
+                if filters:
+                    match = True
+                    for filter_key, filter_value in filters.items():
+                        entity_value = relationship.get(filter_key)
+                        if entity_value != filter_value:
+                            match = False
+                            break
+                    if match:
+                        results.append(relationship)
+                else:
+                    results.append(relationship)
+        else:
+            # Handle regular entities with primary keys
+            id_field = "position_id" if entity_type == "job_positions" else "skill_id"
+            
+            for entity_id, entity_data in entities.items():
+                if filters:
+                    match = True
+                    for filter_key, filter_value in filters.items():
+                        entity_value = entity_data.get(filter_key)
+                        if entity_value != filter_value:
+                            match = False
+                            break
+                    if match:
+                        results.append({**entity_data, id_field: entity_id})
+                else:
+                    results.append({**entity_data, id_field: entity_id})
+        
+        return json.dumps({
+            "success": True,
+            "entity_type": entity_type,
+            "count": len(results),
+            "results": results
+        })
+
+    @staticmethod
+    def manage_audit_logs_invoke(
+        data: Dict[str, Any],
+        operation: str,
+        user_id: str,
+        action: str,
+        reference_type: str,
+        reference_id: str,
+        field_name: Optional[str] = None,
+        old_value: Optional[str] = None,
+        new_value: Optional[str] = None,
+    ) -> str:
+        """
+        Executes the create operation for audit logs.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        timestamp = "2025-10-01T12:00:00"
+        audit_logs = data.get("audit_logs", {})
+        users = data.get("users", {})
+
+        if operation != "create":
+            return json.dumps({"error": "Invalid operation. Only 'create' is permitted for audit logs."})
+        
+        if not all([user_id, action, reference_type, reference_id]):
+            return json.dumps({"error": "Missing required parameters for create operation."})
+        
+        if user_id not in users:
+            return json.dumps({"error": f"User with ID {user_id} not found."})
+
+        valid_actions = ["create", "read", "update", "delete", "approve", "reject"]
+        if action not in valid_actions:
+            return json.dumps({"error": f"Invalid action. Must be one of {valid_actions}."})
+
+        new_log_id = generate_id(audit_logs)
+        new_log = {
+            "log_id": new_log_id,
+            "user_id": user_id,
+            "action": action,
+            "reference_type": reference_type,
+            "reference_id": reference_id,
+            "field_name": field_name,
+            "old_value": old_value,
+            "new_value": new_value,
+            "timestamp": timestamp,
+        }
+        audit_logs[new_log_id] = new_log
+        return json.dumps(new_log)
+
+    @staticmethod
+    def manage_user_invoke(
+        data: Dict[str, Any],
+        action: str,
+        user_id: Optional[str] = None,
+        first_name: Optional[str] = None,
+        last_name: Optional[str] = None,
+        email: Optional[str] = None,
+        role: Optional[str] = None,
+        phone_number: Optional[str] = None,
+        status: Optional[str] = None,
+        mfa_enabled: Optional[bool] = None,
+    ) -> str:
+        """
+        Executes the specified action (create or update) on user accounts.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        timestamp = "2025-10-01T12:00:00"
+        users = data.get("users", {})
+
+        # Validate supported roles
+        supported_roles = [
+            "hr_director", "hr_manager", "recruiter", "payroll_administrator",
+            "hiring_manager", "finance_officer", "it_administrator", 
+            "compliance_officer", "employee"
+        ]
+
+        # Validate supported statuses
+        supported_statuses = ["active", "inactive"]
+
+        if action == "create":
+            # Required fields for user creation
+            if not all([first_name, last_name, email, role]):
+                return json.dumps({
+                    "error": "Missing required parameters for create operation. Required: first_name, last_name, email, role"
+                })
+
+            # Validate role
+            if role not in supported_roles:
+                return json.dumps({
+                    "error": f"Invalid role '{role}'. Must be one of: {', '.join(supported_roles)}"
+                })
+
+            # Validate status if provided
+            if status and status not in supported_statuses:
+                return json.dumps({
+                    "error": f"Invalid status '{status}'. Must be one of: {', '.join(supported_statuses)}"
+                })
+
+            # Check for duplicate email
+            for existing_user in users.values():
+                if existing_user.get("email") == email:
+                    return json.dumps({
+                        "error": f"User with email '{email}' already exists"
+                    })
+
+            # Generate new user ID
+            new_user_id = generate_id(users)
+
+            # Create new user record
+            new_user = {
+                "user_id": new_user_id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+                "role": role,
+                "status": status or "active",  # Default to active if not specified
+                "mfa_enabled": mfa_enabled if mfa_enabled is not None else False,  # Default to False
+                "created_at": timestamp,
+                "updated_at": timestamp
+            }
+
+            # Add phone_number if provided
+            if phone_number:
+                new_user["phone_number"] = phone_number
+
+            # Add to users data
+            users[new_user_id] = new_user
+
+            return json.dumps({
+                "success": True,
+                "message": f"User created successfully with ID {new_user_id}",
+                "user_id": new_user_id,
+                "user_data": new_user
+            })
+
+        elif action == "update":
+            # user_id is required for update
+            if not user_id:
+                return json.dumps({
+                    "error": "Missing required parameter 'user_id' for update operation"
+                })
+
+            # Check if user exists
+            if user_id not in users:
+                return json.dumps({
+                    "error": f"User with ID {user_id} not found"
+                })
+
+            user_to_update = users[user_id]
+
+            # Validate role if being updated
+            if role and role not in supported_roles:
+                return json.dumps({
+                    "error": f"Invalid role '{role}'. Must be one of: {', '.join(supported_roles)}"
+                })
+
+            # Validate status if being updated
+            if status and status not in supported_statuses:
+                return json.dumps({
+                    "error": f"Invalid status '{status}'. Must be one of: {', '.join(supported_statuses)}"
+                })
+
+            # Check for duplicate email if email is being changed
+            if email and email != user_to_update.get("email"):
+                for existing_user in users.values():
+                    if existing_user.get("email") == email:
+                        return json.dumps({
+                            "error": f"User with email '{email}' already exists"
+                        })
+
+            # Track what fields are being updated
+            updated_fields = []
+
+            # Update fields if provided
+            if first_name:
+                user_to_update["first_name"] = first_name
+                updated_fields.append("first_name")
+            
+            if last_name:
+                user_to_update["last_name"] = last_name
+                updated_fields.append("last_name")
+            
+            if email:
+                user_to_update["email"] = email
+                updated_fields.append("email")
+            
+            if role:
+                user_to_update["role"] = role
+                updated_fields.append("role")
+            
+            if phone_number:
+                user_to_update["phone_number"] = phone_number
+                updated_fields.append("phone_number")
+            
+            if status:
+                user_to_update["status"] = status
+                updated_fields.append("status")
+            
+            if mfa_enabled is not None:
+                user_to_update["mfa_enabled"] = mfa_enabled
+                updated_fields.append("mfa_enabled")
+
+            # Update timestamp
+            user_to_update["updated_at"] = timestamp
+
+            if not updated_fields:
+                return json.dumps({
+                    "error": "No fields provided to update"
+                })
+
+            return json.dumps({
+                "success": True,
+                "message": f"User {user_id} updated successfully",
+                "updated_fields": updated_fields,
+                "user_data": user_to_update
+            })
+
+        else:
+            return json.dumps({
+                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
+            })
+
+    @staticmethod
+    def manage_employee_invoke(
+        data: Dict[str, Any],
+        action: str,
+        employee_id: Optional[str] = None,
+        user_id: Optional[str] = None,
+        position_id: Optional[str] = None,
+        hire_date: Optional[str] = None,
+        manager_id: Optional[str] = None,
+        date_of_birth: Optional[str] = None,
+        address: Optional[str] = None,
+        hourly_rate: Optional[float] = None,
+        employment_status: Optional[str] = None,
+    ) -> str:
+        """
+        Executes the specified action (create or update) on employee records.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        def validate_date_format(date_str: str, field_name: str) -> bool:
+            """Validates date format YYYY-MM-DD"""
+            if not date_str:
+                return True
+            try:
+                parts = date_str.split('-')
+                if len(parts) != 3:
+                    return False
+                year, month, day = map(int, parts)
+                if not (1900 <= year <= 2100 and 1 <= month <= 12 and 1 <= day <= 31):
+                    return False
+                return True
+            except ValueError:
+                return False
+
+        timestamp = "2025-10-01T12:00:00"
+        employees = data.get("employees", {})
+        users = data.get("users", {})
+        job_positions = data.get("job_positions", {})
+
+        # Validate supported employment statuses
+        supported_employment_statuses = ["active", "inactive", "terminated"]
+
+        if action == "create":
+            # Required fields for employee creation (onboarding)
+            if not all([user_id, position_id, hire_date]):
+                return json.dumps({
+                    "error": "Missing required parameters for create operation. Required: user_id, position_id, hire_date"
+                })
+
+            # Validate user exists
+            if user_id not in users:
+                return json.dumps({
+                    "error": f"User with ID '{user_id}' not found"
+                })
+
+            # Validate position exists
+            if position_id not in job_positions:
+                return json.dumps({
+                    "error": f"Job position with ID '{position_id}' not found"
+                })
+
+            # Check if employee record already exists for this user
+            for existing_employee in employees.values():
+                if existing_employee.get("user_id") == user_id:
+                    return json.dumps({
+                        "error": f"Employee record already exists for user ID '{user_id}'"
+                    })
+
+            # Validate manager exists if provided
+            if manager_id:
+                manager_exists = False
+                for employee in employees.values():
+                    if employee.get("employee_id") == manager_id and employee.get("employment_status") == "active":
+                        manager_exists = True
+                        break
+                if not manager_exists:
+                    return json.dumps({
+                        "error": f"Active manager with employee ID '{manager_id}' not found"
+                    })
+
+            # Validate hire_date format
+            if not validate_date_format(hire_date, "hire_date"):
+                return json.dumps({
+                    "error": "Invalid hire_date format. Use YYYY-MM-DD"
+                })
+
+            # Validate date_of_birth format if provided
+            if date_of_birth and not validate_date_format(date_of_birth, "date_of_birth"):
+                return json.dumps({
+                    "error": "Invalid date_of_birth format. Use YYYY-MM-DD"
+                })
+
+            # Validate employment_status if provided
+            if employment_status and employment_status not in supported_employment_statuses:
+                return json.dumps({
+                    "error": f"Invalid employment_status '{employment_status}'. Must be one of: {', '.join(supported_employment_statuses)}"
+                })
+
+            # Validate hourly_rate if provided
+            if hourly_rate is not None:
+                try:
+                    hourly_rate = float(hourly_rate)
+                    if hourly_rate < 0:
+                        return json.dumps({
+                            "error": "Hourly rate must be non-negative"
+                        })
+                except (ValueError, TypeError):
+                    return json.dumps({
+                        "error": "Invalid hourly_rate value. Must be a number"
+                    })
+
+            # Generate new employee ID
+            new_employee_id = generate_id(employees)
+
+            # Create new employee record
+            new_employee = {
+                "employee_id": new_employee_id,
+                "user_id": user_id,
+                "position_id": position_id,
+                "hire_date": hire_date,
+                "employment_status": employment_status if employment_status else "active",
+                "manager_id": manager_id,
+                "date_of_birth": date_of_birth,
+                "address": address,
+                "hourly_rate": hourly_rate,
+                "created_at": timestamp,
+                "updated_at": timestamp
+            }
+
+            # Add to employees data
+            employees[new_employee_id] = new_employee
+
+            return json.dumps({
+                "success": True,
+                "message": f"Employee record created successfully for user ID '{user_id}'",
+                "employee_id": new_employee_id,
+                "employee_data": new_employee
+            })
+
+        elif action == "update":
+            # Required field for employee update
+            if not employee_id:
+                return json.dumps({
+                    "error": "Missing required parameter 'employee_id' for update operation"
+                })
+
+            # At least one optional field must be provided
+            optional_fields = [position_id, employment_status, manager_id, date_of_birth, address, hourly_rate]
+            if not any(field is not None for field in optional_fields):
+                return json.dumps({
+                    "error": "At least one optional parameter (position_id, employment_status, manager_id, date_of_birth, address, hourly_rate) must be provided for update operation"
+                })
+
+            # Check if employee exists
+            if employee_id not in employees:
+                return json.dumps({
+                    "error": f"Employee with ID '{employee_id}' not found"
+                })
+
+            # Validate position exists if provided
+            if position_id and position_id not in job_positions:
+                return json.dumps({
+                    "error": f"Job position with ID '{position_id}' not found"
+                })
+
+            # Validate manager exists if provided
+            if manager_id:
+                manager_exists = False
+                for employee in employees.values():
+                    if employee.get("employee_id") == manager_id and employee.get("employment_status") == "active":
+                        manager_exists = True
+                        break
+                if not manager_exists:
+                    return json.dumps({
+                        "error": f"Active manager with employee ID '{manager_id}' not found"
+                    })
+
+            # Validate date_of_birth format if provided
+            if date_of_birth and not validate_date_format(date_of_birth, "date_of_birth"):
+                return json.dumps({
+                    "error": "Invalid date_of_birth format. Use YYYY-MM-DD"
+                })
+
+            # Validate employment_status if provided
+            if employment_status and employment_status not in supported_employment_statuses:
+                return json.dumps({
+                    "error": f"Invalid employment_status '{employment_status}'. Must be one of: {', '.join(supported_employment_statuses)}"
+                })
+
+            # Validate hourly_rate if provided
+            if hourly_rate is not None:
+                try:
+                    hourly_rate = float(hourly_rate)
+                    if hourly_rate < 0:
+                        return json.dumps({
+                            "error": "Hourly rate must be non-negative"
+                        })
+                except (ValueError, TypeError):
+                    return json.dumps({
+                        "error": "Invalid hourly_rate value. Must be a number"
+                    })
+
+            # Update employee record
+            employee_record = employees[employee_id]
+            
+            if position_id:
+                employee_record["position_id"] = position_id
+            if employment_status:
+                employee_record["employment_status"] = employment_status
+            if manager_id is not None:  # Allow setting to None
+                employee_record["manager_id"] = manager_id
+            if date_of_birth:
+                employee_record["date_of_birth"] = date_of_birth
+            if address:
+                employee_record["address"] = address
+            if hourly_rate is not None:
+                employee_record["hourly_rate"] = hourly_rate
+            
+            employee_record["updated_at"] = timestamp
+
+            return json.dumps({
+                "success": True,
+                "message": f"Employee with ID '{employee_id}' updated successfully",
+                "employee_id": employee_id,
+                "employee_data": employee_record
+            })
+
+        else:
+            return json.dumps({
+                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
+            })
+
+    @staticmethod
+    def manage_expense_reimbursements_invoke(
+        data: Dict[str, Any],
+        operation: str,
+        employee_id: Optional[str] = None,
+        expense_date: Optional[str] = None,
+        amount: Optional[float] = None,
+        expense_type: Optional[str] = None,
+        receipt_file_path: Optional[str] = None,
+        reimbursement_id: Optional[str] = None,
+        status: Optional[str] = None,
+        approved_by: Optional[str] = None,
+        payment_date: Optional[str] = None,
+    ) -> str:
+        """
+        Executes the specified operation (create or update) on expense reimbursements.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        timestamp = "2025-10-01T12:00:00"
+        expense_reimbursements = data.get("expense_reimbursements", {})
+        employees = data.get("employees", {})
+        users = data.get("users", {})
+
+        if operation == "create":
+            if not all([employee_id, expense_date, amount, expense_type]):
+                return json.dumps({"error": "Missing required parameters for create operation."})
+
+            if employee_id not in employees:
+                return json.dumps({"error": f"Employee with ID {employee_id} not found."})
+
+            # --- Start of revised validation logic ---
+            if amount <= 0:
+                return json.dumps({"error": "Validation failed: The amount must be a positive value."})
+            
+            try:
+                # This check is now just to validate the date format is correct.
+                datetime.datetime.strptime(expense_date, '%Y-%m-%d').date()
+            except ValueError:
+                return json.dumps({"error": "Invalid date format. Please use YYYY-MM-DD."})
+            # --- End of revised validation logic ---
+            
+            valid_expense_types = ["travel", "meals", "equipment", "training", "other"]
+            if expense_type not in valid_expense_types:
+                return json.dumps({"error": f"Invalid expense type. Must be one of {valid_expense_types}."})
+
+            new_reimbursement_id = generate_id(expense_reimbursements)
+            new_reimbursement = {
+                "reimbursement_id": new_reimbursement_id,
+                "employee_id": employee_id,
+                "expense_date": expense_date,
+                "amount": amount,
+                "expense_type": expense_type,
+                "receipt_file_path": receipt_file_path,
+                "status": "submitted",
+                "approved_by": None,
+                "payment_date": None,
+                "created_at": timestamp,
+                "updated_at": timestamp,
+            }
+            expense_reimbursements[new_reimbursement_id] = new_reimbursement
+            return json.dumps(new_reimbursement)
+
+        elif operation == "update":
+            if not all([reimbursement_id, status]):
+                return json.dumps({"error": "Missing reimbursement_id or status for update operation."})
+
+            if reimbursement_id not in expense_reimbursements:
+                return json.dumps({"error": f"Reimbursement with ID {reimbursement_id} not found."})
+
+            valid_statuses = ["approved", "rejected", "paid"]
+            if status not in valid_statuses:
+                return json.dumps({"error": f"Invalid status. Must be one of {valid_statuses}."})
+
+            if status in ["approved", "rejected"] and not approved_by:
+                return json.dumps({"error": f"approved_by is required when status is '{status}'."})
+            
+            if status == "paid" and not payment_date:
+                return json.dumps({"error": "payment_date is required when status is 'paid'."})
+            
+            if approved_by and approved_by not in users:
+                return json.dumps({"error": f"User with ID {approved_by} not found."})
+
+            record_to_update = expense_reimbursements[reimbursement_id]
+            record_to_update["status"] = status
+            
+            if approved_by:
+                record_to_update["approved_by"] = approved_by
+            if payment_date:
+                record_to_update["payment_date"] = payment_date
+            
+            record_to_update["updated_at"] = timestamp
+            return json.dumps(record_to_update)
+
+        else:
+            return json.dumps({"error": "Invalid operation. Must be 'create' or 'update'."})
+
+    @staticmethod
+    def manage_leave_requests_invoke(
+        data: Dict[str, Any],
+        operation: str,
+        employee_id: Optional[str] = None,
+        leave_type: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        days_requested: Optional[float] = None,
+        leave_id: Optional[str] = None,
+        status: Optional[str] = None,
+        approved_by: Optional[str] = None,
+    ) -> str:
+        """
+        Executes the specified operation (create or update) on leave requests.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        timestamp = "2025-10-01T12:00:00"
+        leave_requests = data.get("leave_requests", {})
+        employees = data.get("employees", {})
+        users = data.get("users", {})
+
+        if operation == "create":
+            if not all([employee_id, leave_type, start_date, end_date, days_requested]):
+                return json.dumps({"error": "Missing required parameters for create operation."})
+            
+            if employee_id not in employees:
+                return json.dumps({"error": f"Employee with ID {employee_id} not found."})
+            
+            # --- Start of revised validation logic ---
+            try:
+                start_date_obj = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+                end_date_obj = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+
+                if start_date_obj > end_date_obj:
+                    return json.dumps({"error": "Validation failed: The start_date cannot be after the end_date."})
+            except ValueError:
+                return json.dumps({"error": "Invalid date format. Please use YYYY-MM-DD."})
+            # --- End of revised validation logic ---
+            
+            valid_leave_types = ["annual", "sick", "fmla", "personal", "bereavement", "jury_duty"]
+            if leave_type not in valid_leave_types:
+                return json.dumps({"error": f"Invalid leave type. Must be one of {valid_leave_types}."})
+
+            new_leave_id = generate_id(leave_requests)
+            new_request = {
+                "leave_id": new_leave_id,
+                "employee_id": employee_id,
+                "leave_type": leave_type,
+                "start_date": start_date,
+                "end_date": end_date,
+                "days_requested": days_requested,
+                "status": "pending",
+                "approved_by": None,
+                "approval_date": None,
+                "created_at": timestamp,
+                "updated_at": timestamp,
+            }
+            leave_requests[new_leave_id] = new_request
+            return json.dumps(new_request)
+
+        elif operation == "update":
+            if not all([leave_id, status, approved_by]):
+                return json.dumps({"error": "Missing required parameters for update operation."})
+
+            if leave_id not in leave_requests:
+                return json.dumps({"error": f"Leave request with ID {leave_id} not found."})
+            
+            if approved_by not in users:
+                return json.dumps({"error": f"User with ID {approved_by} not found."})
+
+            valid_statuses = ["approved", "rejected", "cancelled"]
+            if status not in valid_statuses:
+                return json.dumps({"error": f"Invalid status. Must be one of {valid_statuses}."})
+
+            request_to_update = leave_requests[leave_id]
+            request_to_update["status"] = status
+            request_to_update["approved_by"] = approved_by
+            request_to_update["approval_date"] = timestamp
+            request_to_update["updated_at"] = timestamp
+            return json.dumps(request_to_update)
+
+        else:
+            return json.dumps({"error": "Invalid operation. Must be 'create' or 'update'."})
+
+    @staticmethod
+    def discover_user_employee_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+        """
+        Discover user and employee entities. The entity to discover is decided by entity_type.
+        Optionally, filters can be applied to narrow down the search results.
+        
+        Supported entities:
+        - employees: Employee records by employee_id, user_id, position_id, hire_date, employment_status, manager_id, date_of_birth, address, hourly_rate, created_at, updated_at
+        - users: User records by user_id, first_name, last_name, email, phone_number, role, status, mfa_enabled, created_at, updated_at
+        """
+        if entity_type not in ["employees", "users"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'employees' or 'users'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid data format for {entity_type}"
+            })
+        
+        results = []
+        entities = data.get(entity_type, {})
+        
+        for entity_id, entity_data in entities.items():
+            if filters:
+                match = True
+                for filter_key, filter_value in filters.items():
+                    entity_value = entity_data.get(filter_key)
+                    if entity_value != filter_value:
+                        match = False
+                        break
+                if match:
+                    # Add appropriate ID field based on entity type
+                    id_field = "employee_id" if entity_type == "employees" else "user_id"
+                    results.append({**entity_data, id_field: entity_id})
+            else:
+                id_field = "employee_id" if entity_type == "employees" else "user_id"
+                results.append({**entity_data, id_field: entity_id})
+        
+        return json.dumps({
+            "success": True,
+            "entity_type": entity_type,
+            "count": len(results),
+            "results": results
+        })
+
+    @staticmethod
+    def discover_expense_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+        """
+        Discover expense entities.
+        
+        Supported entities:
+        - expense_reimbursements: Expense reimbursements by reimbursement_id, employee_id, expense_date, amount, expense_type, receipt_file_path, status, approved_by, payment_date, created_at, updated_at
+        """
+        if entity_type not in ["expense_reimbursements"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'expense_reimbursements'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid data format for {entity_type}"
+            })
+        
+        results = []
+        entities = data.get("expense_reimbursements", {})
+        
+        for entity_id, entity_data in entities.items():
+            if filters:
+                match = True
+                for filter_key, filter_value in filters.items():
+                    entity_value = entity_data.get(filter_key)
+                    if entity_value != filter_value:
+                        match = False
+                        break
+                if match:
+                    results.append({**entity_data, "reimbursement_id": entity_id})
+            else:
+                results.append({**entity_data, "reimbursement_id": entity_id})
+        
+        return json.dumps({
+            "success": True,
+            "entity_type": entity_type,
+            "count": len(results),
+            "results": results
+        })
+
+    @staticmethod
+    def discover_document_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+        """
+        Discover document entities.
+        
+        Supported entities:
+        - document_storage: Document storage records by document_id, document_name, document_type, employee_id, file_path, upload_date, uploaded_by, confidentiality_level, retention_period_years, expiry_date, status, created_at
+        """
+        if entity_type not in ["document_storage"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'document_storage'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid data format for {entity_type}"
+            })
+        
+        results = []
+        entities = data.get("document_storage", {})
+        
+        for entity_id, entity_data in entities.items():
+            if filters:
+                match = True
+                for filter_key, filter_value in filters.items():
+                    entity_value = entity_data.get(filter_key)
+                    if entity_value != filter_value:
+                        match = False
+                        break
+                if match:
+                    results.append({**entity_data, "document_id": entity_id})
+            else:
+                results.append({**entity_data, "document_id": entity_id})
+        
+        return json.dumps({
+            "success": True,
+            "entity_type": entity_type,
+            "count": len(results),
+            "results": results
+        })
+
+    @staticmethod
+    def manage_job_position_invoke(
+        data: Dict[str, Any],
+        action: str,
+        position_id: Optional[str] = None,
+        title: Optional[str] = None,
+        department_id: Optional[str] = None,
+        job_level: Optional[str] = None,
+        employment_type: Optional[str] = None,
+        status: Optional[str] = None,
+        hourly_rate_min: Optional[float] = None,
+        hourly_rate_max: Optional[float] = None,
+    ) -> str:
+        """
+        Executes the specified action (create or update) on job position records.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        timestamp = "2025-10-01T12:00:00"
+        job_positions = data.get("job_positions", {})
+        departments = data.get("departments", {})
+
+        # Validate supported job levels
+        supported_job_levels = ["entry", "junior", "mid", "senior", "lead", "manager", "director", "executive"]
+        
+        # Validate supported employment types
+        supported_employment_types = ["full_time", "part_time", "contract", "intern"]
+        
+        # Validate supported statuses
+        supported_statuses = ["draft", "open", "closed"]
+
+        if action == "create":
+            # Required fields for job position creation
+            if not all([title, department_id, job_level, employment_type, status]):
+                return json.dumps({
+                    "error": "Missing required parameters for create operation. Required: title, department_id, job_level, employment_type, status"
+                })
+
+            # Validate department_id exists
+            if department_id not in departments:
+                return json.dumps({
+                    "error": f"Department with ID '{department_id}' not found"
+                })
+
+            # Validate job_level
+            if job_level not in supported_job_levels:
+                return json.dumps({
+                    "error": f"Invalid job_level '{job_level}'. Must be one of: {', '.join(supported_job_levels)}"
+                })
+
+            # Validate employment_type
+            if employment_type not in supported_employment_types:
+                return json.dumps({
+                    "error": f"Invalid employment_type '{employment_type}'. Must be one of: {', '.join(supported_employment_types)}"
+                })
+
+            # Validate status
+            if status not in supported_statuses:
+                return json.dumps({
+                    "error": f"Invalid status '{status}'. Must be one of: {', '.join(supported_statuses)}"
+                })
+
+            # Validate hourly rates if provided
+            if hourly_rate_min is not None and hourly_rate_min < 0:
+                return json.dumps({
+                    "error": "hourly_rate_min must be non-negative"
+                })
+
+            if hourly_rate_max is not None and hourly_rate_max < 0:
+                return json.dumps({
+                    "error": "hourly_rate_max must be non-negative"
+                })
+
+            if (hourly_rate_min is not None and hourly_rate_max is not None and 
+                hourly_rate_min > hourly_rate_max):
+                return json.dumps({
+                    "error": "hourly_rate_min cannot be greater than hourly_rate_max"
+                })
+
+            # Generate new position ID
+            new_position_id = generate_id(job_positions)
+
+            # Create new job position record
+            new_position = {
+                "position_id": new_position_id,
+                "title": title,
+                "department_id": department_id,
+                "job_level": job_level,
+                "employment_type": employment_type,
+                "status": status,
+                "created_at": timestamp,
+                "updated_at": timestamp
+            }
+
+            # Add hourly rates if provided
+            if hourly_rate_min is not None:
+                new_position["hourly_rate_min"] = hourly_rate_min
+            
+            if hourly_rate_max is not None:
+                new_position["hourly_rate_max"] = hourly_rate_max
+
+            # Add to job positions data
+            job_positions[new_position_id] = new_position
+
+            return json.dumps({
+                "success": True,
+                "message": f"Job position created successfully with ID {new_position_id}",
+                "position_id": new_position_id,
+                "position_data": new_position
+            })
+
+        elif action == "update":
+            # position_id is required for update
+            if not position_id:
+                return json.dumps({
+                    "error": "Missing required parameter 'position_id' for update operation"
+                })
+
+            # Check if position exists
+            if position_id not in job_positions:
+                return json.dumps({
+                    "error": f"Job position with ID {position_id} not found"
+                })
+
+            position_to_update = job_positions[position_id]
+
+            # Validate department_id if being updated
+            if department_id and department_id not in departments:
+                return json.dumps({
+                    "error": f"Department with ID '{department_id}' not found"
+                })
+
+            # Validate job_level if being updated
+            if job_level and job_level not in supported_job_levels:
+                return json.dumps({
+                    "error": f"Invalid job_level '{job_level}'. Must be one of: {', '.join(supported_job_levels)}"
+                })
+
+            # Validate employment_type if being updated
+            if employment_type and employment_type not in supported_employment_types:
+                return json.dumps({
+                    "error": f"Invalid employment_type '{employment_type}'. Must be one of: {', '.join(supported_employment_types)}"
+                })
+
+            # Validate status if being updated
+            if status and status not in supported_statuses:
+                return json.dumps({
+                    "error": f"Invalid status '{status}'. Must be one of: {', '.join(supported_statuses)}"
+                })
+
+            # Validate hourly rates if being updated
+            if hourly_rate_min is not None and hourly_rate_min < 0:
+                return json.dumps({
+                    "error": "hourly_rate_min must be non-negative"
+                })
+
+            if hourly_rate_max is not None and hourly_rate_max < 0:
+                return json.dumps({
+                    "error": "hourly_rate_max must be non-negative"
+                })
+
+            # Check rate relationship if both are being updated
+            current_min = position_to_update.get("hourly_rate_min")
+            current_max = position_to_update.get("hourly_rate_max")
+            
+            effective_min = hourly_rate_min if hourly_rate_min is not None else current_min
+            effective_max = hourly_rate_max if hourly_rate_max is not None else current_max
+            
+            if (effective_min is not None and effective_max is not None and 
+                effective_min > effective_max):
+                return json.dumps({
+                    "error": "hourly_rate_min cannot be greater than hourly_rate_max"
+                })
+
+            # Track what fields are being updated
+            updated_fields = []
+
+            # Update fields if provided
+            if title:
+                position_to_update["title"] = title
+                updated_fields.append("title")
+            
+            if department_id:
+                position_to_update["department_id"] = department_id
+                updated_fields.append("department_id")
+            
+            if job_level:
+                position_to_update["job_level"] = job_level
+                updated_fields.append("job_level")
+            
+            if employment_type:
+                position_to_update["employment_type"] = employment_type
+                updated_fields.append("employment_type")
+            
+            if status:
+                position_to_update["status"] = status
+                updated_fields.append("status")
+            
+            if hourly_rate_min is not None:
+                position_to_update["hourly_rate_min"] = hourly_rate_min
+                updated_fields.append("hourly_rate_min")
+            
+            if hourly_rate_max is not None:
+                position_to_update["hourly_rate_max"] = hourly_rate_max
+                updated_fields.append("hourly_rate_max")
+
+            # Update timestamp
+            position_to_update["updated_at"] = timestamp
+
+            if not updated_fields:
+                return json.dumps({
+                    "error": "No fields provided to update. At least one optional field must be provided"
+                })
+
+            return json.dumps({
+                "success": True,
+                "message": f"Job position {position_id} updated successfully",
+                "updated_fields": updated_fields,
+                "position_data": position_to_update
+            })
+
+        else:
+            return json.dumps({
+                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
+            })
+
+    @staticmethod
+    def manage_employee_training_invoke(
+        data: Dict[str, Any],
+        operation: str,
+        employee_id: Optional[str] = None,
+        program_id: Optional[str] = None,
+        enrollment_date: Optional[str] = None,
+        training_record_id: Optional[str] = None,
+        status: Optional[str] = None,
+        completion_date: Optional[str] = None,
+        score: Optional[float] = None,
+        certificate_issued: Optional[bool] = None,
+        expiry_date: Optional[str] = None,
+    ) -> str:
+        """
+        Executes the specified operation (create or update) on employee training records.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        timestamp = "2025-10-01T12:00:00"
+        employee_trainings = data.get("employee_training", {})
+        employees = data.get("employees", {})
+        programs = data.get("training_programs", {})
+
+        if operation == "create":
+            if not all([employee_id, program_id, enrollment_date]):
+                return json.dumps({"error": "Missing required parameters for create operation."})
+
+            if employee_id not in employees:
+                return json.dumps({"error": f"Employee with ID {employee_id} not found."})
+            if program_id not in programs:
+                return json.dumps({"error": f"Training program with ID {program_id} not found."})
+
+            new_record_id = generate_id(employee_trainings)
+            new_record = {
+                "training_record_id": new_record_id,
+                "employee_id": employee_id,
+                "program_id": program_id,
+                "enrollment_date": enrollment_date,
+                "status": "enrolled",
+                "completion_date": None,
+                "score": None,
+                "certificate_issued": False,
+                "expiry_date": None,
+                "created_at": timestamp,
+                "updated_at": timestamp,
+            }
+            employee_trainings[new_record_id] = new_record
+            return json.dumps(new_record)
+
+        elif operation == "update":
+            if not all([training_record_id, status]):
+                return json.dumps({"error": "Missing required parameters for update operation."})
+            
+            if training_record_id not in employee_trainings:
+                return json.dumps({"error": f"Training record with ID {training_record_id} not found."})
+            
+            valid_statuses = ["in_progress", "completed", "failed", "cancelled"]
+            if status not in valid_statuses:
+                return json.dumps({"error": f"Invalid status. Must be one of {valid_statuses}."})
+
+            record_to_update = employee_trainings[training_record_id]
+            record_to_update["status"] = status
+            if completion_date is not None:
+                record_to_update["completion_date"] = completion_date
+            if score is not None:
+                record_to_update["score"] = score
+            if certificate_issued is not None:
+                record_to_update["certificate_issued"] = certificate_issued
+            if expiry_date is not None:
+                record_to_update["expiry_date"] = expiry_date
+            
+            record_to_update["updated_at"] = timestamp
+            return json.dumps(record_to_update)
+
+        else:
+            return json.dumps({"error": "Invalid operation. Must be 'create' or 'update'."})
+
+    @staticmethod
+    def manage_performance_review_invoke(data: Dict[str, Any], action: str, review_data: Dict[str, Any] = None, review_id: str = None) -> str:
+        """
+        Create or update performance review records.
         
         Actions:
-        - create: Create new portfolio (requires portfolio_data with investor_id, fund_manager_approval OR finance_officer_approval, optional status)
-        - update: Update existing portfolio (requires portfolio_id and portfolio_data with changes like status, fund_manager_approval)
+        - create: Create new performance review (requires review_data with employee_id, reviewer_id, review_period_start, review_period_end, review_type, overall_rating)
+        - update: Update existing performance review (requires review_id, review_data)
+        """
+        
+        def generate_id(table: Dict[str, Any]) -> int:
+            if not table:
+                return 1
+            return max(int(k) for k in table.keys()) + 1
+            
+        def is_valid_date_order(start_date: str, end_date: str) -> bool:
+            """Check if start date is before end date - simplified for demo"""
+            return start_date <= end_date
+            
+        def is_valid_status_progression(current_status: str, new_status: str) -> bool:
+            """Validate status progression follows proper workflow"""
+            # Define proper progression: draft → submitted → approved
+            workflow_order = ["draft", "submitted", "approved"]
+            
+            if current_status not in workflow_order or new_status not in workflow_order:
+                return False
+            
+            current_index = workflow_order.index(current_status)
+            new_index = workflow_order.index(new_status)
+            
+            # Can only move forward or stay the same
+            return new_index >= current_index
+        
+        if action not in ["create", "update"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": "Invalid data format for performance reviews"
+            })
+        
+        performance_reviews = data.get("performance_reviews", {})
+        employees = data.get("employees", {})
+        users = data.get("users", {})
+        
+        if action == "create":
+            if not review_data:
+                return json.dumps({
+                    "success": False,
+                    "error": "review_data is required for create action"
+                })
+            
+            # Validate required fields
+            required_fields = ["employee_id", "reviewer_id", "review_period_start", "review_period_end", "review_type", "overall_rating"]
+            missing_fields = [field for field in required_fields if field not in review_data]
+            if missing_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Employee or reviewer not found or inactive - missing fields: {', '.join(missing_fields)}"
+                })
+            
+            # Validate that employee exists and has active status
+            employee_id = str(review_data["employee_id"])
+            if employee_id not in employees:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Employee or reviewer not found or inactive"
+                })
+            
+            employee = employees[employee_id]
+            if employee.get("employment_status") != "active":
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Employee or reviewer not found or inactive"
+                })
+            
+            # Validate that reviewer exists and has active status
+            reviewer_id = str(review_data["reviewer_id"])
+            if reviewer_id not in users:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Employee or reviewer not found or inactive"
+                })
+            
+            reviewer = users[reviewer_id]
+            if reviewer.get("status") != "active":
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Employee or reviewer not found or inactive"
+                })
+            
+            # Validate that review period dates are logical (start date before end date)
+            review_period_start = review_data["review_period_start"]
+            review_period_end = review_data["review_period_end"]
+            if not is_valid_date_order(review_period_start, review_period_end):
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid review period dates or type - start date must be before end date"
+                })
+            
+            # Validate review_type is within accepted categories according to schema
+            valid_types = ["annual", "quarterly", "probationary", "project_based"]
+            if review_data["review_type"] not in valid_types:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Invalid review period dates or type - review_type must be one of: {', '.join(valid_types)}"
+                })
+            
+            # Validate overall_rating according to schema
+            valid_ratings = ["exceeds_expectations", "meets_expectations", "below_expectations", "unsatisfactory"]
+            if review_data["overall_rating"] not in valid_ratings:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Invalid rating or scores - overall_rating must be one of: {', '.join(valid_ratings)}"
+                })
+            
+            # Validate only allowed fields are present
+            allowed_fields = ["employee_id", "reviewer_id", "review_period_start", "review_period_end", 
+                            "review_type", "overall_rating", "goals_achievement_score", "communication_score",
+                            "teamwork_score", "leadership_score", "technical_skills_score", "status"]
+            invalid_fields = [field for field in review_data.keys() if field not in allowed_fields]
+            if invalid_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Invalid fields for performance review creation: {', '.join(invalid_fields)}"
+                })
+            
+            # Generate new review ID
+            new_review_id = generate_id(performance_reviews)
+            
+            # Create performance review with required information
+            new_review = {
+                "review_id": str(new_review_id),
+                "employee_id": employee_id,
+                "reviewer_id": reviewer_id,
+                "review_period_start": review_period_start,
+                "review_period_end": review_period_end,
+                "review_type": review_data["review_type"],
+                "overall_rating": review_data["overall_rating"],
+                "goals_achievement_score": review_data.get("goals_achievement_score"),
+                "communication_score": review_data.get("communication_score"),
+                "teamwork_score": review_data.get("teamwork_score"),
+                "leadership_score": review_data.get("leadership_score"),
+                "technical_skills_score": review_data.get("technical_skills_score"),
+                "status": review_data.get("status", "draft"),  # If status is not specified during creation, set it to draft
+                "created_at": "2025-10-01T12:00:00",
+                "updated_at": "2025-10-01T12:00:00"
+            }
+            
+            performance_reviews[str(new_review_id)] = new_review
+            
+            return json.dumps({
+                "success": True,
+                "action": "create",
+                "review_id": str(new_review_id),
+                "message": f"Performance review {new_review_id} created successfully",
+                "review_data": new_review
+            })
+        
+        elif action == "update":
+            if not review_id:
+                return json.dumps({
+                    "success": False,
+                    "error": "review_id is required for update action"
+                })
+            
+            if review_id not in performance_reviews:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Performance review not found"
+                })
+            
+            if not review_data:
+                return json.dumps({
+                    "success": False,
+                    "error": "review_data is required for update action"
+                })
+            
+            # Validate at least one optional field is provided
+            update_fields = ["employee_id", "reviewer_id", "review_period_start", "review_period_end", "review_type", "overall_rating", "goals_achievement_score", "communication_score", "teamwork_score", "leadership_score", "technical_skills_score", "status"]
+            provided_fields = [field for field in update_fields if field in review_data]
+            if not provided_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": "At least one optional field must be provided for updates"
+                })
+            
+            # Get current review for validation
+            current_review = performance_reviews[review_id]
+            current_status = current_review.get("status", "draft")
+            
+            # Validate only allowed fields for updates
+            invalid_fields = [field for field in review_data.keys() if field not in update_fields]
+            if invalid_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Invalid fields for performance review update: {', '.join(invalid_fields)}"
+                })
+            
+            # Validate status transitions follow proper workflow if status is being updated
+            if "status" in review_data:
+                new_status = review_data["status"]
+                valid_statuses = ["draft", "submitted", "approved"]
+                
+                if new_status not in valid_statuses:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Performance review operation failed - status must be one of: {', '.join(valid_statuses)}"
+                    })
+                
+                # Update status through proper progression (draft to submitted to approved)
+                if not is_valid_status_progression(current_status, new_status):
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Performance review operation failed - invalid status transition from {current_status} to {new_status}"
+                    })
+            
+            # Validate overall_rating if provided
+            if "overall_rating" in review_data:
+                valid_ratings = ["exceeds_expectations", "meets_expectations", "below_expectations", "unsatisfactory"]
+                if review_data["overall_rating"] not in valid_ratings:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Performance review operation failed - overall_rating must be one of: {', '.join(valid_ratings)}"
+                    })
+            
+            # Validate review_type if provided
+            if "review_type" in review_data:
+                valid_types = ["annual", "quarterly", "probationary", "project_based"]
+                if review_data["review_type"] not in valid_types:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Performance review operation failed - review_type must be one of: {', '.join(valid_types)}"
+                    })
+            
+            # Update performance review
+            updated_review = current_review.copy()
+            for key, value in review_data.items():
+                updated_review[key] = value
+            
+            updated_review["updated_at"] = "2025-10-01T12:00:00"
+            performance_reviews[review_id] = updated_review
+            
+            return json.dumps({
+                "success": True,
+                "action": "update",
+                "review_id": review_id,
+                "message": f"Performance review {review_id} updated successfully",
+                "review_data": updated_review
+            })
+
+    @staticmethod
+    def manage_job_position_skills_invoke(
+        data: Dict[str, Any],
+        action: str,
+        position_id: str,
+        skill_id: Optional[str] = None,
+    ) -> str:
+        """
+        Executes the specified action (add or remove) on job position skills associations.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        job_positions = data.get("job_positions", {})
+        job_position_skills = data.get("job_position_skills", {})
+        skills = data.get("skills", {})
+
+        # Validate position exists
+        if position_id not in job_positions:
+            return json.dumps({
+                "error": f"Job position with ID '{position_id}' not found"
+            })
+
+        if action == "add":
+            # skill_id is required for add
+            if not skill_id:
+                return json.dumps({
+                    "error": "Missing required parameter 'skill_id' for add operation"
+                })
+
+            # Validate skill exists
+            if skill_id not in skills:
+                return json.dumps({
+                    "error": f"Skill with ID '{skill_id}' not found"
+                })
+
+            # Check if association already exists
+            for existing_association in job_position_skills.values():
+                if (existing_association.get("position_id") == position_id and 
+                    existing_association.get("skill_id") == skill_id):
+                    return json.dumps({
+                        "error": f"Skill {skill_id} is already associated with position {position_id}"
+                    })
+
+            # Generate new association ID
+            new_association_id = generate_id(job_position_skills)
+
+            # Create new association
+            new_association = {
+                "position_id": position_id,
+                "skill_id": skill_id
+            }
+
+            # Add to job position skills data
+            job_position_skills[new_association_id] = new_association
+
+            return json.dumps({
+                "success": True,
+                "message": f"Skill {skill_id} added to position {position_id} successfully",
+                "association_id": new_association_id,
+                "association_data": new_association
+            })
+
+        elif action == "remove":
+            # skill_id is required for remove
+            if not skill_id:
+                return json.dumps({
+                    "error": "Missing required parameter 'skill_id' for remove operation"
+                })
+
+            # Find the association to remove
+            association_to_remove = None
+            association_id_to_remove = None
+            
+            for assoc_id, association in job_position_skills.items():
+                if (association.get("position_id") == position_id and 
+                    association.get("skill_id") == skill_id):
+                    association_to_remove = association
+                    association_id_to_remove = assoc_id
+                    break
+
+            if not association_to_remove:
+                return json.dumps({
+                    "error": f"No association found between position {position_id} and skill {skill_id}"
+                })
+
+            # Remove the association
+            del job_position_skills[association_id_to_remove]
+
+            return json.dumps({
+                "success": True,
+                "message": f"Skill {skill_id} removed from position {position_id} successfully",
+                "removed_association_id": association_id_to_remove
+            })
+
+        elif action == "list":
+            # List all skills associated with the position
+            associated_skills = []
+            
+            for association in job_position_skills.values():
+                if association.get("position_id") == position_id:
+                    skill_id = association.get("skill_id")
+                    skill_info = skills.get(skill_id, {})
+                    associated_skills.append({
+                        "skill_id": skill_id,
+                        "skill_name": skill_info.get("skill_name", "Unknown"),
+                        "skill_category": skill_info.get("category", "Unknown")
+                    })
+
+            return json.dumps({
+                "success": True,
+                "message": f"Found {len(associated_skills)} skills associated with position {position_id}",
+                "position_id": position_id,
+                "associated_skills": associated_skills
+            })
+
+        else:
+            return json.dumps({
+                "error": f"Invalid action '{action}'. Must be 'add', 'remove', or 'list'"
+            })
+
+    @staticmethod
+    def manage_department_invoke(
+        data: Dict[str, Any],
+        action: str,
+        department_id: Optional[str] = None,
+        department_name: Optional[str] = None,
+        manager_id: Optional[str] = None,
+        budget: Optional[float] = None,
+        status: Optional[str] = None,
+    ) -> str:
+        """
+        Executes the specified action (create or update) on department records.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        timestamp = "2025-10-01T12:00:00"
+        departments = data.get("departments", {})
+        users = data.get("users", {})
+
+        # Validate supported statuses
+        supported_statuses = ["active", "inactive"]
+
+        if action == "create":
+            # Required fields for department creation
+            if not all([department_name, manager_id]):
+                return json.dumps({
+                    "error": "Missing required parameters for create operation. Required: department_name, manager_id"
+                })
+
+            # Validate manager_id exists in users
+            if manager_id not in users:
+                return json.dumps({
+                    "error": f"Manager with ID '{manager_id}' not found in users"
+                })
+
+            # Validate status if provided
+            if status and status not in supported_statuses:
+                return json.dumps({
+                    "error": f"Invalid status '{status}'. Must be one of: {', '.join(supported_statuses)}"
+                })
+
+            # Check for duplicate department name
+            for existing_dept in departments.values():
+                if existing_dept.get("department_name") == department_name:
+                    return json.dumps({
+                        "error": f"Department with name '{department_name}' already exists"
+                    })
+
+            # Generate new department ID
+            new_department_id = generate_id(departments)
+
+            # Create new department record
+            new_department = {
+                "department_id": new_department_id,
+                "department_name": department_name,
+                "manager_id": manager_id,
+                "status": status or "active",  # Default to active if not specified
+                "created_at": timestamp,
+                "updated_at": timestamp
+            }
+
+            # Add budget if provided
+            if budget is not None:
+                if budget < 0:
+                    return json.dumps({
+                        "error": "Budget must be a non-negative value"
+                    })
+                new_department["budget"] = budget
+
+            # Add to departments data
+            departments[new_department_id] = new_department
+
+            return json.dumps({
+                "success": True,
+                "message": f"Department created successfully with ID {new_department_id}",
+                "department_id": new_department_id,
+                "department_data": new_department
+            })
+
+        elif action == "update":
+            # department_id is required for update
+            if not department_id:
+                return json.dumps({
+                    "error": "Missing required parameter 'department_id' for update operation"
+                })
+
+            # Check if department exists
+            if department_id not in departments:
+                return json.dumps({
+                    "error": f"Department with ID {department_id} not found"
+                })
+
+            department_to_update = departments[department_id]
+
+            # Validate manager_id if being updated
+            if manager_id and manager_id not in users:
+                return json.dumps({
+                    "error": f"Manager with ID '{manager_id}' not found in users"
+                })
+
+            # Validate status if being updated
+            if status and status not in supported_statuses:
+                return json.dumps({
+                    "error": f"Invalid status '{status}'. Must be one of: {', '.join(supported_statuses)}"
+                })
+
+            # Check for duplicate department name if name is being changed
+            if department_name and department_name != department_to_update.get("department_name"):
+                for existing_dept in departments.values():
+                    if existing_dept.get("department_name") == department_name:
+                        return json.dumps({
+                            "error": f"Department with name '{department_name}' already exists"
+                        })
+
+            # Validate budget if provided
+            if budget is not None and budget < 0:
+                return json.dumps({
+                    "error": "Budget must be a non-negative value"
+                })
+
+            # Track what fields are being updated
+            updated_fields = []
+
+            # Update fields if provided
+            if department_name:
+                department_to_update["department_name"] = department_name
+                updated_fields.append("department_name")
+            
+            if manager_id:
+                department_to_update["manager_id"] = manager_id
+                updated_fields.append("manager_id")
+            
+            if budget is not None:
+                department_to_update["budget"] = budget
+                updated_fields.append("budget")
+            
+            if status:
+                department_to_update["status"] = status
+                updated_fields.append("status")
+
+            # Update timestamp
+            department_to_update["updated_at"] = timestamp
+
+            if not updated_fields:
+                return json.dumps({
+                    "error": "No fields provided to update. At least one optional field must be provided"
+                })
+
+            return json.dumps({
+                "success": True,
+                "message": f"Department {department_id} updated successfully",
+                "updated_fields": updated_fields,
+                "department_data": department_to_update
+            })
+
+        else:
+            return json.dumps({
+                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
+            })
+
+    @staticmethod
+    def manage_interview_invoke(data: Dict[str, Any], action: str, interview_data: Dict[str, Any] = None, interview_id: str = None) -> str:
+        """
+        Create or update interview records.
+        
+        Actions:
+        - create: Schedule new interview (requires interview_data with application_id, interviewer_id, interview_type, scheduled_date)
+        - update: Record interview outcome (requires interview_id and interview_data with outcome details)
+        """
+        
+        def generate_id(table: Dict[str, Any]) -> int:
+            if not table:
+                return 1
+            return max(int(k) for k in table.keys()) + 1
+            
+        def is_future_datetime(datetime_str: str) -> bool:
+            """Check if datetime is in future - simplified for demo"""
+            # In real implementation, would compare with current datetime
+            # For demo purposes, assume dates starting with "2024" or earlier are not future
+            return not (datetime_str.startswith("2024") or datetime_str.startswith("2023"))
+        
+        if action not in ["create", "update"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": "Invalid data format for interviews"
+            })
+        
+        interviews = data.get("interviews", {})
+        job_applications = data.get("job_applications", {})
+        users = data.get("users", {})
+        
+        if action == "create":
+            if not interview_data:
+                return json.dumps({
+                    "success": False,
+                    "error": "interview_data is required for create action"
+                })
+            
+            # Validate required fields
+            required_fields = ["application_id", "interviewer_id", "interview_type", "scheduled_date"]
+            missing_fields = [field for field in required_fields if field not in interview_data]
+            if missing_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Invalid interview scheduling details - missing fields: {', '.join(missing_fields)}"
+                })
+            
+            # Validate that application exists
+            application_id = str(interview_data["application_id"])
+            if application_id not in job_applications:
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Application or interviewer not found"
+                })
+            
+            # Validate that interviewer exists
+            interviewer_id = str(interview_data["interviewer_id"])
+            if interviewer_id not in users:
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Application or interviewer not found"
+                })
+            
+            # Validate interview_type enum according to schema
+            valid_types = ["phone_screening", "technical", "behavioral", "panel", "final"]
+            if interview_data["interview_type"] not in valid_types:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Invalid interview type or scheduled date - interview_type must be one of: {', '.join(valid_types)}"
+                })
+            
+            # Validate that scheduled date and time is in the future
+            scheduled_date = interview_data["scheduled_date"]
+            if not is_future_datetime(scheduled_date):
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid interview type or scheduled date - scheduled date must be in the future"
+                })
+            
+            # Validate that duration is positive time value with reasonable default
+            duration_minutes = interview_data.get("duration_minutes", 60)  # Standard duration default
+            if not isinstance(duration_minutes, (int, float)) or duration_minutes <= 0:
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid interview scheduling details - duration must be positive"
+                })
+            
+            # Validate only allowed fields are present for creation
+            allowed_fields = ["application_id", "interviewer_id", "interview_type", "scheduled_date", 
+                            "duration_minutes", "status"]
+            invalid_fields = [field for field in interview_data.keys() if field not in allowed_fields]
+            if invalid_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Invalid fields for interview creation: {', '.join(invalid_fields)}"
+                })
+            
+            # Generate new interview ID
+            new_interview_id = generate_id(interviews)
+            
+            # Create new interview record
+            new_interview = {
+                "interview_id": str(new_interview_id),
+                "application_id": application_id,
+                "interviewer_id": interviewer_id,
+                "interview_type": interview_data["interview_type"],
+                "scheduled_date": scheduled_date,
+                "duration_minutes": duration_minutes,
+                "status": interview_data.get("status", "scheduled"),  # If status is not specified, set it to scheduled
+                "overall_rating": None,
+                "technical_score": None,
+                "communication_score": None,
+                "cultural_fit_score": None,
+                "recommendation": None,
+                "created_at": "2025-10-01T12:00:00",
+                "updated_at": "2025-10-01T12:00:00"
+            }
+            
+            interviews[str(new_interview_id)] = new_interview
+            
+            return json.dumps({
+                "success": True,
+                "action": "create",
+                "interview_id": str(new_interview_id),
+                "message": f"Interview {new_interview_id} scheduled successfully",
+                "interview_data": new_interview
+            })
+        
+        elif action == "update":
+            if not interview_id:
+                return json.dumps({
+                    "success": False,
+                    "error": "interview_id is required for update action"
+                })
+            
+            if interview_id not in interviews:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Interview not found or invalid status"
+                })
+            
+            if not interview_data:
+                return json.dumps({
+                    "success": False,
+                    "error": "interview_data is required for update action"
+                })
+            
+            # Get current interview for validation
+            current_interview = interviews[interview_id]
+            current_status = current_interview.get("status")
+            
+            # Validate that interview has scheduled or completed status
+            if current_status not in ["scheduled", "completed"]:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Interview not found or invalid status"
+                })
+            
+            # Validate at least one optional field is provided
+            update_fields = ["overall_rating", "technical_score", "communication_score", 
+                           "cultural_fit_score", "recommendation", "status"]
+            provided_fields = [field for field in update_fields if field in interview_data]
+            if not provided_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": "At least one optional field must be provided for updates"
+                })
+            
+            # Validate only allowed fields for updates (outcome recording)
+            invalid_fields = [field for field in interview_data.keys() if field not in update_fields]
+            if invalid_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Invalid fields for interview outcome recording: {', '.join(invalid_fields)}"
+                })
+            
+            # Validate overall rating is within accepted scale if provided
+            if "overall_rating" in interview_data:
+                valid_ratings = ["excellent", "good", "average", "below_average", "poor"]
+                if interview_data["overall_rating"] not in valid_ratings:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Invalid rating, scores, or recommendation - overall_rating must be one of: {', '.join(valid_ratings)}"
+                    })
+            
+            # Validate individual scores are within acceptable numeric range if provided
+            score_fields = ["technical_score", "communication_score", "cultural_fit_score"]
+            for score_field in score_fields:
+                if score_field in interview_data:
+                    score = interview_data[score_field]
+                    if score is not None and (not isinstance(score, (int, float)) or score < 0 or score > 10):
+                        return json.dumps({
+                            "success": False,
+                            "error": f"Halt: Invalid rating, scores, or recommendation - {score_field} must be within 0-10 range"
+                        })
+            
+            # Validate recommendation is within accepted options if provided
+            if "recommendation" in interview_data:
+                valid_recommendations = ["strong_hire", "hire", "no_hire", "strong_no_hire"]
+                if interview_data["recommendation"] not in valid_recommendations:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Invalid rating, scores, or recommendation - recommendation must be one of: {', '.join(valid_recommendations)}"
+                    })
+            
+            # Validate status if provided
+            if "status" in interview_data:
+                valid_statuses = ["scheduled", "completed", "cancelled", "no_show"]
+                if interview_data["status"] not in valid_statuses:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Invalid status - must be one of: {', '.join(valid_statuses)}"
+                    })
+            
+            # Update interview record with outcome information
+            updated_interview = current_interview.copy()
+            for key, value in interview_data.items():
+                updated_interview[key] = value
+            
+            # If status is not specified, set it to completed when outcome is being recorded
+            if "status" not in interview_data and any(field in interview_data for field in ["overall_rating", "recommendation"]):
+                updated_interview["status"] = "completed"
+            
+            updated_interview["updated_at"] = "2025-10-01T12:00:00"
+            interviews[interview_id] = updated_interview
+            
+            # Update related job application status based on interview outcome
+            application_id = current_interview.get("application_id")
+            if application_id and application_id in job_applications:
+                application = job_applications[application_id]
+                current_app_status = application.get("status")
+                new_app_status = current_app_status
+                
+                recommendation = updated_interview.get("recommendation")
+                overall_rating = updated_interview.get("overall_rating")
+                interview_type = updated_interview.get("interview_type")
+                
+                # Update job application status based on interview outcome per policy
+                if recommendation in ["strong_hire", "hire"]:
+                    if current_app_status == "interviewing":
+                        new_app_status = "offer_made"
+                elif recommendation in ["no_hire", "strong_no_hire"]:
+                    new_app_status = "rejected"
+                elif not recommendation and overall_rating:
+                    # When no recommendation provided, use rating
+                    if overall_rating in ["poor", "below_average"]:
+                        new_app_status = "rejected"
+                    # excellent/good ratings remain at interviewing for potential additional interviews
+                
+                # Final interviews with positive recommendations automatically advance to offer_made
+                if interview_type == "final" and recommendation in ["strong_hire", "hire"]:
+                    new_app_status = "offer_made"
+                
+                # Update application status if changed
+                if new_app_status != current_app_status:
+                    updated_application = application.copy()
+                    updated_application["status"] = new_app_status
+                    updated_application["updated_at"] = "2025-10-01T12:00:00"
+                    job_applications[application_id] = updated_application
+            
+            return json.dumps({
+                "success": True,
+                "action": "update",
+                "interview_id": interview_id,
+                "message": f"Interview {interview_id} outcome recorded successfully",
+                "interview_data": updated_interview
+            })
+
+    @staticmethod
+    def manage_benefits_plan_invoke(data: Dict[str, Any], action: str, plan_data: Dict[str, Any] = None, plan_id: str = None) -> str:
+        """
+        Create or update benefits plan records.
+        
+        Actions:
+        - create: Create new benefits plan (requires plan_data with plan_name, plan_type, effective_date)
+        - update: Update existing benefits plan (requires plan_id and plan_data with changes)
         """
         
         def generate_id(table: Dict[str, Any]) -> int:
@@ -615,244 +2234,289 @@ class Tools:
                 "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
             })
         
-        # Access portfolios data
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": "Invalid data format for portfolios"
+                "error": "Invalid data format for benefits plans"
             })
         
-        portfolios = data.get("portfolios", {})
-        portfolio_holdings = data.get("portfolio_holdings", {})
+        benefits_plans = data.get("benefits_plans", {})
         
         if action == "create":
-            if not portfolio_data:
+            if not plan_data:
                 return json.dumps({
                     "success": False,
-                    "error": "portfolio_data is required for create action"
+                    "error": "plan_data is required for create action"
                 })
             
             # Validate required fields for creation
-            required_fields = ["investor_id"]
-            missing_fields = [field for field in required_fields if field not in portfolio_data]
+            required_fields = ["plan_name", "plan_type", "effective_date"]
+            missing_fields = [field for field in required_fields if field not in plan_data]
             if missing_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Missing required fields for portfolio creation: {', '.join(missing_fields)}"
+                    "error": f"Halt: Missing or invalid inputs - missing fields: {', '.join(missing_fields)}"
                 })
             
-            # Validate approval - Fund Manager OR Finance Officer approval required
-            has_fund_manager_approval = portfolio_data.get("fund_manager_approval", False)
-            has_finance_officer_approval = portfolio_data.get("finance_officer_approval", False)
-            
-            if not (has_fund_manager_approval or has_finance_officer_approval):
+            # Validate plan_type enum according to schema
+            valid_types = ["health_insurance", "dental", "vision", "life_insurance", "disability", "retirement_401k", "pto", "flexible_spending"]
+            if plan_data["plan_type"] not in valid_types:
                 return json.dumps({
                     "success": False,
-                    "error": "Either Fund Manager approval or Finance Officer approval is required for portfolio creation"
+                    "error": f"Halt: Invalid plan type or dates - plan_type must be one of: {', '.join(valid_types)}"
+                })
+            
+            # Validate cost amounts are non-negative monetary values if provided
+            for cost_field in ["employee_cost", "employer_cost"]:
+                if cost_field in plan_data:
+                    cost_value = plan_data[cost_field]
+                    if cost_value is not None and (not isinstance(cost_value, (int, float)) or cost_value < 0):
+                        return json.dumps({
+                            "success": False,
+                            "error": f"Halt: Invalid plan type or dates - {cost_field} must be non-negative"
+                        })
+            
+            # Validate date consistency - expiration date must occur after effective date if provided
+            effective_date = plan_data["effective_date"]
+            expiration_date = plan_data.get("expiration_date")
+            if expiration_date and expiration_date <= effective_date:
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid plan type or dates - expiration date must be after effective date"
                 })
             
             # Validate only allowed fields are present
-            allowed_fields = ["investor_id", "status", "fund_manager_approval", "finance_officer_approval"]
-            invalid_fields = [field for field in portfolio_data.keys() if field not in allowed_fields]
+            allowed_fields = ["plan_name", "plan_type", "provider", "employee_cost", "employer_cost", 
+                            "status", "effective_date", "expiration_date"]
+            invalid_fields = [field for field in plan_data.keys() if field not in allowed_fields]
             if invalid_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Invalid fields for portfolio creation: {', '.join(invalid_fields)}"
+                    "error": f"Invalid fields for benefits plan creation: {', '.join(invalid_fields)}"
                 })
             
-            # Validate status enum if provided
-            if "status" in portfolio_data:
-                valid_statuses = ["active", "inactive", "archived"]
-                if portfolio_data["status"] not in valid_statuses:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
-                    })
+            # Generate new plan ID
+            new_plan_id = generate_id(benefits_plans)
             
-            # Check if investor already has an active portfolio (policy constraint)
-            investor_id = portfolio_data["investor_id"]
-            for existing_portfolio in portfolios.values():
-                if (existing_portfolio.get("investor_id") == investor_id and 
-                    existing_portfolio.get("status") == "active"):
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Investor {investor_id} already has an active portfolio. One investor is only allowed to have one portfolio."
-                    })
-            
-            # Generate new portfolio ID using consistent pattern
-            new_portfolio_id = generate_id(portfolios)
-            
-            # Create new portfolio record
-            new_portfolio = {
-                "portfolio_id": str(new_portfolio_id) if new_portfolio_id else None ,
-                "investor_id": str(portfolio_data["investor_id"]) if portfolio_data["investor_id"] else None,
-                "status": portfolio_data.get("status", "active"),
+            # Create new benefits plan
+            new_plan = {
+                "plan_id": str(new_plan_id),
+                "plan_name": plan_data["plan_name"],
+                "plan_type": plan_data["plan_type"],
+                "provider": plan_data.get("provider"),
+                "employee_cost": plan_data.get("employee_cost"),
+                "employer_cost": plan_data.get("employer_cost"),
+                "status": plan_data.get("status", "active"),  # If status is not specified during creation, set it to active
+                "effective_date": plan_data["effective_date"],
+                "expiration_date": plan_data.get("expiration_date"),
                 "created_at": "2025-10-01T12:00:00",
                 "updated_at": "2025-10-01T12:00:00"
             }
             
-            portfolios[str(new_portfolio_id)] = new_portfolio
+            benefits_plans[str(new_plan_id)] = new_plan
             
             return json.dumps({
                 "success": True,
                 "action": "create",
-                "portfolio_id": str(new_portfolio_id) if new_portfolio_id else None ,
-                "message": f"Portfolio {new_portfolio_id} created successfully for investor {investor_id}",
-                "portfolio_data": new_portfolio
+                "plan_id": str(new_plan_id),
+                "message": f"Benefits plan {new_plan_id} created successfully",
+                "plan_data": new_plan
             })
         
         elif action == "update":
-            if not portfolio_id:
+            if not plan_id:
                 return json.dumps({
                     "success": False,
-                    "error": "portfolio_id is required for update action"
+                    "error": "plan_id is required for update action"
                 })
             
-            if portfolio_id not in portfolios:
+            if plan_id not in benefits_plans:
                 return json.dumps({
                     "success": False,
-                    "error": f"Portfolio record {portfolio_id} not found"
+                    "error": f"Halt: Plan not found"
                 })
             
-            if not portfolio_data:
+            if not plan_data:
                 return json.dumps({
                     "success": False,
-                    "error": "portfolio_data is required for update action"
+                    "error": "plan_data is required for update action"
                 })
             
-            # Validate required approvals for updates - Fund Manager approval required
-            if not portfolio_data.get("fund_manager_approval", False):
+            # Validate at least one optional field is provided
+            update_fields = ["plan_name", "plan_type", "provider", "employee_cost", "employer_cost", 
+                           "status", "effective_date", "expiration_date"]
+            provided_fields = [field for field in update_fields if field in plan_data]
+            if not provided_fields:
                 return json.dumps({
                     "success": False,
-                    "error": "Fund Manager approval is required for portfolio update"
+                    "error": "At least one optional field must be provided for updates"
                 })
             
-            # Validate only allowed fields are present for updates
-            allowed_update_fields = ["status", "fund_manager_approval"]
-            invalid_fields = [field for field in portfolio_data.keys() if field not in allowed_update_fields]
+            # Get current plan for validation
+            current_plan = benefits_plans[plan_id]
+            
+            # Validate only allowed fields for updates
+            invalid_fields = [field for field in plan_data.keys() if field not in update_fields]
             if invalid_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Invalid fields for portfolio update: {', '.join(invalid_fields)}. Cannot update investor_id."
+                    "error": f"Invalid fields for benefits plan update: {', '.join(invalid_fields)}"
                 })
             
             # Validate status enum if provided
-            if "status" in portfolio_data:
-                valid_statuses = ["active", "inactive", "archived"]
-                if portfolio_data["status"] not in valid_statuses:
+            if "status" in plan_data:
+                valid_statuses = ["active", "inactive"]
+                if plan_data["status"] not in valid_statuses:
                     return json.dumps({
                         "success": False,
-                        "error": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+                        "error": f"Halt: Benefits plan operation failed - status must be one of: {', '.join(valid_statuses)}"
                     })
-                
-                # Check if closing a portfolio with active holdings (policy constraint)
-                current_portfolio = portfolios[portfolio_id]
-                if (current_portfolio.get("status") == "active" and 
-                    portfolio_data["status"] in ["inactive", "archived"]):
-                    
-                    # Check for active holdings in this portfolio
-                    has_active_holdings = any(
-                        holding.get("portfolio_id") == portfolio_id 
-                        for holding in portfolio_holdings.values()
-                    )
-                    
-                    if has_active_holdings:
+            
+            # Validate plan_type enum if provided
+            if "plan_type" in plan_data:
+                valid_types = ["health_insurance", "dental", "vision", "life_insurance", "disability", "retirement_401k", "pto", "flexible_spending"]
+                if plan_data["plan_type"] not in valid_types:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Benefits plan operation failed - plan_type must be one of: {', '.join(valid_types)}"
+                    })
+            
+            # Validate cost amounts are non-negative monetary values if provided
+            for cost_field in ["employee_cost", "employer_cost"]:
+                if cost_field in plan_data:
+                    cost_value = plan_data[cost_field]
+                    if cost_value is not None and (not isinstance(cost_value, (int, float)) or cost_value < 0):
                         return json.dumps({
                             "success": False,
-                            "error": f"Cannot close portfolio {portfolio_id} because it has active holdings. Please remove all holdings before closing the portfolio."
+                            "error": f"Halt: Benefits plan operation failed - {cost_field} must be non-negative"
                         })
             
-            # Update portfolio record
-            updated_portfolio = portfolios[portfolio_id].copy()
-            for key, value in portfolio_data.items():
-                if key not in ["fund_manager_approval"]:
-                    updated_portfolio[key] = value
+            # Validate date consistency
+            effective_date = plan_data.get("effective_date", current_plan.get("effective_date"))
+            expiration_date = plan_data.get("expiration_date", current_plan.get("expiration_date"))
             
-            updated_portfolio["updated_at"] = "2025-10-01T12:00:00"
-            portfolios[portfolio_id] = updated_portfolio
+            if effective_date and expiration_date and expiration_date <= effective_date:
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Benefits plan operation failed - expiration date must be after effective date"
+                })
+            
+            # Update benefits plan
+            updated_plan = current_plan.copy()
+            for key, value in plan_data.items():
+                updated_plan[key] = value
+            
+            updated_plan["updated_at"] = "2025-10-01T12:00:00"
+            benefits_plans[plan_id] = updated_plan
             
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "portfolio_id": str(portfolio_id),
-                "message": f"Portfolio {portfolio_id} updated successfully",
-                "portfolio_data": updated_portfolio
+                "plan_id": plan_id,
+                "message": f"Benefits plan {plan_id} updated successfully",
+                "plan_data": updated_plan
             })
 
     @staticmethod
-    def generate_report_invoke(data: Dict[str, Any], fund_id: str, report_date: str, export_period_end: str, generated_by: str, investor_id: Optional[str] = None, report_type: str = "performance", status: str = "pending") -> str:
+    def manage_document_storage_invoke(
+        data: Dict[str, Any],
+        operation: str,
+        document_id: Optional[str] = None,
+        document_name: Optional[str] = None,
+        document_type: Optional[str] = None,
+        file_path: Optional[str] = None,
+        uploaded_by: Optional[str] = None,
+        employee_id: Optional[str] = None,
+        confidentiality_level: Optional[str] = 'internal',
+        retention_period_years: Optional[int] = 7,
+        status: Optional[str] = None,
+        expiry_date: Optional[str] = None,
+    ) -> str:
         """
-        Generates a new report record.
-
-        Args:
-            data: The database json.
-            fund_id: ID of the fund for the report.
-            report_date: The date the report is generated.
-            export_period_end: The end date for the reporting period.
-            generated_by: ID of the user generating the report.
-            investor_id: Optional ID of the investor for the report.
-            report_type: The type of report.
-            status: The initial status of the report.
-
-        Returns:
-            A json string of the new report record or an error.
+        Executes the specified operation (create or update) on documents.
         """
-        def generate_id(table: Dict[str, Any]) -> int:
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
             if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
 
-        reports = data.get("reports", {})
-        funds = data.get("funds", {})
+
+        timestamp = "2025-10-01T12:00:00"
+        documents = data.get("documents", {})
         users = data.get("users", {})
-        investors = data.get("investors", {})
+        employees = data.get("employees", {})
 
-        if fund_id not in funds:
-            return json.dumps({"error": f"Fund {fund_id} not found"})
-        if generated_by not in users:
-            return json.dumps({"error": f"User {generated_by} not found"})
-        if investor_id and investor_id not in investors:
-            return json.dumps({"error": f"Investor {investor_id} not found"})
-        
-        valid_report_types = ["performance", "holding", "financial"]
-        if report_type not in valid_report_types:
-            return json.dumps({"error": f"Invalid report_type. Must be one of {valid_report_types}"})
+        if operation == "create":
+            if not all([document_name, document_type, file_path, uploaded_by]):
+                return json.dumps({"error": "Missing required parameters for create operation."})
             
-        valid_statuses = ["pending", "completed", "failed"]
-        if status not in valid_statuses:
-            return json.dumps({"error": f"Invalid status. Must be one of {valid_statuses}"})
-        
-        report_id = str(generate_id(reports))
-        timestamp = "2025-10-01T00:00:00"
-        
-        new_report = {
-            "report_id": str(report_id) if report_id is not None else None,
-            "fund_id": str(fund_id) if fund_id is not None else None,
-            "investor_id": str(investor_id) if investor_id is not None else None,
-            "report_date": report_date,
-            "report_type": report_type,
-            "generated_by": generated_by,
-            "status": status,
-            "created_at": timestamp,
-            "export_period_end": export_period_end
-        }
-        
-        reports[report_id] = new_report
-        return json.dumps(new_report)
+            if uploaded_by not in users:
+                return json.dumps({"error": f"User with ID {uploaded_by} not found."})
+            if employee_id and employee_id not in employees:
+                return json.dumps({"error": f"Employee with ID {employee_id} not found."})
+
+            valid_types = ["contract", "policy", "handbook", "form", "certificate", "report", "resume", "offer_letter"]
+            if document_type not in valid_types:
+                return json.dumps({"error": f"Invalid document type. Must be one of {valid_types}."})
+
+            new_doc_id = generate_id(documents)
+            new_document = {
+                "document_id": new_doc_id,
+                "document_name": document_name,
+                "document_type": document_type,
+                "employee_id": employee_id,
+                "file_path": file_path,
+                "upload_date": timestamp,
+                "uploaded_by": uploaded_by,
+                "confidentiality_level": confidentiality_level,
+                "retention_period_years": retention_period_years,
+                "expiry_date": expiry_date,
+                "status": "active",
+                "created_at": timestamp,
+            }
+            documents[new_doc_id] = new_document
+            return json.dumps(new_document)
+
+        elif operation == "update":
+            if not all([document_id, status]):
+                return json.dumps({"error": "Missing required parameters for update operation."})
+            
+            if document_id not in documents:
+                return json.dumps({"error": f"Document with ID {document_id} not found."})
+
+            valid_statuses = ["active", "archived", "deleted"]
+            if status not in valid_statuses:
+                return json.dumps({"error": f"Invalid status. Must be one of {valid_statuses}."})
+            
+            doc_to_update = documents[document_id]
+            doc_to_update["status"] = status
+            if document_name is not None:
+                doc_to_update["document_name"] = document_name
+            if confidentiality_level is not None:
+                doc_to_update["confidentiality_level"] = confidentiality_level
+            if expiry_date is not None:
+                doc_to_update["expiry_date"] = expiry_date
+            
+            return json.dumps(doc_to_update)
+
+        else:
+            return json.dumps({"error": "Invalid operation. Must be 'create' or 'update'."})
 
     @staticmethod
-    def discover_portfolio_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+    def discover_recruitment_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
         """
-        Discover portfolio entities: portfolios and portfolio holdings.
+        Discover recruitment entities.
         
         Supported entities:
-        - portfolios: Portfolio records by portfolio_id, investor_id, status
-        - portfolio_holdings: Portfolio holding records by holding_id, portfolio_id, fund_id, quantity, cost_basis
+        - candidates: Candidate records by candidate_id, first_name, last_name, email, phone_number, address, source, status, created_at, updated_at
+        - job_applications: Job application records by application_id, candidate_id, position_id, application_date, status, recruiter_id, ai_screening_score, final_decision, created_at, updated_at
+        - interviews: Interview records by interview_id, application_id, interviewer_id, interview_type, scheduled_date, duration_minutes, status, overall_rating, technical_score, communication_score, cultural_fit_score, recommendation, created_at, updated_at
         """
-        if entity_type not in ["portfolios", "portfolio_holdings"]:
+        if entity_type not in ["candidates", "job_applications", "interviews"]:
             return json.dumps({
                 "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'portfolios' or 'portfolio_holdings'"
+                "error": f"Invalid entity_type '{entity_type}'. Must be one of: 'candidates', 'job_applications', 'interviews'"
             })
         
         if not isinstance(data, dict):
@@ -862,13 +2526,15 @@ class Tools:
             })
         
         results = []
-        
-        id_field = {
-            "portfolios": "portfolio_id",
-            "portfolio_holdings": "holding_id"
-        }[entity_type]
-        
         entities = data.get(entity_type, {})
+        
+        # Determine ID field based on entity type
+        id_field_map = {
+            "candidates": "candidate_id",
+            "job_applications": "application_id", 
+            "interviews": "interview_id"
+        }
+        id_field = id_field_map[entity_type]
         
         for entity_id, entity_data in entities.items():
             if filters:
@@ -891,19 +2557,33 @@ class Tools:
         })
 
     @staticmethod
-    def manage_instrument_price_invoke(data: Dict[str, Any], action: str, price_data: Dict[str, Any] = None, price_id: str = None) -> str:
+    def manage_payroll_record_invoke(data: Dict[str, Any], action: str, payroll_data: Dict[str, Any] = None, payroll_id: str = None) -> str:
         """
-        Create or update instrument price records.
+        Create or update payroll records.
         
         Actions:
-        - create: Create new price record (requires price_data with instrument_id, price_date, open_price, high_price, low_price, close_price, fund_manager_approval, compliance_officer_approval)
-        - update: Update existing price record (requires price_id and price_data with changes, fund_manager_approval, compliance_officer_approval)
+        - create: Process payroll run (requires payroll_data with employee_id, pay_period_start, pay_period_end, hourly_rate)
+        - update: Payroll correction (requires payroll_id, payroll_data with correction details)
         """
         
         def generate_id(table: Dict[str, Any]) -> int:
             if not table:
                 return 1
             return max(int(k) for k in table.keys()) + 1
+            
+        def is_valid_date_order(start_date: str, end_date: str) -> bool:
+            """Check if start date is before end date - simplified for demo"""
+            return start_date <= end_date
+            
+        def aggregate_approved_timesheet_hours(employee_id: str, pay_period_start: str, pay_period_end: str, timesheets: Dict[str, Any]) -> float:
+            """Aggregate approved timesheet hours for the specified pay period"""
+            total_hours = 0.0
+            for timesheet in timesheets.values():
+                if (timesheet.get("employee_id") == employee_id and 
+                    timesheet.get("status") == "approved" and
+                    pay_period_start <= timesheet.get("work_date", "") <= pay_period_end):
+                    total_hours += float(timesheet.get("total_hours", 0))
+            return total_hours
         
         if action not in ["create", "update"]:
             return json.dumps({
@@ -911,613 +2591,536 @@ class Tools:
                 "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
             })
         
-        # Access instrument_prices data
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": "Invalid data format for instrument_prices"
+                "error": "Invalid data format for payroll records"
             })
         
-        instrument_prices = data.get("instrument_prices", {})
+        payroll_records = data.get("payroll_records", {})
+        employees = data.get("employees", {})
+        employee_timesheets = data.get("employee_timesheets", {})
         
         if action == "create":
-            if not price_data:
+            if not payroll_data:
                 return json.dumps({
                     "success": False,
-                    "error": "price_data is required for create action"
+                    "error": "payroll_data is required for create action"
                 })
             
-            # Validate required fields for creation
-            required_fields = ["instrument_id", "price_date", "open_price", "high_price", "low_price", "close_price", "fund_manager_approval", "compliance_officer_approval"]
-            missing_fields = [field for field in required_fields if field not in price_data]
+            # Validate that all required information is provided: employee, pay period dates
+            required_fields = ["employee_id", "pay_period_start", "pay_period_end", "hourly_rate"]
+            missing_fields = [field for field in required_fields if field not in payroll_data]
             if missing_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Missing required fields for price creation: {', '.join(missing_fields)}. Both Fund Manager and Compliance Officer approvals are required."
+                    "error": f"Halt: Missing or invalid inputs - missing fields: {', '.join(missing_fields)}"
                 })
-            if not (price_data.get("fund_manager_approval") and price_data.get("compliance_officer_approval")):
+            
+            # Validate that employee exists in system
+            employee_id = str(payroll_data["employee_id"])
+            if employee_id not in employees:
                 return json.dumps({
                     "success": False,
-                    "error": "Both Fund Manager and Compliance Officer approvals are required for price creation"
+                    "error": f"Halt: Missing or invalid inputs - employee not found"
+                })
+            
+            # Validate that pay period dates are logical (start date before end date)
+            pay_period_start = payroll_data["pay_period_start"]
+            pay_period_end = payroll_data["pay_period_end"]
+            if not is_valid_date_order(pay_period_start, pay_period_end):
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid pay period dates or hourly rate - start date must be before end date"
+                })
+            
+            # Validate that hourly rate is positive monetary value
+            try:
+                hourly_rate = float(payroll_data["hourly_rate"])
+                if hourly_rate <= 0:
+                    return json.dumps({
+                        "success": False,
+                        "error": "Halt: Invalid pay period dates or hourly rate - hourly rate must be positive"
+                    })
+            except (ValueError, TypeError):
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid pay period dates or hourly rate - invalid hourly rate format"
+                })
+            
+            # Aggregate approved timesheet hours for the specified pay period
+            hours_worked = aggregate_approved_timesheet_hours(employee_id, pay_period_start, pay_period_end, employee_timesheets)
+            
+            # Check if no approved timesheet hours found
+            if hours_worked == 0:
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: No approved timesheet hours found"
                 })
             
             # Validate only allowed fields are present
-            allowed_fields = ["instrument_id", "price_date", "open_price", "high_price", "low_price", "close_price", "fund_manager_approval", "compliance_officer_approval"]
-            invalid_fields = [field for field in price_data.keys() if field not in allowed_fields]
+            allowed_fields = ["employee_id", "pay_period_start", "pay_period_end", "hourly_rate", 
+                            "hours_worked", "payment_date", "status", "approved_by"]
+            invalid_fields = [field for field in payroll_data.keys() if field not in allowed_fields]
             if invalid_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Invalid fields for price creation: {', '.join(invalid_fields)}"
+                    "error": f"Invalid fields for payroll creation: {', '.join(invalid_fields)}"
                 })
             
-            # Validate all prices are positive
-            price_fields = ["open_price", "high_price", "low_price", "close_price"]
-            for field in price_fields:
-                if price_data[field] <= 0:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"{field} must be positive - negative values are not allowed"
-                    })
+            # Generate new payroll ID
+            new_payroll_id = generate_id(payroll_records)
             
-            # Validate price logic (high >= low)
-            if price_data["high_price"] < price_data["low_price"]:
-                return json.dumps({
-                    "success": False,
-                    "error": "Invalid price data: high price must be greater than or equal to low price"
-                })
+            # Calculate hours worked from approved timesheets if not provided
+            final_hours_worked = payroll_data.get("hours_worked", hours_worked)
             
-            # Check for existing price for the same instrument and date
-            instrument_id = price_data["instrument_id"]
-            price_date = price_data["price_date"]
-            for existing_price in instrument_prices.values():
-                if (existing_price.get("instrument_id") == instrument_id and 
-                    existing_price.get("price_date") == price_date):
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Price already exists for instrument {instrument_id} on date {price_date}. Only one price per instrument per date is allowed."
-                    })
-            
-            # Generate new price ID using the same pattern as CreateFund
-            new_price_id = generate_id(instrument_prices)
-            
-            # Create new price record
-            new_price = {
-                "price_id": str(new_price_id),
-                "instrument_id": str(price_data["instrument_id"]),
-                "price_date": price_data["price_date"],
-                "open_price": price_data["open_price"],
-                "high_price": price_data["high_price"],
-                "low_price": price_data["low_price"],
-                "close_price": price_data["close_price"]
+            # Create payroll record with required information
+            new_payroll = {
+                "payroll_id": str(new_payroll_id),
+                "employee_id": employee_id,
+                "pay_period_start": pay_period_start,
+                "pay_period_end": pay_period_end,
+                "hours_worked": final_hours_worked,
+                "hourly_rate": hourly_rate,
+                "payment_date": payroll_data.get("payment_date"),
+                "status": payroll_data.get("status", "pending"),  # If status is not specified, set it to pending
+                "approved_by": payroll_data.get("approved_by"),
+                "created_at": "2025-10-01T12:00:00",
+                "updated_at": "2025-10-01T12:00:00"
             }
             
-            instrument_prices[str(new_price_id)] = new_price
+            payroll_records[str(new_payroll_id)] = new_payroll
             
             return json.dumps({
                 "success": True,
                 "action": "create",
-                "price_id": str(new_price_id),
-                "message": f"Instrument price {new_price_id} created successfully for instrument {instrument_id} on {price_date}",
-                "price_data": new_price
+                "payroll_id": str(new_payroll_id),
+                "message": f"Payroll record {new_payroll_id} created successfully with {final_hours_worked} hours",
+                "payroll_data": new_payroll
             })
         
         elif action == "update":
-            if not price_id:
+            if not payroll_id:
                 return json.dumps({
                     "success": False,
-                    "error": "price_id is required for update action"
+                    "error": "payroll_id is required for update action"
                 })
             
-            if price_id not in instrument_prices:
+            # Validate that payroll record exists in the system
+            if payroll_id not in payroll_records:
                 return json.dumps({
                     "success": False,
-                    "error": f"Instrument price record {price_id} not found"
+                    "error": f"Halt: Payroll record not found"
                 })
             
-            if not price_data:
+            if not payroll_data:
                 return json.dumps({
                     "success": False,
-                    "error": "price_data is required for update action"
+                    "error": "payroll_data is required for update action"
                 })
             
-            # Validate required approvals for updates
-            required_approvals = ["fund_manager_approval", "compliance_officer_approval"]
-            missing_approvals = [field for field in required_approvals if field not in price_data]
-            if missing_approvals:
+            # Validate at least one optional field is provided
+            update_fields = ["pay_period_start", "pay_period_end", "hours_worked", "hourly_rate", "payment_date", "status", "approved_by"]
+            provided_fields = [field for field in update_fields if field in payroll_data]
+            if not provided_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Missing required approvals for price update: {', '.join(missing_approvals)}. Both Fund Manager and Compliance Officer approvals are required."
+                    "error": "At least one optional field must be provided for updates"
                 })
             
-            if not (price_data.get("fund_manager_approval") and price_data.get("compliance_officer_approval")):
-                return json.dumps({
-                    "success": False,
-                    "error": "Both Fund Manager and Compliance Officer approvals are required for price update"
-                })
-            
-            # Validate only allowed fields are present for updates
-            allowed_update_fields = ["open_price", "high_price", "low_price", "close_price", "fund_manager_approval", "compliance_officer_approval"]
-            invalid_fields = [field for field in price_data.keys() if field not in allowed_update_fields]
+            # Validate only allowed fields for corrections
+            invalid_fields = [field for field in payroll_data.keys() if field not in update_fields]
             if invalid_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Invalid fields for price update: {', '.join(invalid_fields)}. Cannot update instrument_id or price_date."
+                    "error": f"Invalid fields for payroll correction: {', '.join(invalid_fields)}. Cannot update employee_id."
                 })
             
-            # Get current price data for validation
-            current_price = instrument_prices[price_id].copy()
-            
-            # Update current price with new values for validation
-            for key, value in price_data.items():
-                if key not in ["fund_manager_approval", "compliance_officer_approval"]:
-                    current_price[key] = value
-            
-            # Validate all prices are positive if provided
-            price_fields = ["open_price", "high_price", "low_price", "close_price"]
-            for field in price_fields:
-                if field in price_data and price_data[field] <= 0:
+            # Validate that correction information is valid (hours worked and hourly rate must be positive)
+            if "hours_worked" in payroll_data:
+                try:
+                    hours_worked = float(payroll_data["hours_worked"])
+                    if hours_worked <= 0:
+                        return json.dumps({
+                            "success": False,
+                            "error": "Halt: Invalid correction information - hours worked must be positive"
+                        })
+                except (ValueError, TypeError):
                     return json.dumps({
                         "success": False,
-                        "error": f"{field} must be positive - negative values are not allowed"
+                        "error": "Halt: Invalid correction information - invalid hours worked format"
                     })
             
-            # Validate price logic after update
-            if current_price["high_price"] < current_price["low_price"]:
-                return json.dumps({
-                    "success": False,
-                    "error": "Invalid price data: high price must be greater than or equal to low price"
-                })
+            if "hourly_rate" in payroll_data:
+                try:
+                    hourly_rate = float(payroll_data["hourly_rate"])
+                    if hourly_rate <= 0:
+                        return json.dumps({
+                            "success": False,
+                            "error": "Halt: Invalid correction information - hourly rate must be positive"
+                        })
+                except (ValueError, TypeError):
+                    return json.dumps({
+                        "success": False,
+                        "error": "Halt: Invalid correction information - invalid hourly rate format"
+                    })
             
-            # Update price record
-            updated_price = instrument_prices[price_id].copy()
-            for key, value in price_data.items():
-                if key not in ["fund_manager_approval", "compliance_officer_approval"]:
-                    updated_price[key] = value
+            # Validate pay period dates if provided
+            current_payroll = payroll_records[payroll_id]
+            if "pay_period_start" in payroll_data or "pay_period_end" in payroll_data:
+                start_date = payroll_data.get("pay_period_start", current_payroll.get("pay_period_start"))
+                end_date = payroll_data.get("pay_period_end", current_payroll.get("pay_period_end"))
+                if not is_valid_date_order(start_date, end_date):
+                    return json.dumps({
+                        "success": False,
+                        "error": "Halt: Invalid correction information - start date must be before end date"
+                    })
             
-            instrument_prices[price_id] = updated_price
+            # Validate status enum if provided
+            if "status" in payroll_data:
+                valid_statuses = ["draft", "approved", "paid", "cancelled"]
+                if payroll_data["status"] not in valid_statuses:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Invalid correction information - status must be one of: {', '.join(valid_statuses)}"
+                    })
+            
+            # Adjust payroll record with correction details
+            updated_payroll = current_payroll.copy()
+            
+            for key, value in payroll_data.items():
+                updated_payroll[key] = value
+            
+            updated_payroll["updated_at"] = "2025-10-01T12:00:00"
+            payroll_records[payroll_id] = updated_payroll
             
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "price_id": str(price_id) if price_id is not None else None,
-                "message": f"Instrument price {price_id} updated successfully",
-                "price_data": updated_price
+                "payroll_id": payroll_id,
+                "message": f"Payroll record {payroll_id} corrected successfully",
+                "payroll_data": updated_payroll
             })
 
     @staticmethod
-    def discover_trading_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+    def manage_skill_invoke(
+        data: Dict[str, Any],
+        action: str,
+        skill_id: Optional[str] = None,
+        skill_name: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> str:
         """
-        Discover trading entities.
-        
-        Supported entities:
-        - trades: Trade records by trade_id, fund_id, instrument_id, trade_date, quantity, price, side, status
+        Executes the specified action (create or update) on skills.
         """
-        if entity_type not in ["trades"]:
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        timestamp = "2025-10-01T12:00:00"
+        skills = data.get("skills", {})
+
+        # Validate supported statuses
+        supported_statuses = ["active", "inactive"]
+
+        if action == "create":
+            # Required fields for skill creation
+            if not skill_name:
+                return json.dumps({
+                    "error": "Missing required parameter 'skill_name' for create operation"
+                })
+
+            # Validate status if provided
+            if status and status not in supported_statuses:
+                return json.dumps({
+                    "error": f"Invalid status '{status}'. Must be one of: {', '.join(supported_statuses)}"
+                })
+
+            # Check for duplicate skill names
+            for existing_skill in skills.values():
+                if existing_skill.get("skill_name", "").lower() == skill_name.lower():
+                    return json.dumps({
+                        "error": f"Skill with name '{skill_name}' already exists"
+                    })
+
+            # Generate new skill ID
+            new_skill_id = generate_id(skills)
+
+            # Create new skill record
+            new_skill = {
+                "skill_id": new_skill_id,
+                "skill_name": skill_name.strip(),
+                "status": status if status else "active",
+                "created_at": timestamp,
+                "updated_at": timestamp
+            }
+
+            # Add to skills data
+            skills[new_skill_id] = new_skill
+
             return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'trades'"
+                "success": True,
+                "message": f"Skill '{skill_name}' created successfully",
+                "skill_id": new_skill_id,
+                "skill_data": new_skill
             })
-        
-        if not isinstance(data, dict):
+
+        elif action == "update":
+            # Required field for skill update
+            if not skill_id:
+                return json.dumps({
+                    "error": "Missing required parameter 'skill_id' for update operation"
+                })
+
+            # At least one optional field must be provided
+            if not any([skill_name, status]):
+                return json.dumps({
+                    "error": "At least one optional parameter (skill_name, status) must be provided for update operation"
+                })
+
+            # Check if skill exists
+            if skill_id not in skills:
+                return json.dumps({
+                    "error": f"Skill with ID '{skill_id}' not found"
+                })
+
+            # Validate status if provided
+            if status and status not in supported_statuses:
+                return json.dumps({
+                    "error": f"Invalid status '{status}'. Must be one of: {', '.join(supported_statuses)}"
+                })
+
+            # Check for duplicate skill names (excluding current skill)
+            if skill_name:
+                for existing_skill_id, existing_skill in skills.items():
+                    if (existing_skill_id != skill_id and 
+                        existing_skill.get("skill_name", "").lower() == skill_name.lower()):
+                        return json.dumps({
+                            "error": f"Skill with name '{skill_name}' already exists"
+                        })
+
+            # Update skill record
+            skill_record = skills[skill_id]
+            
+            if skill_name:
+                skill_record["skill_name"] = skill_name.strip()
+            if status:
+                skill_record["status"] = status
+            
+            skill_record["updated_at"] = timestamp
+
             return json.dumps({
-                "success": False,
-                "error": f"Invalid data format for {entity_type}"
+                "success": True,
+                "message": f"Skill with ID '{skill_id}' updated successfully",
+                "skill_id": skill_id,
+                "skill_data": skill_record
             })
-        
-        results = []
-        entities = data.get("trades", {})
-        
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**entity_data, "trade_id": str(entity_id)})
-            else:
-                results.append({**entity_data, "trade_id": str(entity_id)})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": entity_type,
-            "count": len(results),
-            "results": results
-        })
+
+        else:
+            return json.dumps({
+                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
+            })
 
     @staticmethod
-    def approval_lookup_invoke(data: Dict[str, Any], action: str, requester_email: str) -> str:
-        # Define role authorization mapping
+    def check_approval_invoke(data: Dict[str, Any], action: str, requester_email: str) -> str:
+        """
+        Check approval for HR actions based on SOPs and approval data.
+        
+        Args:
+            data: Environment data containing users and approvals
+            action: The HR action being performed
+            requester_email: Email of the user requesting the action  
+        """
+        # Define role authorization mapping based on SOPs
         role_authorizations = {
-            "compliance_officer": [
-                "investor_onboarding", "investor_offboarding", "subscription_management", 
-                "commitments_create", "commitments_fulfill", "redemption_processing",
-                "instrument_creation", "instrument_update",
+            "hr_director": [
+                "user_provisioning", "create_department", "update_department", 
+                "create_benefits_plan", "update_benefits_plan", "create_job_position", 
+                "update_job_position", "skills_management", "job_position_skills_management"
             ],
-            "fund_manager": [
-                "fund_management_setup", "fund_management_maintenance", "trade_execution", 
-                "portfolio_creation", "portfolio_update", "portfolio_holding_management", 
-                "instrument_creation", "instrument_update", "nav_record_updates", "instrument_price_updates",
-                "reporting_performance", "reporting_financial", "subscription_management"
+            "hr_manager": [
+                "employee_onboarding", "employee_offboarding", "performance_review_final_approval"
+            ],
+            "it_administrator": [
+                "user_provisioning"
             ],
             "finance_officer": [
-                "nav_valuation", "redemption_processing", 
-                "portfolio_creation", "invoice_management", "payment_processing", 
-                "nav_record_creation", "nav_record_updates", "reporting_holding"
+                "create_benefits_plan", "update_benefits_plan", "process_payroll_run", 
+                "payroll_correction"
             ],
-            "trader": [
-                "trade_execution"
+            "hiring_manager": [
+                "create_job_position", "update_job_position", "job_position_skills_management",
+                "manage_application_stage", "timesheet_approval", "timesheet_correction"
             ],
-            "system_administrator": [
-                "user_account_management", "system_monitoring"
+            "recruiter": [
+                "manage_application_stage"
+            ],
+            "payroll_administrator": [
+                "timesheet_approval", "timesheet_correction"
+            ],
+            "compliance_officer": [
+                "employee_onboarding", "employee_offboarding"
             ]
         }
         
         # Define actions requiring multiple approvers (AND logic)
         and_approval_actions = {
-            "fund_management_setup": ["fund_manager", "compliance_officer"],
-            "fund_management_maintenance": ["fund_manager", "compliance_officer"],
-            "redemption_processing": ["compliance_officer", "finance_officer"],
-            "instrument_creation": ["fund_manager", "compliance_officer"],
-            "instrument_update": ["fund_manager", "compliance_officer"],
-            "nav_record_updates": ["finance_officer", "fund_manager"],
-            "instrument_price_updates": ["fund_manager", "compliance_officer"],
-            "subscription_management": ["compliance_officer", "fund_manager"]
+            "employee_onboarding": ["hr_manager", "compliance_officer"],
+            "employee_offboarding": ["hr_manager", "compliance_officer"]
         }
         
-        # Define actions allowing alternative approvers (OR logic)
+        # Define actions allowing alternative approvers (OR logic)  
         or_approval_actions = {
-            "portfolio_creation": ["fund_manager", "finance_officer"]
+            "user_provisioning": ["hr_director", "it_administrator"],
+            "create_benefits_plan": ["hr_director", "finance_officer"],
+            "update_benefits_plan": ["hr_director", "finance_officer"],
+            "create_job_position": ["hr_director", "hiring_manager"],
+            "update_job_position": ["hr_director", "hiring_manager"],
+            "job_position_skills_management": ["hr_director", "hiring_manager"],
+            "manage_application_stage": ["recruiter", "hiring_manager"],
+            "timesheet_approval": ["payroll_administrator", "hiring_manager"],
+            "timesheet_correction": ["payroll_administrator", "hiring_manager"]
         }
         
+        # Define simplified action to approval keyword mapping
+        action_keywords = {
+            "user_provisioning": ["user provisioning", "elevated roles"],
+            "create_department": ["department creation"],
+            "update_department": ["department update", "department manager"],
+            "create_benefits_plan": ["benefits plan creation"],
+            "update_benefits_plan": ["benefits plan update"],
+            "create_job_position": ["job position", "publishable"],
+            "update_job_position": ["job position", "publishable"],
+            "job_position_skills_management": ["job position", "skills"],
+            "manage_application_stage": ["application stage"],
+            "employee_onboarding": ["onboarding"],
+            "employee_offboarding": ["offboarding"],
+            "timesheet_approval": ["timesheet approval"],
+            "timesheet_correction": ["timesheet correction"],
+            "process_payroll_run": ["payroll run"],
+            "payroll_correction": ["payroll correction"],
+            "performance_review_final_approval": ["performance review"],
+            "skills_management": ["skills management"]
+        }
+        
+        # Find the requester's role
         users = data.get("users", {})
+        role_conducting_action = None
+        
         for user in users.values():
             if user.get("email") == requester_email:
                 role_conducting_action = user.get("role")
-                requester_id = user.get("user_id")
                 break
-        else:
+        
+        if not role_conducting_action:
             return json.dumps({
                 "approval_valid": False,
                 "error": f"No user found with email: {requester_email}"
             })
-        # Check if role is directly authorized for the action
-        authorized_roles = role_authorizations.get(role_conducting_action, [])
-        if action in authorized_roles:
-            return json.dumps({
-                "approval_valid": True, 
-                # "authorized_by_role": True,
-                "message": f"Role '{role_conducting_action}' is directly authorized for action '{action}'",
-            })
         
-        # If not directly authorized, calculate and check approval code
-        # Generate calculated approval code: action + requester_id
-        calculated_approval_code = f"{action}_{requester_id}"
+        # Check if role is directly authorized for the action (single approver actions)
+        single_approver_actions = [
+            "create_department", "update_department", "skills_management", 
+            "process_payroll_run", "payroll_correction", "performance_review_final_approval"
+        ]
         
-        approvals = data.get("approvals", {})
-        
-        # Check if calculated approval code exists
-        approvals_found_for_code = []
-        for approval in approvals.values():
-            if approval.get("code") == calculated_approval_code:
-                approvals_found_for_code.append(approval)
-                # break
-        # print(f"Approvals found for code '{calculated_approval_code}': {approvals_found_for_code}")
-        if not approvals_found_for_code:
-            return json.dumps({
-                "approval_valid": False,
-                "error": f"No approval found"
-            })
-
-        approvals_approved_by = [ approvals_found.get("approved_by") for approvals_found in approvals_found_for_code if "approved_by" in approvals_found ]
-        # Check AND logic actions
-        if action in and_approval_actions:
-            required_roles = and_approval_actions[action]
-            for approved_by in approvals_approved_by:
-                if required_roles and approved_by in required_roles:
-                    required_roles.remove(approved_by)
-                    # return json.dumps({
-                    #     "approval_valid": True,
-                    #     "approved_by": approved_by,
-                    #     "approval_type": "and_logic",
-                    #     "note": f"Requires all roles: {', '.join(required_roles)}"
-                    # })
-            if not required_roles:
+        if action in single_approver_actions:
+            authorized_roles = role_authorizations.get(role_conducting_action, [])
+            if action in authorized_roles:
                 return json.dumps({
                     "approval_valid": True,
-                    "approved_by": approvals_approved_by,
+                    "message": f"Role '{role_conducting_action}' is directly authorized for action '{action}'"
                 })
             else:
                 return json.dumps({
                     "approval_valid": False,
-                    "error": f"Requires additional approvals from roles: {', '.join(required_roles)}"
+                    "error": f"Role '{role_conducting_action}' is not authorized for action '{action}'"
                 })
         
-        # Check OR logic actions
-        elif action in or_approval_actions:
-            allowed_roles = or_approval_actions[action]
-            for approved_by in approvals_approved_by:
-                if approved_by in allowed_roles:
-                    return json.dumps({
-                        "approval_valid": True,
-                        "approved_by": approved_by,
-                    })
+        # For approval-based actions, check the approvals data
+        approvals = data.get("approvals", {})
         
-        # Check single approver actions
-        else:
-            for role, actions in role_authorizations.items():
-                approved_by = approvals_found_for_code[0].get("approved_by")
-                if action in actions and approved_by == role:
-                    # print("single approver match found")
-                    return json.dumps({
-                        "approval_valid": True,
-                        "approved_by": approved_by,
-                    })
+        # Find matching approvals using keywords
+        matching_approvals = []
+        keywords = action_keywords.get(action, [action])
+        
+        for approval in approvals.values():
+            action_name = approval.get("action_name", "").lower()
+            
+            # Check if any keyword matches the approval action name
+            for keyword in keywords:
+                if keyword.lower() in action_name:
+                    matching_approvals.append(approval)
+                    break
+        
+        if not matching_approvals:
+            return json.dumps({
+                "approval_valid": False,
+                "error": f"No approval found for action '{action}'"
+            })
+        
+        # Extract approver roles from matching approvals
+        approver_roles = []
+        for approval in matching_approvals:
+            approver_role = approval.get("approver_role")
+            if approver_role:
+                approver_roles.append(approver_role)
+        
+        # Check AND logic actions (require all specified roles)
+        if action in and_approval_actions:
+            required_roles = set(and_approval_actions[action])
+            approved_roles = set(approver_roles)
+            
+            if required_roles.issubset(approved_roles):
+                return json.dumps({
+                    "approval_valid": True,
+                    "approved_by": list(required_roles),
+                    "message": f"All required approvals received from: {', '.join(required_roles)}"
+                })
+            else:
+                missing_roles = required_roles - approved_roles
+                return json.dumps({
+                    "approval_valid": False,
+                    "error": f"Missing required approvals from roles: {', '.join(missing_roles)}"
+                })
+        
+        # Check OR logic actions (any of the specified roles is sufficient)
+        elif action in or_approval_actions:
+            allowed_roles = set(or_approval_actions[action])
+            approved_roles = set(approver_roles)
+            
+            if allowed_roles.intersection(approved_roles):
+                valid_approver = list(allowed_roles.intersection(approved_roles))[0]
+                return json.dumps({
+                    "approval_valid": True,
+                    "approved_by": valid_approver,
+                    "message": f"Approved by authorized role: {valid_approver}"
+                })
+            else:
+                return json.dumps({
+                    "approval_valid": False,
+                    "error": f"No valid approval from authorized roles: {', '.join(allowed_roles)}"
+                })
         
         return json.dumps({
             "approval_valid": False,
-            "error": f"No valid approval found"
+            "error": f"No valid approval found for action '{action}'"
         })
 
     @staticmethod
-    def manage_invoice_invoke(data: Dict[str, Any], action: str, invoice_data: Dict[str, Any] = None, invoice_id: str = None) -> str:
+    def discover_timesheet_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
         """
-        Create or update invoice records.
-        
-        Actions:
-        - create: Create new invoice record (requires invoice_data with invoice_date, due_date, amount, finance_officer_approval)
-        - update: Update existing invoice record (requires invoice_id and invoice_data with changes, finance_officer_approval)
-        """
-        
-        def generate_id(table: Dict[str, Any]) -> int:
-            if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
-        
-        if action not in ["create", "update"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
-            })
-        
-        # Access invoices data
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid data format for invoices"
-            })
-        
-        invoices = data.get("invoices", {})
-        
-        if action == "create":
-            if not invoice_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "invoice_data is required for create action"
-                })
-            
-            # Validate required fields for creation
-            required_fields = ["invoice_date", "due_date", "amount", "finance_officer_approval"]
-            missing_fields = [field for field in required_fields if field not in invoice_data]
-            if missing_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Missing required fields for invoice creation: {', '.join(missing_fields)}. Finance Officer approval is required."
-                })
-            
-            # Validate that finance_officer_approval is True
-            if not invoice_data.get("finance_officer_approval"):
-                return json.dumps({
-                    "success": False,
-                    "error": "Finance Officer approval must be True for invoice creation"
-                })
-            
-            # Validate only allowed fields are present
-            allowed_fields = ["commitment_id", "invoice_date", "due_date", "amount", "status", "finance_officer_approval"]
-            invalid_fields = [field for field in invoice_data.keys() if field not in allowed_fields]
-            if invalid_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid fields for invoice creation: {', '.join(invalid_fields)}"
-                })
-            
-            # Validate amount is positive
-            if invoice_data["amount"] <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "Invoice amount must be positive - negative or zero values are not allowed"
-                })
-            
-            # Validate status enum if provided
-            if "status" in invoice_data:
-                valid_statuses = ["issued", "paid"]
-                if invoice_data["status"] not in valid_statuses:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Invalid status '{invoice_data['status']}'. Must be one of: {', '.join(valid_statuses)}"
-                    })
-            
-            # Validate date logic (due_date should not be before invoice_date)
-            if invoice_data["due_date"] < invoice_data["invoice_date"]:
-                return json.dumps({
-                    "success": False,
-                    "error": "Invalid date logic: due date cannot be before invoice date"
-                })
-            
-            # Validate that invoice_date is not in the future (using current system date)
-            from datetime import datetime
-            current_date = "2025-10-01"  # Based on policy current date
-            if invoice_data["invoice_date"] > current_date:
-                return json.dumps({
-                    "success": False,
-                    "error": "Invalid invoice date: cannot create invoice with future date"
-                })
-            
-            # Check for existing invoice with same commitment_id and invoice_date if commitment_id is provided
-            if "commitment_id" in invoice_data and invoice_data["commitment_id"]:
-                commitment_id = invoice_data["commitment_id"]
-                invoice_date = invoice_data["invoice_date"]
-                for existing_invoice in invoices.values():
-                    if (existing_invoice.get("commitment_id") == commitment_id and 
-                        existing_invoice.get("invoice_date") == invoice_date):
-                        return json.dumps({
-                            "success": False,
-                            "error": f"Invoice already exists for commitment {commitment_id} on date {invoice_date}. Only one invoice per commitment per date is allowed."
-                        })
-            
-            # Generate new invoice ID using the same pattern as other tools
-            new_invoice_id = generate_id(invoices)
-            
-            # Create new invoice record
-            new_invoice = {
-                "invoice_id": str(new_invoice_id) if new_invoice_id is not None else None,
-                "commitment_id": str(invoice_data.get("commitment_id")) if invoice_data.get("commitment_id") is not None else None,
-                "invoice_date": invoice_data["invoice_date"],
-                "due_date": invoice_data["due_date"],
-                "amount": invoice_data["amount"],
-                "status": invoice_data.get("status", "issued"),
-                "updated_at": "2025-10-01T12:00:00"
-            }
-            
-            invoices[str(new_invoice_id)] = new_invoice
-            
-            return json.dumps({
-                "success": True,
-                "action": "create",
-                "invoice_id": str(new_invoice_id),
-                "message": f"Invoice {new_invoice_id} created successfully for commitment {invoice_data.get('commitment_id', 'N/A')} on {invoice_data['invoice_date']}",
-                "invoice_data": new_invoice
-            })
-        
-        elif action == "update":
-            if not invoice_id:
-                return json.dumps({
-                    "success": False,
-                    "error": "invoice_id is required for update action"
-                })
-            
-            if invoice_id not in invoices:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invoice record {invoice_id} not found"
-                })
-            
-            if not invoice_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "invoice_data is required for update action"
-                })
-            
-            # Validate required approval for updates
-            if "finance_officer_approval" not in invoice_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "Missing required approval for invoice update: finance_officer_approval. Finance Officer approval is required."
-                })
-            
-            # Validate that finance_officer_approval is True
-            if not invoice_data.get("finance_officer_approval"):
-                return json.dumps({
-                    "success": False,
-                    "error": "Finance Officer approval must be True for invoice update"
-                })
-            
-            # Validate only allowed fields are present for updates
-            allowed_update_fields = ["status", "due_date", "amount", "commitment_id", "finance_officer_approval"]
-            invalid_fields = [field for field in invoice_data.keys() if field not in allowed_update_fields]
-            if invalid_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid fields for invoice update: {', '.join(invalid_fields)}. Cannot update invoice_date."
-                })
-            
-            # Get current invoice data for validation
-            current_invoice = invoices[invoice_id].copy()
-            current_status = current_invoice.get("status", "issued")
-            
-            # Check if invoice is already paid (cannot modify paid invoices except specific fields)
-            if current_status == "paid" and "status" in invoice_data and invoice_data["status"] != "paid":
-                return json.dumps({
-                    "success": False,
-                    "error": "Cannot change status from paid to issued - paid invoices cannot be unpaid"
-                })
-            
-            # Validate amount if provided
-            if "amount" in invoice_data and invoice_data["amount"] <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "Invoice amount must be positive - negative or zero values are not allowed"
-                })
-            
-            # Validate status if provided
-            if "status" in invoice_data:
-                valid_statuses = ["issued", "paid"]
-                if invoice_data["status"] not in valid_statuses:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Invalid status '{invoice_data['status']}'. Must be one of: {', '.join(valid_statuses)}"
-                    })
-            
-            # Update current invoice with new values for validation
-            temp_invoice = current_invoice.copy()
-            for key, value in invoice_data.items():
-                if key not in ["finance_officer_approval"]:
-                    temp_invoice[key] = value
-            
-            # Validate date logic after update if due_date is being changed
-            if "due_date" in invoice_data:
-                if temp_invoice["due_date"] < temp_invoice["invoice_date"]:
-                    return json.dumps({
-                        "success": False,
-                        "error": "Invalid date logic: due date cannot be before invoice date"
-                    })
-            
-            # Check for duplicate commitment_id and invoice_date combination if commitment_id is being updated
-            if "commitment_id" in invoice_data and invoice_data["commitment_id"]:
-                commitment_id = invoice_data["commitment_id"]
-                invoice_date = temp_invoice["invoice_date"]
-                for existing_id, existing_invoice in invoices.items():
-                    if (existing_id != invoice_id and 
-                        existing_invoice.get("commitment_id") == commitment_id and 
-                        existing_invoice.get("invoice_date") == invoice_date):
-                        return json.dumps({
-                            "success": False,
-                            "error": f"Invoice already exists for commitment {commitment_id} on date {invoice_date}. Only one invoice per commitment per date is allowed."
-                        })
-            
-            # Update invoice record
-            updated_invoice = current_invoice.copy()
-            for key, value in invoice_data.items():
-                if key not in ["finance_officer_approval"]:
-                    updated_invoice[key] = value
-            
-            updated_invoice["updated_at"] = "2025-10-01T12:00:00"
-            invoices[invoice_id] = updated_invoice
-            
-            return json.dumps({
-                "success": True,
-                "action": "update",
-                "invoice_id": str(invoice_id) if invoice_id is not None else None,
-                "message": f"Invoice {invoice_id} updated successfully",
-                "invoice_data": updated_invoice
-            })
-
-    @staticmethod
-    def discover_investment_flow_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover investment flow entities: subscriptions, commitments, and redemptions.
+        Discover timesheet entities.
         
         Supported entities:
-        - subscriptions: Subscription records by subscription_id, fund_id, investor_id, amount, status, request_assigned_to, request_date, approval_date
-        - commitments: Commitment records by commitment_id, fund_id, investor_id, commitment_amount, commitment_date, status
-        - redemptions: Redemption records by redemption_id, subscription_id, request_date, redemption_amount, status, processed_date, redemption_fee
+        - employee_timesheets: Employee timesheet records by timesheet_id, employee_id, work_date, clock_in_time, clock_out_time, break_duration_minutes, total_hours, project_code, approved_by, status, created_at, updated_at
         """
-        if entity_type not in ["subscriptions", "commitments", "redemptions"]:
+        if entity_type not in ["employee_timesheets"]:
             return json.dumps({
                 "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'subscriptions', 'commitments', or 'redemptions'"
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'employee_timesheets'"
             })
         
         if not isinstance(data, dict):
@@ -1527,15 +3130,355 @@ class Tools:
             })
         
         results = []
+        entities = data.get("employee_timesheets", {})
         
-        id_field = {
-            "subscriptions": "subscription_id",
-            "commitments": "commitment_id",
-            "redemptions": "redemption_id"
-        }[entity_type]
+        for entity_id, entity_data in entities.items():
+            if filters:
+                match = True
+                for filter_key, filter_value in filters.items():
+                    entity_value = entity_data.get(filter_key)
+                    if entity_value != filter_value:
+                        match = False
+                        break
+                if match:
+                    results.append({**entity_data, "timesheet_id": entity_id})
+            else:
+                results.append({**entity_data, "timesheet_id": entity_id})
         
+        return json.dumps({
+            "success": True,
+            "entity_type": entity_type,
+            "count": len(results),
+            "results": results
+        })
+
+    @staticmethod
+    def manage_candidate_invoke(
+        data: Dict[str, Any],
+        action: str,
+        candidate_id: Optional[str] = None,
+        first_name: Optional[str] = None,
+        last_name: Optional[str] = None,
+        email: Optional[str] = None,
+        source: Optional[str] = None,
+        phone_number: Optional[str] = None,
+        address: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> str:
+        """
+        Executes the specified action (create or update) on candidate records.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            """Generates a new unique ID for a record."""
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+
+        def validate_email_format(email: str) -> bool:
+            """Basic email format validation"""
+            return "@" in email and "." in email.split("@")[1]
+
+        timestamp = "2025-10-01T12:00:00"
+        candidates = data.get("candidates", {})
+
+        # Validate supported sources based on SOPs
+        supported_sources = ["website", "referral", "linkedin", "job_board", "recruiter", "other"]
+        
+        # Map SOPs sources to existing data sources for compatibility
+        source_mapping = {
+            "website": "company_website",
+            "referral": "referral", 
+            "linkedin": "social_media",
+            "job_board": "job_board",
+            "recruiter": "recruiter",
+            "other": "career_fair"  # Map 'other' to existing career_fair for compatibility
+        }
+
+        # Validate supported statuses
+        supported_statuses = ["new", "screening", "interviewing", "offered", "hired", "rejected"]
+
+        if action == "create":
+            # Required fields for candidate creation
+            if not all([first_name, last_name, email, source]):
+                return json.dumps({
+                    "error": "Missing required parameters for create operation. Required: first_name, last_name, email, source"
+                })
+
+            # Validate source
+            if source not in supported_sources:
+                return json.dumps({
+                    "error": f"Invalid source '{source}'. Must be one of: {', '.join(supported_sources)}"
+                })
+
+            # Validate email format
+            if not validate_email_format(email):
+                return json.dumps({
+                    "error": "Invalid email format"
+                })
+
+            # Check for duplicate email addresses
+            for existing_candidate in candidates.values():
+                if existing_candidate.get("email", "").lower() == email.lower():
+                    return json.dumps({
+                        "error": f"Candidate with email '{email}' already exists"
+                    })
+
+            # Validate status if provided
+            if status and status not in supported_statuses:
+                return json.dumps({
+                    "error": f"Invalid status '{status}'. Must be one of: {', '.join(supported_statuses)}"
+                })
+
+            # Generate new candidate ID
+            new_candidate_id = generate_id(candidates)
+
+            # Map source to internal format for data consistency
+            internal_source = source_mapping.get(source, source)
+
+            # Create new candidate record
+            new_candidate = {
+                "candidate_id": new_candidate_id,
+                "first_name": first_name.strip(),
+                "last_name": last_name.strip(),
+                "email": email.lower().strip(),
+                "phone_number": phone_number.strip() if phone_number else None,
+                "address": address.strip() if address else None,
+                "source": internal_source,
+                "status": status if status else "new",
+                "created_at": timestamp,
+                "updated_at": timestamp
+            }
+
+            # Add to candidates data
+            candidates[new_candidate_id] = new_candidate
+
+            return json.dumps({
+                "success": True,
+                "message": f"Candidate '{first_name} {last_name}' created successfully",
+                "candidate_id": new_candidate_id,
+                "candidate_data": new_candidate
+            })
+
+        elif action == "update":
+            # Required field for candidate update
+            if not candidate_id:
+                return json.dumps({
+                    "error": "Missing required parameter 'candidate_id' for update operation"
+                })
+
+            # At least one optional field must be provided
+            optional_fields = [first_name, last_name, email, source, phone_number, address, status]
+            if not any(field is not None for field in optional_fields):
+                return json.dumps({
+                    "error": "At least one optional parameter (first_name, last_name, email, source, phone_number, address, status) must be provided for update operation"
+                })
+
+            # Check if candidate exists
+            if candidate_id not in candidates:
+                return json.dumps({
+                    "error": f"Candidate with ID '{candidate_id}' not found"
+                })
+
+            # Validate source if provided
+            if source and source not in supported_sources:
+                return json.dumps({
+                    "error": f"Invalid source '{source}'. Must be one of: {', '.join(supported_sources)}"
+                })
+
+            # Validate email format if provided
+            if email and not validate_email_format(email):
+                return json.dumps({
+                    "error": "Invalid email format"
+                })
+
+            # Check for duplicate email addresses (excluding current candidate)
+            if email:
+                for existing_candidate_id, existing_candidate in candidates.items():
+                    if (existing_candidate_id != candidate_id and 
+                        existing_candidate.get("email", "").lower() == email.lower()):
+                        return json.dumps({
+                            "error": f"Candidate with email '{email}' already exists"
+                        })
+
+            # Validate status if provided
+            if status and status not in supported_statuses:
+                return json.dumps({
+                    "error": f"Invalid status '{status}'. Must be one of: {', '.join(supported_statuses)}"
+                })
+
+            # Update candidate record
+            candidate_record = candidates[candidate_id]
+            
+            if first_name:
+                candidate_record["first_name"] = first_name.strip()
+            if last_name:
+                candidate_record["last_name"] = last_name.strip()
+            if email:
+                candidate_record["email"] = email.lower().strip()
+            if source:
+                # Map source to internal format for data consistency
+                internal_source = source_mapping.get(source, source)
+                candidate_record["source"] = internal_source
+            if phone_number is not None:  # Allow setting to None
+                candidate_record["phone_number"] = phone_number.strip() if phone_number else None
+            if address is not None:  # Allow setting to None
+                candidate_record["address"] = address.strip() if address else None
+            if status:
+                candidate_record["status"] = status
+            
+            candidate_record["updated_at"] = timestamp
+
+            return json.dumps({
+                "success": True,
+                "message": f"Candidate with ID '{candidate_id}' updated successfully",
+                "candidate_id": candidate_id,
+                "candidate_data": candidate_record
+            })
+
+        else:
+            return json.dumps({
+                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
+            })
+
+    @staticmethod
+    def manage_payroll_deduction_invoke(data: Dict[str, Any], action: str, deduction_data: Dict[str, Any] = None) -> str:
+        """
+        Create payroll deduction records. Updates are not supported as per schema design.
+        """
+        
+        def generate_id(table: Dict[str, Any]) -> int:
+            if not table:
+                return 1
+            return max(int(k) for k in table.keys()) + 1
+        
+        if action not in ["create"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid action '{action}'. Only 'create' is supported for payroll deductions"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": "Invalid data format for payroll deductions"
+            })
+        
+        payroll_deductions = data.get("payroll_deductions", {})
+        payroll_records = data.get("payroll_records", {})
+        users = data.get("users", {})
+        
+        if action == "create":
+            if not deduction_data:
+                return json.dumps({
+                    "success": False,
+                    "error": "deduction_data is required for create action"
+                })
+            
+            # Validate required fields
+            required_fields = ["payroll_id", "deduction_type", "amount", "created_by"]
+            missing_fields = [field for field in required_fields if field not in deduction_data]
+            if missing_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Payroll record not found - missing fields: {', '.join(missing_fields)}"
+                })
+            
+            # Validate that payroll record exists in the system
+            payroll_id = str(deduction_data["payroll_id"])
+            if payroll_id not in payroll_records:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Payroll record not found"
+                })
+            
+            # Validate that creator exists in the user system
+            created_by = str(deduction_data["created_by"])
+            if created_by not in users:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Creator not found"
+                })
+            
+            # Validate deduction_type enum according to schema
+            valid_types = ["tax", "insurance", "retirement", "garnishment", "equipment", "other"]
+            if deduction_data["deduction_type"] not in valid_types:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Invalid deduction type or amount - deduction_type must be one of: {', '.join(valid_types)}"
+                })
+            
+            # Validate amount is positive monetary value
+            try:
+                amount = float(deduction_data["amount"])
+                if amount <= 0:
+                    return json.dumps({
+                        "success": False,
+                        "error": "Halt: Invalid deduction type or amount - amount must be positive"
+                    })
+            except (ValueError, TypeError):
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid deduction type or amount - invalid amount format"
+                })
+            
+            # Validate only allowed fields are present
+            allowed_fields = ["payroll_id", "deduction_type", "amount", "created_by"]
+            invalid_fields = [field for field in deduction_data.keys() if field not in allowed_fields]
+            if invalid_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Invalid fields for payroll deduction creation: {', '.join(invalid_fields)}"
+                })
+            
+            # Generate new deduction ID
+            new_deduction_id = generate_id(payroll_deductions)
+            
+            # Create new deduction record
+            new_deduction = {
+                "deduction_id": str(new_deduction_id),
+                "payroll_id": payroll_id,
+                "deduction_type": deduction_data["deduction_type"],
+                "amount": deduction_data["amount"],
+                "created_by": created_by,
+                "created_at": "2025-10-01T12:00:00"
+            }
+            
+            payroll_deductions[str(new_deduction_id)] = new_deduction
+            
+            return json.dumps({
+                "success": True,
+                "action": "create",
+                "deduction_id": str(new_deduction_id),
+                "message": f"Payroll deduction {new_deduction_id} created successfully",
+                "deduction_data": new_deduction
+            })
+
+    @staticmethod
+    def discover_benefits_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+        """
+        Discover benefits entities.
+        
+        Supported entities:
+        - benefits_plans: Benefits plans by plan_id, plan_name, plan_type, provider, employee_cost, employer_cost, status, effective_date, expiration_date, created_at, updated_at
+        - employee_benefits: Employee benefits by enrollment_id, employee_id, plan_id, enrollment_date, status, coverage_level, beneficiary_name, beneficiary_relationship, created_at, updated_at
+        """
+        if entity_type not in ["benefits_plans", "employee_benefits"]:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'benefits_plans' or 'employee_benefits'"
+            })
+        
+        if not isinstance(data, dict):
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid data format for {entity_type}"
+            })
+        
+        results = []
         entities = data.get(entity_type, {})
         
+        id_field = "plan_id" if entity_type == "benefits_plans" else "enrollment_id"
+        print(filters)
         for entity_id, entity_data in entities.items():
             if filters:
                 match = True
@@ -1557,21 +3500,25 @@ class Tools:
         })
 
     @staticmethod
-    def manage_fund_invoke(data: Dict[str, Any], action: str, fund_data: Dict[str, Any] = None, fund_id: str = None) -> str:
+    def manage_employee_benefits_invoke(data: Dict[str, Any], action: str, benefits_data: Dict[str, Any] = None, enrollment_id: str = None) -> str:
         """
-        Create or update fund records.
+        Create or update employee benefits records.
         
         Actions:
-        - create: Create new fund (requires fund_data with name, fund_type, manager_id, fund_manager_approval, compliance_officer_approval, 
-                 optional size, base_currency, status)
-        - update: Update existing fund (requires fund_id and fund_data with changes, fund_manager_approval, 
-                 compliance_officer_approval)
+        - create: Create new employee benefits enrollment (requires benefits_data with employee_id, plan_id, enrollment_date, coverage_level)
+        - update: Update existing enrollment (requires enrollment_id and benefits_data with changes)
         """
         
         def generate_id(table: Dict[str, Any]) -> int:
             if not table:
                 return 1
             return max(int(k) for k in table.keys()) + 1
+            
+        def is_future_date(date_str: str) -> bool:
+            """Check if date is in future - simplified for demo"""
+            # In real implementation, would compare with current date
+            # For demo purposes, assume dates starting with "2026" or later are future
+            return date_str.startswith("2026") or date_str.startswith("2027")
         
         if action not in ["create", "update"]:
             return json.dumps({
@@ -1579,715 +3526,217 @@ class Tools:
                 "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
             })
         
-        # Access funds data
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": "Invalid data format for funds"
+                "error": "Invalid data format for employee benefits"
             })
         
-        funds = data.get("funds", {})
+        employee_benefits = data.get("employee_benefits", {})
+        employees = data.get("employees", {})
+        benefits_plans = data.get("benefits_plans", {})
         
         if action == "create":
-            if not fund_data:
+            if not benefits_data:
                 return json.dumps({
                     "success": False,
-                    "error": "fund_data is required for create action"
+                    "error": "benefits_data is required for create action"
                 })
             
-            # Validate required fields for creation
-            required_fields = ["name", "fund_type", "manager_id", "fund_manager_approval", "compliance_officer_approval"]
-            missing_fields = [field for field in required_fields if field not in fund_data]
+            # Validate required fields
+            required_fields = ["employee_id", "plan_id", "enrollment_date", "coverage_level"]
+            missing_fields = [field for field in required_fields if field not in benefits_data]
             if missing_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Missing required fields for fund creation: {', '.join(missing_fields)}. Both Fund Manager and Compliance Officer approvals are required."
+                    "error": f"Halt: Employee or plan not found or inactive - missing fields: {', '.join(missing_fields)}"
                 })
             
-            # Validate both approvals are present and true
-            if not (fund_data.get("fund_manager_approval") and fund_data.get("compliance_officer_approval")):
+            # Validate that employee exists and has active status
+            employee_id = str(benefits_data["employee_id"])
+            if employee_id not in employees:
                 return json.dumps({
                     "success": False,
-                    "error": "Both Fund Manager and Compliance Officer approvals are required for fund creation"
+                    "error": f"Halt: Employee or plan not found or inactive"
                 })
             
+            employee = employees[employee_id]
+            if employee.get("employment_status") != "active":
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Employee or plan not found or inactive"
+                })
+            
+            # Validate that benefits plan exists and has active status
+            plan_id = str(benefits_data["plan_id"])
+            if plan_id not in benefits_plans:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Employee or plan not found or inactive"
+                })
+            
+            plan = benefits_plans[plan_id]
+            if plan.get("status") != "active":
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Employee or plan not found or inactive"
+                })
+            
+            # Validate that enrollment date is not in future
+            enrollment_date = benefits_data["enrollment_date"]
+            if is_future_date(enrollment_date):
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid enrollment date or coverage level - enrollment date cannot be in future"
+                })
+            
+            # Validate coverage_level enum according to schema
+            valid_levels = ["employee_only", "employee_spouse", "employee_children", "family"]
+            if benefits_data["coverage_level"] not in valid_levels:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Invalid enrollment date or coverage level - coverage_level must be one of: {', '.join(valid_levels)}"
+                })
+            
+            # Check that employee is not already enrolled in the same plan type
+            plan_type = plan.get("plan_type")
+            for existing_enrollment in employee_benefits.values():
+                if (existing_enrollment.get("employee_id") == employee_id and 
+                    existing_enrollment.get("status") == "active"):
+                    existing_plan_id = str(existing_enrollment.get("plan_id"))
+                    if existing_plan_id in benefits_plans:
+                        existing_plan_type = benefits_plans[existing_plan_id].get("plan_type")
+                        if existing_plan_type == plan_type:
+                            return json.dumps({
+                                "success": False,
+                                "error": f"Halt: Employee already enrolled in same plan type"
+                            })
+            
             # Validate only allowed fields are present
-            allowed_fields = ["name", "fund_type", "size", "base_currency", "manager_id", "status", "fund_manager_approval", "compliance_officer_approval"]
-            invalid_fields = [field for field in fund_data.keys() if field not in allowed_fields]
+            allowed_fields = ["employee_id", "plan_id", "enrollment_date", "coverage_level", "status",
+                            "beneficiary_name", "beneficiary_relationship"]
+            invalid_fields = [field for field in benefits_data.keys() if field not in allowed_fields]
             if invalid_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Invalid fields for fund creation: {', '.join(invalid_fields)}"
+                    "error": f"Invalid fields for benefits enrollment: {', '.join(invalid_fields)}"
                 })
             
-            # Validate fund_type enum
-            valid_fund_types = ["equity_funds", "bond_funds", "multi_asset_funds", "money_market_funds", "hedge_funds", "private_equity_funds", "real_estate_funds"]
-            if fund_data["fund_type"] not in valid_fund_types:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid fund_type. Must be one of: {', '.join(valid_fund_types)}"
-                })
+            # Generate new enrollment ID
+            new_enrollment_id = generate_id(employee_benefits)
             
-            # Validate size if provided (must be positive number)
-            if "size" in fund_data:
-                try:
-                    size_value = float(fund_data["size"])
-                    if size_value <= 0:
-                        return json.dumps({
-                            "success": False,
-                            "error": "Fund size must be a positive number"
-                        })
-                except (ValueError, TypeError):
-                    return json.dumps({
-                        "success": False,
-                        "error": "Fund size must be a valid number"
-                    })
-            
-            # Validate status if provided
-            if "status" in fund_data:
-                valid_statuses = ["open", "closed"]
-                if fund_data["status"] not in valid_statuses:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
-                    })
-            
-            # Check for duplicate fund name
-            fund_name = fund_data["name"].strip()
-            for existing_fund in funds.values():
-                if existing_fund.get("name", "").strip().lower() == fund_name.lower():
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Fund with name '{fund_name}' already exists"
-                    })
-            
-            # Generate new fund ID using the same pattern as manage_instrument_price
-            new_fund_id = generate_id(funds)
-            
-            # Create new fund record
-            new_fund = {
-                "fund_id": str(new_fund_id) if new_fund_id is not None else None,
-                "name": fund_data["name"],
-                "fund_type": fund_data["fund_type"],
-                "size": fund_data.get("size"),
-                "base_currency": fund_data.get("base_currency", "USD"),
-                "manager_id": str(fund_data["manager_id"]) if fund_data.get("manager_id") is not None else None,
-                "status": fund_data.get("status", "open"),
+            # Create new employee benefits record
+            new_benefits = {
+                "enrollment_id": str(new_enrollment_id),
+                "employee_id": employee_id,
+                "plan_id": plan_id,
+                "enrollment_date": enrollment_date,
+                "status": benefits_data.get("status", "active"),  # If enrollment status is not specified during enrollment, set it to active
+                "coverage_level": benefits_data["coverage_level"],
+                "beneficiary_name": benefits_data.get("beneficiary_name"),
+                "beneficiary_relationship": benefits_data.get("beneficiary_relationship"),
                 "created_at": "2025-10-01T12:00:00",
                 "updated_at": "2025-10-01T12:00:00"
             }
             
-            funds[str(new_fund_id)] = new_fund
+            employee_benefits[str(new_enrollment_id)] = new_benefits
             
             return json.dumps({
                 "success": True,
                 "action": "create",
-                "fund_id": str(new_fund_id),
-                "message": f"Fund {new_fund_id} created successfully with name '{fund_data['name']}'",
-                "fund_data": new_fund
+                "enrollment_id": str(new_enrollment_id),
+                "message": f"Employee benefits enrollment {new_enrollment_id} created successfully",
+                "benefits_data": new_benefits
             })
         
         elif action == "update":
-            if not fund_id:
+            if not enrollment_id:
                 return json.dumps({
                     "success": False,
-                    "error": "fund_id is required for update action"
+                    "error": "enrollment_id is required for update action"
                 })
             
-            if fund_id not in funds:
+            if enrollment_id not in employee_benefits:
                 return json.dumps({
                     "success": False,
-                    "error": f"Fund {fund_id} not found"
+                    "error": f"Halt: Enrollment not found"
                 })
             
-            if not fund_data:
+            if not benefits_data:
                 return json.dumps({
                     "success": False,
-                    "error": "fund_data is required for update action"
+                    "error": "benefits_data is required for update action"
                 })
             
-            # Validate required approvals for updates
-            required_approvals = ["fund_manager_approval", "compliance_officer_approval"]
-            missing_approvals = [field for field in required_approvals if field not in fund_data]
-            if missing_approvals:
+            # Validate at least one optional field is provided
+            update_fields = ["employee_id", "plan_id", "enrollment_date", "status", "coverage_level", "beneficiary_name", "beneficiary_relationship"]
+            provided_fields = [field for field in update_fields if field in benefits_data]
+            if not provided_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Missing required approvals for fund update: {', '.join(missing_approvals)}. Both Fund Manager and Compliance Officer approvals are required."
+                    "error": "At least one optional field must be provided for updates"
                 })
             
-            # Validate both approvals are present and true
-            if not (fund_data.get("fund_manager_approval") and fund_data.get("compliance_officer_approval")):
-                return json.dumps({
-                    "success": False,
-                    "error": "Both Fund Manager and Compliance Officer approvals are required for fund update"
-                })
+            # Get current enrollment for validation
+            current_benefits = employee_benefits[enrollment_id]
             
-            # Validate only allowed fields are present for updates
-            allowed_update_fields = ["name", "fund_type", "size", "base_currency", "manager_id", "status", 
-                                   "fund_manager_approval", "compliance_officer_approval"]
-            invalid_fields = [field for field in fund_data.keys() if field not in allowed_update_fields]
+            # Validate only allowed fields for updates
+            invalid_fields = [field for field in benefits_data.keys() if field not in update_fields]
             if invalid_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Invalid fields for fund update: {', '.join(invalid_fields)}"
+                    "error": f"Invalid fields for benefits enrollment update: {', '.join(invalid_fields)}"
                 })
             
-            # Validate fund_type enum if provided
-            if "fund_type" in fund_data:
-                valid_fund_types = ["equity_funds", "bond_funds", "multi_asset_funds", "money_market_funds", "hedge_funds", "private_equity_funds", "real_estate_funds"]
-                if fund_data["fund_type"] not in valid_fund_types:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Invalid fund_type. Must be one of: {', '.join(valid_fund_types)}"
-                    })
-            
-            # Validate size if provided
-            if "size" in fund_data:
-                try:
-                    size_value = float(fund_data["size"])
-                    if size_value <= 0:
-                        return json.dumps({
-                            "success": False,
-                            "error": "Fund size must be a positive number"
-                        })
-                except (ValueError, TypeError):
-                    return json.dumps({
-                        "success": False,
-                        "error": "Fund size must be a valid number"
-                    })
-            
-            # Validate status transitions
-            current_fund = funds[fund_id]
-            current_status = current_fund.get("status", "open")
-            if "status" in fund_data:
-                new_status = fund_data["status"]
-                valid_statuses = ["open", "closed"]
+            # Validate status transitions if status is being updated
+            if "status" in benefits_data:
+                valid_statuses = ["active", "terminated", "pending"]
+                new_status = benefits_data["status"]
                 
                 if new_status not in valid_statuses:
                     return json.dumps({
                         "success": False,
-                        "error": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+                        "error": f"Halt: Benefits enrollment operation failed - status must be one of: {', '.join(valid_statuses)}"
                     })
-                
-                # Define invalid status transitions
-                invalid_transitions = {
-                    "closed": ["open"]  # Cannot reopen closed fund
-                }
-                
-                if current_status in invalid_transitions and new_status in invalid_transitions[current_status]:
+            
+            # Validate coverage_level enum if provided
+            if "coverage_level" in benefits_data:
+                valid_levels = ["employee_only", "employee_spouse", "employee_children", "family"]
+                if benefits_data["coverage_level"] not in valid_levels:
                     return json.dumps({
                         "success": False,
-                        "error": f"Invalid transition from {current_status} to {new_status}"
+                        "error": f"Halt: Benefits enrollment operation failed - coverage_level must be one of: {', '.join(valid_levels)}"
                     })
             
-            # Check for duplicate fund name if updating name
-            if "name" in fund_data:
-                new_fund_name = fund_data["name"].strip()
-                for existing_fund_id, existing_fund in funds.items():
-                    if (existing_fund_id != fund_id and 
-                        existing_fund.get("name", "").strip().lower() == new_fund_name.lower()):
-                        return json.dumps({
-                            "success": False,
-                            "error": f"Fund with name '{new_fund_name}' already exists"
-                        })
+            # Update employee benefits record
+            updated_benefits = current_benefits.copy()
+            for key, value in benefits_data.items():
+                updated_benefits[key] = value
             
-            # Update fund record
-            updated_fund = current_fund.copy()
-            for key, value in fund_data.items():
-                if key not in ["fund_manager_approval", "compliance_officer_approval"]:  # Skip approval codes
-                    updated_fund[key] = value
-            
-            updated_fund["updated_at"] = "2025-10-01T12:00:00"
-            funds[fund_id] = updated_fund
+            updated_benefits["updated_at"] = "2025-10-01T12:00:00"
+            employee_benefits[enrollment_id] = updated_benefits
             
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "fund_id": str(fund_id),
-                "message": f"Fund {fund_id} updated successfully",
-                "fund_data": updated_fund
+                "enrollment_id": enrollment_id,
+                "message": f"Employee benefits enrollment {enrollment_id} updated successfully",
+                "benefits_data": updated_benefits
             })
 
     @staticmethod
-    def process_redemption_invoke(data: Dict[str, Any], redemption_id: str, status: str, 
-               compliance_officer_approval: bool, finance_officer_approval: bool,
-               processed_date: Optional[str] = None) -> str:
+    def discover_training_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
         """
-        Processes a redemption request by updating its status.
-
-        Args:
-            data: The database json.
-            redemption_id: The ID of the redemption to process.
-            status: The new status for the redemption.
-            compliance_officer_approval: Compliance Officer approval (required).
-            finance_officer_approval: Finance Officer approval (required).
-            processed_date: The date the redemption was processed.
-
-        Returns:
-            A json string representing the updated redemption record or an error.
-        """
-        redemptions = data.get("redemptions", {})
-
-        # Validate required approvals first
-        if not compliance_officer_approval:
-            return json.dumps({
-                "success": False,
-                "error": "Compliance Officer approval is required for redemption processing"
-            })
-        
-        if not finance_officer_approval:
-            return json.dumps({
-                "success": False,
-                "error": "Finance Officer approval is required for redemption processing"
-            })
-
-        if redemption_id not in redemptions:
-            return json.dumps({
-                "success": False,
-                "error": f"Redemption {redemption_id} not found"
-            })
-
-        valid_statuses = ["pending", "approved", "processed", "cancelled"]
-        if status not in valid_statuses:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid status. Must be one of {valid_statuses}"
-            })
-
-        if status == "processed" and not processed_date:
-            return json.dumps({
-                "success": False,
-                "error": "processed_date is required when status is 'processed'"
-            })
-
-        redemption = redemptions[redemption_id]
-        current_status = redemption.get("status", "").lower()
-        
-        # Validate status transitions
-        if current_status == "processed" and status != "processed":
-            return json.dumps({
-                "success": False,
-                "error": "Cannot change status of already processed redemption"
-            })
-        
-        if current_status == "cancelled" and status != "cancelled":
-            return json.dumps({
-                "success": False,
-                "error": "Cannot change status of cancelled redemption"
-            })
-
-        redemption["status"] = status
-        if processed_date:
-            redemption["processed_date"] = processed_date
-        redemption["updated_at"] = "2025-10-01T00:00:00"
-
-        return json.dumps(redemption)
-
-    @staticmethod
-    def manage_payment_invoke(data: Dict[str, Any], action: str, payment_data: Dict[str, Any] = None, payment_id: str = None) -> str:
-        """
-        Create or update payment records.
-        
-        Actions:
-        - create: Create new payment (requires payment_data with invoice_id, subscription_id, payment_date, amount, payment_method, finance_officer_approval)
-        - update: Update existing payment (requires payment_id and payment_data with changes like status, amount, finance_officer_approval)
-        """
-        
-        def generate_id(table: Dict[str, Any]) -> int:
-            if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
-        
-        if action not in ["create", "update"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
-            })
-        
-        # Access payments data
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid data format for payments"
-            })
-        
-        payments = data.get("payments", {})
-        
-        if action == "create":
-            if not payment_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "payment_data is required for create action"
-                })
-            
-            # Validate required fields for creation - updated per policy
-            required_fields = ["invoice_id", "subscription_id", "payment_date", "amount", "payment_method", "finance_officer_approval"]
-            missing_fields = [field for field in required_fields if field not in payment_data]
-            if missing_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Missing required fields for payment creation: {', '.join(missing_fields)}. Finance Officer approval is required."
-                })
-            
-            # Validate required approval for creation
-            if not payment_data.get("finance_officer_approval"):
-                return json.dumps({
-                    "success": False,
-                    "error": "Finance Officer approval is required for payment creation"
-                })
-            
-            # Validate only allowed fields are present
-            allowed_fields = ["invoice_id", "subscription_id", "payment_date", "amount", "payment_method", "status", "finance_officer_approval"]
-            invalid_fields = [field for field in payment_data.keys() if field not in allowed_fields]
-            if invalid_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid fields for payment creation: {', '.join(invalid_fields)}"
-                })
-            
-            # Validate amount is positive
-            if payment_data["amount"] <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "Payment amount must be positive"
-                })
-            
-            # Validate payment_method enum
-            valid_payment_methods = ["wire", "cheque", "credit_card", "bank_transfer"]
-            if payment_data["payment_method"] not in valid_payment_methods:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid payment_method. Must be one of: {', '.join(valid_payment_methods)}"
-                })
-            
-            # Validate status if provided
-            if "status" in payment_data:
-                valid_statuses = ["draft", "completed", "failed"]
-                if payment_data["status"] not in valid_statuses:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
-                    })
-            
-            # Generate new payment ID using the same pattern as ManageInstrumentPrice
-            new_payment_id = generate_id(payments)
-            
-            # Create new payment record
-            new_payment = {
-                "payment_id": str(new_payment_id) if new_payment_id else None ,
-                "invoice_id": str(payment_data["invoice_id"]) if payment_data["invoice_id"] else None,
-                "subscription_id": str(payment_data["subscription_id"]) if payment_data["subscription_id"] else None,
-                "payment_date": payment_data["payment_date"],
-                "amount": payment_data["amount"],
-                "payment_method": payment_data["payment_method"],
-                "status": payment_data.get("status", "draft"),
-                "created_at": "2025-10-01T12:00:00"
-            }
-            
-            payments[str(new_payment_id)] = new_payment
-            
-            return json.dumps({
-                "success": True,
-                "action": "create",
-                "payment_id": str(new_payment_id) if new_payment_id else None ,
-                "message": f"Payment {new_payment_id} created successfully for invoice {payment_data['invoice_id']}",
-                "payment_data": new_payment
-            })
-        
-        elif action == "update":
-            if not payment_id:
-                return json.dumps({
-                    "success": False,
-                    "error": "payment_id is required for update action"
-                })
-            
-            if payment_id not in payments:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Payment {payment_id} not found"
-                })
-            
-            if not payment_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "payment_data is required for update action"
-                })
-            
-            # Validate required approval for updates
-            if "finance_officer_approval" not in payment_data:
-                return json.dumps({
-                    "success": False,
-                    "error": "finance_officer_approval is required for payment updates"
-                })
-            
-            if not payment_data.get("finance_officer_approval"):
-                return json.dumps({
-                    "success": False,
-                    "error": "Finance Officer approval is required for payment update"
-                })
-            
-            # Validate only allowed fields are present for updates (cannot update core fields)
-            allowed_update_fields = ["status", "amount", "payment_date", "payment_method", "finance_officer_approval"]
-            invalid_fields = [field for field in payment_data.keys() if field not in allowed_update_fields]
-            if invalid_fields:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid fields for payment update: {', '.join(invalid_fields)}. Cannot update invoice_id or subscription_id."
-                })
-            
-            # Get current payment for validation
-            current_payment = payments[payment_id]
-            current_status = current_payment.get("status", "draft")
-            new_status = payment_data.get("status")
-            
-            # Validate status if provided
-            if new_status and new_status not in ["draft", "completed", "failed"]:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid status. Must be one of: draft, completed, failed"
-                })
-            
-            # Validate status transitions - cannot modify completed/processed payments per policy
-            if current_status == "completed" and new_status and new_status != "completed":
-                return json.dumps({
-                    "success": False,
-                    "error": "Cannot modify completed payment - cannot change status from completed to draft or failed"
-                })
-            
-            if current_status == "failed" and new_status == "completed":
-                return json.dumps({
-                    "success": False,
-                    "error": "Cannot change status from failed to completed - create new payment instead"
-                })
-            
-            # Validate amount if provided
-            if "amount" in payment_data and payment_data["amount"] <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "Payment amount must be positive"
-                })
-            
-            # Validate payment_method if provided
-            if "payment_method" in payment_data:
-                valid_payment_methods = ["wire", "cheque", "credit_card", "bank_transfer"]
-                if payment_data["payment_method"] not in valid_payment_methods:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Invalid payment_method. Must be one of: {', '.join(valid_payment_methods)}"
-                    })
-            
-            # Update payment record
-            updated_payment = current_payment.copy()
-            for key, value in payment_data.items():
-                if key != "finance_officer_approval":  # Skip approval from being stored
-                    updated_payment[key] = value
-            
-            updated_payment["updated_at"] = "2025-10-01T12:00:00"
-            payments[payment_id] = updated_payment
-            
-            return json.dumps({
-                "success": True,
-                "action": "update",
-                "payment_id": str(payment_id),
-                "message": f"Payment {payment_id} updated successfully",
-                "payment_data": updated_payment
-            })
-
-    @staticmethod
-    def manage_instrument_invoke(data: Dict[str, Any], fund_manager_approval: bool = False, 
-               compliance_officer_approval: bool = False,
-               instrument_id: Optional[str] = None, ticker: Optional[str] = None, 
-               name: Optional[str] = None, instrument_type: Optional[str] = None, 
-               status: Optional[str] = None) -> str:
-        """
-        Creates a new financial instrument or updates an existing one.
-
-        Args:
-            data: The database json.
-            fund_manager_approval: Fund Manager approval (required for creation and updates).
-            compliance_officer_approval: Compliance Officer approval (required for creation and critical updates).
-            instrument_id: The ID of the instrument to update. If None, a new one is created.
-            ticker: The unique ticker symbol for the instrument.
-            name: The name of the instrument.
-            instrument_type: The type of the instrument.
-            status: The status of the instrument.
-
-        Returns:
-            A json string of the created/updated instrument or an error.
-        """
-        def generate_id(table: Dict[str, Any]) -> int:
-            if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
-
-        instruments = data.get("instruments", {})
-
-        valid_statuses = ["active", "inactive"]
-        valid_instrument_types = [
-            'equities_common_shares','equities_preferred_shares','equities_indexed','equities_domestic','equities_international','bonds_corporate','bonds_municipal','bonds_government','bonds_inflation_linked','bonds_high_yield','bonds_distressed','money_market_treasury_bills','money_market_commercial_paper','certificates_of_deposit','repurchase_agreements','short_term_municipal_notes','bankers_acceptances','commodities_gold_oil_futures','commodities_spot','commodities_futures','derivatives_options','derivatives_futures','derivatives_swaps','real_estate_direct_property','real_estate_reits','mortgage_backed_securities','property_development_loans','private_equity','equity_stakes_private_companies','equity_stakes_infrastructure_assets','mezzanine_financing','convertible_preferred_stock','leveraged_buyout_debt','distressed_debt','project_finance_debt','infrastructure_bonds','ppp_investments','infrastructure_debt_equity','infrastructure_projects','alternative_assets_hedge_funds','alternative_assets_commodities'
-        ]
-
-        # Update logic
-        if instrument_id:
-            if instrument_id not in instruments:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Instrument {instrument_id} not found"
-                })
-
-            # Fund Manager approval always required for updates
-            if not fund_manager_approval:
-                return json.dumps({
-                    "success": False,
-                    "error": "Fund Manager approval is required for instrument updates"
-                })
-
-            instrument = instruments[instrument_id]
-            critical_change = False
-            
-            # Check if this is a critical change (ticker or instrument_type)
-            if ticker is not None and instrument.get('ticker') != ticker:
-                critical_change = True
-            if instrument_type is not None and instrument.get('instrument_type') != instrument_type:
-                critical_change = True
-            
-            # Compliance Officer approval required for critical changes
-            if critical_change and not compliance_officer_approval:
-                return json.dumps({
-                    "success": False,
-                    "error": "Compliance Officer approval is required for ticker or instrument type changes"
-                })
-
-            # Validate and update ticker if provided
-            if ticker is not None:
-                if not ticker.strip():
-                    return json.dumps({
-                        "success": False,
-                        "error": "Ticker cannot be empty"
-                    })
-                
-                # Check for ticker uniqueness if it's being changed
-                if instrument.get('ticker') != ticker:
-                    for inst_id, inst_data in instruments.items():
-                        if inst_id != instrument_id and inst_data.get('ticker') == ticker:
-                            return json.dumps({
-                                "success": False,
-                                "error": f"Ticker '{ticker}' already exists for another instrument."
-                            })
-                
-                instrument['ticker'] = ticker
-
-            # Validate and update name if provided
-            if name is not None:
-                if not name.strip():
-                    return json.dumps({
-                        "success": False,
-                        "error": "Name cannot be empty"
-                    })
-                instrument['name'] = name
-
-            # Validate and update instrument_type if provided
-            if instrument_type is not None:
-                if instrument_type not in valid_instrument_types:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Invalid instrument_type '{instrument_type}' provided."
-                    })
-                instrument['instrument_type'] = instrument_type
-
-            # Validate and update status if provided
-            if status is not None:
-                if status not in valid_statuses:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Invalid status. Must be one of {valid_statuses}"
-                    })
-                instrument['status'] = status
-
-            instrument['updated_at'] = "2025-10-01T00:00:00"
-            return json.dumps(instrument)
-
-        # Create logic
-        else:
-            # For creation, both approvals are required
-            if not fund_manager_approval:
-                return json.dumps({
-                    "success": False,
-                    "error": "Fund Manager approval is required for instrument creation"
-                })
-            
-            if not compliance_officer_approval:
-                return json.dumps({
-                    "success": False,
-                    "error": "Compliance Officer approval is required for instrument creation"
-                })
-
-            # All fields required for creation
-            if not ticker or not ticker.strip():
-                return json.dumps({
-                    "success": False,
-                    "error": "Ticker is required for instrument creation"
-                })
-            
-            if not name or not name.strip():
-                return json.dumps({
-                    "success": False,
-                    "error": "Name is required for instrument creation"
-                })
-
-            if not instrument_type:
-                return json.dumps({
-                    "success": False,
-                    "error": "Instrument type is required for instrument creation"
-                })
-
-            if instrument_type not in valid_instrument_types:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid instrument_type '{instrument_type}' provided."
-                })
-
-            if status and status not in valid_statuses:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid status. Must be one of {valid_statuses}"
-                })
-
-            # Check for ticker uniqueness
-            for inst in instruments.values():
-                if inst.get('ticker') == ticker:
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Ticker '{ticker}' already exists."
-                    })
-
-            new_id = str(generate_id(instruments))
-            timestamp = "2025-10-01T00:00:00"
-            new_instrument = {
-                "instrument_id": str(new_id) if new_id is not None else None,
-                "ticker": ticker,
-                "name": name,
-                "instrument_type": instrument_type,
-                "status": status or "active",
-                "created_at": timestamp,
-                "updated_at": timestamp
-            }
-            instruments[str(new_id)] = new_instrument
-            return json.dumps(new_instrument)
-
-    @staticmethod
-    def discover_reporting_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover reporting entities: reports and documents.
+        Discover training entities.
         
         Supported entities:
-        - reports: Report records by report_id, fund_id, investor_id, report_date, report_type, generated_by, status, export_period_end
-        - documents: Document records by document_id, name, format, uploaded_by, upload_date, report_id, size_bytes, confidentiality_level, status
+        - training_programs: Training programs by program_id, program_name, program_type, duration_hours, delivery_method, mandatory, status, created_at, updated_at
+        - employee_training: Employee training records by training_record_id, employee_id, program_id, enrollment_date, completion_date, status, score, certificate_issued, expiry_date, created_at, updated_at
         """
-        if entity_type not in ["reports", "documents"]:
+        if entity_type not in ["training_programs", "employee_training"]:
             return json.dumps({
                 "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'reports' or 'documents'"
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'training_programs' or 'employee_training'"
             })
         
         if not isinstance(data, dict):
@@ -2297,13 +3746,9 @@ class Tools:
             })
         
         results = []
-        
-        id_field = {
-            "reports": "report_id",
-            "documents": "document_id"
-        }[entity_type]
-        
         entities = data.get(entity_type, {})
+        
+        id_field = "program_id" if entity_type == "training_programs" else "training_record_id"
         
         for entity_id, entity_data in entities.items():
             if filters:
@@ -2326,19 +3771,49 @@ class Tools:
         })
 
     @staticmethod
-    def manage_notifications_invoke(data: Dict[str, Any], action: str, notification_data: Dict[str, Any] = None, notification_id: str = None) -> str:
+    def manage_job_application_invoke(data: Dict[str, Any], action: str, application_data: Dict[str, Any] = None, application_id: str = None) -> str:
         """
-        Create or update notification records.
+        Create or update job application records.
         
         Actions:
-        - create: Create new notification (requires notification_data with email, type, class, optional reference_id)
-        - update: Update existing notification (requires notification_id and notification_data with changes like status)
+        - create: Create new application (requires candidate_id, position_id, application_date, recruiter_id)
+        - update: Update existing application (requires application_id, application_data with status updates)
         """
         
         def generate_id(table: Dict[str, Any]) -> int:
             if not table:
                 return 1
             return max(int(k) for k in table.keys()) + 1
+            
+        def is_future_date(date_str: str) -> bool:
+            """Check if date is in future - simplified for demo"""
+            # In real implementation, would compare with current date
+            # For demo purposes, assume dates starting with "2026" or later are future
+            return date_str.startswith("2026") or date_str.startswith("2027")
+            
+        def is_valid_status_transition(current_status: str, new_status: str) -> bool:
+            """Validate status transitions follow proper workflow"""
+            # Define the linear progression workflow
+            workflow_order = ["submitted", "under_review", "screening", "interviewing", "offer_made", "accepted"]
+            terminal_states = ["accepted", "rejected", "withdrawn"]
+            exit_states = ["rejected", "withdrawn"]
+            
+            # Cannot transition from terminal states
+            if current_status in terminal_states:
+                return False
+            
+            # Can exit to rejected/withdrawn from any active stage
+            if new_status in exit_states:
+                return True
+                
+            # Cannot move backward in workflow
+            if current_status in workflow_order and new_status in workflow_order:
+                current_index = workflow_order.index(current_status)
+                new_index = workflow_order.index(new_status)
+                # Can only move forward one step or stay the same
+                return new_index >= current_index and new_index <= current_index + 1
+            
+            return False
         
         if action not in ["create", "update"]:
             return json.dumps({
@@ -2346,852 +3821,495 @@ class Tools:
                 "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
             })
         
-        # Access notifications data
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": "Invalid data format for notifications"
+                "error": "Invalid data format for job applications"
             })
         
-        notifications = data.get("notifications", {})
+        applications = data.get("job_applications", {})
+        candidates = data.get("candidates", {})
+        job_positions = data.get("job_positions", {})
+        users = data.get("users", {})
         
         if action == "create":
-            if not notification_data:
+            if not application_data:
                 return json.dumps({
                     "success": False,
-                    "error": "notification_data is required for create action"
+                    "error": "application_data is required for create action"
                 })
             
             # Validate required fields for creation
-            required_fields = ["email", "type", "class"]
-            missing_fields = [field for field in required_fields if field not in notification_data]
+            required_fields = ["candidate_id", "position_id", "application_date", "recruiter_id"]
+            missing_fields = [field for field in required_fields if field not in application_data]
             if missing_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Missing required fields for notification creation: {', '.join(missing_fields)}"
+                    "error": f"Halt: Missing or invalid inputs - missing fields: {', '.join(missing_fields)}"
                 })
             
-            # Validate only allowed fields are present
-            allowed_fields = ["email", "type", "class", "reference_id", "status"]
-            invalid_fields = [field for field in notification_data.keys() if field not in allowed_fields]
+            # Validate that candidate and position exist and are valid
+            candidate_id = str(application_data["candidate_id"])
+            if candidate_id not in candidates:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Candidate not found"
+                })
+            
+            position_id = str(application_data["position_id"])
+            if position_id not in job_positions:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Position not found"
+                })
+            
+            # Validate that assigned recruiter exists and has recruiter role
+            recruiter_id = str(application_data["recruiter_id"])
+            if recruiter_id not in users:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Recruiter not found"
+                })
+            
+            recruiter = users[recruiter_id]
+            if recruiter.get("role") != "recruiter":
+                return json.dumps({
+                    "success": False,
+                    "error": f"User specified is not a recruiter"
+                })
+            
+            # Validate that application date is not in future
+            application_date = application_data["application_date"]
+            if is_future_date(application_date):
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid status transition - application date cannot be in future"
+                })
+            
+            # Validate AI screening score if provided
+            if "ai_screening_score" in application_data:
+                score = application_data["ai_screening_score"]
+                if score is not None and (not isinstance(score, (int, float)) or score < 0 or score > 100):
+                    return json.dumps({
+                        "success": False,
+                        "error": "Halt: Invalid status transition - AI screening score must be within 0-100 range"
+                    })
+            
+            # Validate final_decision enum if provided
+            if "final_decision" in application_data:
+                valid_decisions = ["hire", "reject", "hold"]
+                if application_data["final_decision"] not in valid_decisions:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Invalid status transition - final_decision must be one of: {', '.join(valid_decisions)}"
+                    })
+            
+            # Validate allowed fields
+            allowed_fields = ["candidate_id", "position_id", "application_date", "recruiter_id", 
+                            "ai_screening_score", "final_decision", "status"]
+            invalid_fields = [field for field in application_data.keys() if field not in allowed_fields]
             if invalid_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Invalid fields for notification creation: {', '.join(invalid_fields)}"
-                })
-            
-            # Validate enum fields
-            valid_types = ["alert", "report", "reminder", "subscription_update"]
-            if notification_data["type"] not in valid_types:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid type. Must be one of: {', '.join(valid_types)}"
-                })
-            
-            valid_classes = ["funds", "investors", "portfolios", "trades", "invoices", "reports", "documents", "subscriptions", "commitments"]
-            if notification_data["class"] not in valid_classes:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid class. Must be one of: {', '.join(valid_classes)}"
-                })
-            
-            # Validate type-class combinations per policy
-            notification_type = notification_data["type"]
-            notification_class = notification_data["class"]
-            
-            valid_combinations = {
-                "alert": ["funds", "investors", "portfolios", "trades", "invoices", "subscriptions", "commitments"],
-                "report": ["funds", "investors", "portfolios", "reports", "documents"],
-                "reminder": ["invoices", "subscriptions", "commitments"],
-                "subscription_update": ["subscriptions", "commitments"]
-            }
-            
-            if notification_class not in valid_combinations[notification_type]:
-                return json.dumps({
-                    "success": False,
-                    "error": f"Invalid type-class combination: {notification_type} notifications are not valid for {notification_class}. Valid classes for {notification_type}: {', '.join(valid_combinations[notification_type])}"
+                    "error": f"Invalid fields for application creation: {', '.join(invalid_fields)}"
                 })
             
             # Validate status if provided
-            if "status" in notification_data:
-                valid_statuses = ["pending", "sent", "failed"]
-                if notification_data["status"] not in valid_statuses:
+            if "status" in application_data:
+                valid_statuses = ["submitted", "under_review", "screening", "interviewing", "offer_made", "accepted", "rejected", "withdrawn"]
+                if application_data["status"] not in valid_statuses:
                     return json.dumps({
                         "success": False,
-                        "error": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+                        "error": f"Halt: Invalid status transition - status must be one of: {', '.join(valid_statuses)}"
                     })
             
-            # Basic email validation
-            email = notification_data["email"]
-            if "@" not in email or "." not in email.split("@")[-1]:
-                return json.dumps({
-                    "success": False,
-                    "error": "Invalid email format"
-                })
+            # Generate new application ID
+            new_app_id = generate_id(applications)
             
-            new_notification_id = generate_id(notifications)
-            
-            # Create new notification record
-            new_notification = {
-                "notification_id": str(new_notification_id) if new_notification_id else None,
-                "email": notification_data["email"],
-                "type": notification_data["type"],
-                "class": notification_data["class"],
-                "reference_id": str(notification_data.get("reference_id")) if notification_data.get("reference_id") else None,
-                "status": notification_data.get("status", "pending"),
-                "sent_at": None,
-                "created_at": "2025-10-01T12:00:00"
+            # Create new application record
+            new_application = {
+                "application_id": str(new_app_id),
+                "candidate_id": candidate_id,
+                "position_id": position_id,
+                "application_date": application_date,
+                "status": application_data.get("status", "submitted"),  # If status is not specified during creation, set it to submitted
+                "recruiter_id": recruiter_id,
+                "ai_screening_score": application_data.get("ai_screening_score"),
+                "final_decision": application_data.get("final_decision"),
+                "created_at": "2025-10-01T12:00:00",
+                "updated_at": "2025-10-01T12:00:00"
             }
             
-            notifications[str(new_notification_id)] = new_notification
+            applications[str(new_app_id)] = new_application
             
             return json.dumps({
                 "success": True,
                 "action": "create",
-                "notification_id": str(new_notification_id) if new_notification_id else None,
-                "message": f"Notification {new_notification_id} created successfully for {notification_data['email']}",
-                "notification_data": new_notification
+                "application_id": str(new_app_id),
+                "message": f"Job application {new_app_id} created successfully",
+                "application_data": new_application
             })
         
         elif action == "update":
-            if not notification_id:
+            if not application_id:
                 return json.dumps({
                     "success": False,
-                    "error": "notification_id is required for update action"
+                    "error": "application_id is required for update action"
                 })
             
-            if notification_id not in notifications:
+            if application_id not in applications:
                 return json.dumps({
                     "success": False,
-                    "error": f"Notification {notification_id} not found"
+                    "error": "Halt: Application not found"
                 })
             
-            if not notification_data:
+            if not application_data:
                 return json.dumps({
                     "success": False,
-                    "error": "notification_data is required for update action"
+                    "error": "application_data is required for update action"
                 })
             
-            # Validate only allowed fields are present for updates
-            allowed_update_fields = ["status", "sent_at"]
-            invalid_fields = [field for field in notification_data.keys() if field not in allowed_update_fields]
+            # Validate at least one optional field is provided
+            update_fields = ["candidate_id", "position_id", "application_date", "recruiter_id", "status", "ai_screening_score", "final_decision"]
+            provided_fields = [field for field in update_fields if field in application_data]
+            if not provided_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": "At least one optional field must be provided for updates"
+                })
+            
+            # Get current application for validation
+            current_application = applications[application_id]
+            current_status = current_application.get("status", "submitted")
+            
+            # Validate allowed update fields
+            invalid_fields = [field for field in application_data.keys() if field not in update_fields]
             if invalid_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Invalid fields for notification update: {', '.join(invalid_fields)}. Cannot update email, type, class, or reference_id."
+                    "error": f"Invalid fields for application update: {', '.join(invalid_fields)}"
                 })
             
-            if "status" in notification_data:
-                valid_statuses = ["pending", "sent", "failed"]
-                if notification_data["status"] not in valid_statuses:
+            # Validate status transitions if status is being updated
+            if "status" in application_data:
+                new_status = application_data["status"]
+                valid_statuses = ["submitted", "under_review", "screening", "interviewing", "offer_made", "accepted", "rejected", "withdrawn"]
+                
+                if new_status not in valid_statuses:
                     return json.dumps({
                         "success": False,
-                        "error": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+                        "error": f"Halt: Invalid status transition - status must be one of: {', '.join(valid_statuses)}"
+                    })
+                
+                # Validate status transitions follow proper workflow
+                if not is_valid_status_transition(current_status, new_status):
+                    return json.dumps({
+                        "success": False,
+                        "error": "Halt: Invalid status transition"
                     })
             
-            current_notification = notifications[notification_id]
-            current_status = current_notification.get("status", "pending")
-            new_status = notification_data.get("status")
+            # Validate AI screening score if provided
+            if "ai_screening_score" in application_data:
+                score = application_data["ai_screening_score"]
+                if score is not None and (not isinstance(score, (int, float)) or score < 0 or score > 100):
+                    return json.dumps({
+                        "success": False,
+                        "error": "Halt: Application stage management failed - AI screening score must be within 0-100 range"
+                    })
             
-            if new_status and current_status == "sent" and new_status in ["pending", "failed"]:
-                return json.dumps({
-                    "success": False,
-                    "error": "Cannot change status from 'sent' to 'pending' or 'failed'"
-                })
+            # Validate final_decision enum if provided
+            if "final_decision" in application_data:
+                valid_decisions = ["hire", "reject", "hold"]
+                if application_data["final_decision"] not in valid_decisions:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Application stage management failed - final_decision must be one of: {', '.join(valid_decisions)}"
+                    })
             
-            if new_status == "sent" and current_status != "sent":
-                notification_data["sent_at"] = "2025-10-01T12:00:00"
+            # Update application record
+            updated_application = current_application.copy()
+            for key, value in application_data.items():
+                updated_application[key] = value
             
-            updated_notification = current_notification.copy()
-            for key, value in notification_data.items():
-                updated_notification[key] = value
-            
-            notifications[notification_id] = updated_notification
+            updated_application["updated_at"] = "2025-10-01T12:00:00"
+            applications[application_id] = updated_application
             
             return json.dumps({
                 "success": True,
                 "action": "update",
-                "notification_id": str(notification_id),
-                "message": f"Notification {notification_id} updated successfully",
-                "notification_data": updated_notification
+                "application_id": application_id,
+                "message": f"Job application {application_id} updated successfully",
+                "application_data": updated_application
             })
 
     @staticmethod
-    def fulfill_commitment_invoke(data: Dict[str, Any], commitment_id: str, compliance_officer_approval: bool = False) -> str:
-        
-        commitments = data.get("commitments", {})
-        
-        # Validate required approvals first
-        if not compliance_officer_approval:
-            return json.dumps({
-                "success": False,
-                "error": "Compliance Officer approval is required for commitment fulfillment"
-            })
-        
-        # Validate commitment exists
-        if str(commitment_id) not in commitments:
-            return json.dumps({"error": f"Commitment {commitment_id} not found"})
-        
-        commitment = commitments[str(commitment_id)]
-        
-        # Check if already fulfilled
-        if commitment.get("status") == "fulfilled":
-            return json.dumps({"error": "Commitment is already fulfilled"})
-        
-        # Update commitment status
-        timestamp = "2025-10-01T00:00:00"
-        commitment["status"] = "fulfilled"
-        commitment["updated_at"] = timestamp
-        
-        return json.dumps(commitment)
-
-    @staticmethod
-    def offboard_investor_invoke(data: Dict[str, Any], investor_id: str, 
-               compliance_officer_approval: bool, reason: str = None) -> str:
-        # Access investors data
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid data format for investors"
-            })
-        
-        investors = data.get("investors", {})
-        
-        # Validate required approval first
-        if not compliance_officer_approval:
-            return json.dumps({
-                "success": False,
-                "error": "Compliance Officer approval is required for investor offboarding"
-            })
-        
-        # Validate required parameters
-        if not investor_id:
-            return json.dumps({
-                "success": False,
-                "error": "investor_id is required for offboarding"
-            })
-        
-        # Check if investor exists
-        if investor_id not in investors:
-            return json.dumps({
-                "success": False,
-                "error": f"Investor {investor_id} not found"
-            })
-        
-        investor = investors[investor_id]
-        
-        # Check if investor is already deactivated
-        current_status = investor.get("status", "").lower()
-        if current_status in ["deactivated", "inactive", "archived", "offboarded"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Investor {investor_id} is already deactivated with status: {current_status}"
-            })
-        
-        # Validate reason if provided
-        if reason is not None and not isinstance(reason, str):
-            return json.dumps({
-                "success": False,
-                "error": "Reason must be a string if provided"
-            })
-        
-        # Update investor record directly
-        investor["status"] = "offboarded"
-
-        # Update the investor in the data
-        investors[investor_id] = investor
-
-        return json.dumps({
-            "success": True,
-            "investor_id": str(investor_id) if investor_id else None,
-            "message": f"Investor {investor_id} successfully offboarded",
-            "investor_data": {
-                "investor_id": str(investor.get("investor_id")) if investor.get("investor_id") else None,
-                "name": investor.get("name"),
-                "status": investor.get("status"),
-                "contact_email": investor.get("contact_email"),
-            }
-        })
-
-    @staticmethod
-    def discover_valuation_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+    def manage_timesheet_entries_invoke(data: Dict[str, Any], action: str, timesheet_data: Dict[str, Any] = None, timesheet_id: str = None) -> str:
         """
-        Discover valuation entities: NAV records and instrument prices.
-        
-        Supported entities:
-        - nav_records: Net Asset Value records by nav_id, fund_id, nav_date, nav_value
-        - instrument_prices: Price data by price_id, instrument_id, price_date, open_price, high_price, low_price, close_price
-        """
-        if entity_type not in ["nav_records", "instrument_prices"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'nav_records' or 'instrument_prices'"
-            })
-        
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid data format for {entity_type}"
-            })
-        
-        results = []
-        
-        id_field = {
-            "nav_records": "nav_id",
-            "instrument_prices": "price_id"
-        }[entity_type]
-        
-        entities = data.get(entity_type, {})
-        
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**entity_data, id_field: entity_id})
-            else:
-                results.append({**entity_data, id_field: entity_id})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": entity_type,
-            "count": len(results),
-            "results": results
-        })
-
-    @staticmethod
-    def discover_user_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover user entities.
-        
-        Supported entities:
-        - users: User records by user_id, first_name, last_name, email, role, timezone, status
-        """
-        if entity_type not in ["users"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'users'"
-            })
-        
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid data format for {entity_type}"
-            })
-        
-        results = []
-        entities = data.get("users", {})
-        
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**entity_data, "user_id": str(entity_id)})
-            else:
-                results.append({**entity_data, "user_id": str(entity_id)})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": entity_type,
-            "count": len(results),
-            "results": results
-        })
-
-    @staticmethod
-    def discover_instrument_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover instrument entities.
-        
-        Supported entities:
-        - instruments: Instrument records by instrument_id, ticker, name, status, instrument_type
-        """
-        if entity_type not in ["instruments"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'instruments'"
-            })
-        
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid data format for {entity_type}"
-            })
-        
-        results = []
-        entities = data.get("instruments", {})
-        
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**entity_data, "instrument_id": str(entity_id)})
-            else:
-                results.append({**entity_data, "instrument_id": str(entity_id)})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": entity_type,
-            "count": len(results),
-            "results": results
-        })
-
-    @staticmethod
-    def create_new_audit_trail_invoke(data: Dict[str, Any], reference_id: str, reference_type: str,
-               action: str, field_name: Optional[str] = None,
-               old_value: Optional[str] = None, new_value: Optional[str] = None) -> str:
-        
-        def generate_id(table: Dict[str, Any]) -> int:
-            if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
-        
-        audit_trails = data.get("audit_trails", {})        
-        
-        # Validate reference_type - Added instrument_price
-        valid_reference_types = [
-            "user", "fund", "investor", "subscription", "commitment", "redemption",
-            "trade", "portfolio", "holding", "instrument", "instrument_price", "invoice", "payment",
-            "document", "report", "nav", "notification"
-        ]
-        if reference_type not in valid_reference_types:
-            raise ValueError(f"Invalid reference_type. Must be one of {valid_reference_types}")
-        
-        # Validate action
-        valid_actions = ["create", "update", "delete", "approve", "cancel", "process"]
-        if action not in valid_actions:
-            raise ValueError(f"Invalid action. Must be one of {valid_actions}")
-        
-        # Business rule validation
-        if action in ["create", "delete"] and field_name is not None:
-            raise ValueError(f"field_name should be null for {action} actions")
-        
-        if action == "create" and old_value is not None:
-            raise ValueError("old_value should be null for create actions")
-        
-        if action == "delete" and new_value is not None:
-            raise ValueError("new_value should be null for delete actions")
-        
-        # Validate that the referenced entity exists based on reference_type - Added instrument_price mapping
-        reference_tables = {
-            "user": "users",
-            "fund": "funds",
-            "investor": "investors",
-            "subscription": "subscriptions",
-            "commitment": "commitments",
-            "redemption": "redemptions",
-            "trade": "trades",
-            "portfolio": "portfolios",
-            "holding": "portfolio_holdings",
-            "instrument": "instruments",
-            "instrument_price": "instrument_prices",
-            "invoice": "invoices",
-            "payment": "payments",
-            "document": "documents",
-            "report": "reports",
-            "nav": "nav_records",
-            "notification": "notifications"
-        }
-        
-        reference_table = reference_tables.get(reference_type)
-        if reference_table and reference_table in data:
-            if str(reference_id) not in data[reference_table]:
-                raise ValueError(f"{reference_type.title()} {reference_id} not found")
-        
-        audit_trail_id = generate_id(audit_trails)
-        timestamp = "2025-10-01T00:00:00"
-        
-        new_audit_trail = {
-            "audit_trail_id": str(audit_trail_id) if audit_trail_id is not None else None,
-            "reference_id": str(reference_id) if reference_id is not None else None,
-            "reference_type": reference_type,
-            "action": action,
-            "field_name": field_name,
-            "old_value": old_value,
-            "new_value": new_value,
-            "created_at": timestamp
-        }
-        
-        audit_trails[str(audit_trail_id)] = new_audit_trail
-        return json.dumps(new_audit_trail)
-
-    @staticmethod
-    def discover_investor_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover investor entities.
-        
-        Supported entities:
-        - investors: Investor records by investor_id, name, registration_number, date_of_incorporation, country, address, tax_id, source_of_funds, status, contact_email, accreditation_status
-        """
-        if entity_type not in ["investors"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'investors'"
-            })
-        
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid data format for {entity_type}"
-            })
-        
-        results = []
-        entities = data.get("investors", {})
-        
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**entity_data, "investor_id": str(entity_id)})
-            else:
-                results.append({**entity_data, "investor_id": str(entity_id)})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": entity_type,
-            "count": len(results),
-            "results": results
-        })
-
-    @staticmethod
-    def manage_subscription_invoke(data: Dict[str, Any], action: str, subscription_data: Dict[str, Any], 
-           subscription_id: Optional[str] = None) -> str:
-        """
-        Create, update, or cancel subscription records.
+        Create or update timesheet entry records.
         
         Actions:
-        - create: Create new subscription (requires subscription_data with fund_id, investor_id, amount, request_assigned_to, request_date, fund_manager_approval, compliance_officer_approval)
-        - update: Update existing subscription (requires subscription_id and subscription_data with changes, fund_manager_approval, compliance_officer_approval)
-        - cancel: Cancel subscription (requires subscription_id, fund_manager_approval, compliance_officer_approval)
+        - create: Create new timesheet entry (requires employee_id, work_date, clock_in_time, clock_out_time)
+        - update: Update existing timesheet entry (requires timesheet_id, timesheet_data)
         """
         
-        if isinstance(subscription_data, str):
-            try:
-                subscription_data = json.loads(subscription_data)
-            except json.JSONDecodeError:
-                return json.dumps({
-                    "success": False,
-                    "error": "Invalid JSON format in subscription_data"
-                })
-
         def generate_id(table: Dict[str, Any]) -> int:
             if not table:
                 return 1
             return max(int(k) for k in table.keys()) + 1
+            
+        def is_valid_time_order(clock_in: str, clock_out: str) -> bool:
+            """Check if clock_in time is before clock_out time - simplified for demo"""
+            return clock_in < clock_out
+            
+        def calculate_total_hours(clock_in: str, clock_out: str, break_minutes: int = 0) -> float:
+            """Calculate total hours worked - simplified calculation for demo"""
+            # In a real implementation, this would parse timestamps and calculate actual duration
+            # For demo purposes, we'll do a simple calculation
+            try:
+                # Assuming format like "2025-10-01T08:00:00"
+                in_hour = int(clock_in.split('T')[1].split(':')[0])
+                out_hour = int(clock_out.split('T')[1].split(':')[0])
+                total_minutes = (out_hour - in_hour) * 60 - break_minutes
+                return round(total_minutes / 60, 2)
+            except:
+                return 0.0
         
-        def validate_date_format(date_str: str, field_name: str) -> Optional[str]:
-            if date_str:
-                date_pattern = r'^\d{4}-\d{2}-\d{2}$'
-                if not re.match(date_pattern, date_str):
-                    return f"Invalid {field_name} format. Must be YYYY-MM-DD"
-            return None
-        
-        def validate_boolean_field(value: Any, field_name: str) -> Optional[str]:
-            if not isinstance(value, bool):
-                return f"Invalid {field_name}. Must be boolean (True/False)"
-            return None
-        
-        # Validate action
-        if action not in ["create", "update", "cancel"]:
+        if action not in ["create", "update"]:
             return json.dumps({
                 "success": False,
-                "error": f"Invalid action '{action}'. Must be 'create', 'update', or 'cancel'"
+                "error": f"Invalid action '{action}'. Must be 'create' or 'update'"
             })
         
-        # Access related data
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": "Invalid data format for subscriptions"
+                "error": "Invalid data format for timesheet entries"
             })
         
-        funds = data.get("funds", {})
-        investors = data.get("investors", {})
+        employee_timesheets = data.get("employee_timesheets", {})
+        employees = data.get("employees", {})
         users = data.get("users", {})
-        subscriptions = data.get("subscriptions", {})
         
         if action == "create":
-            if not subscription_data:
+            if not timesheet_data:
                 return json.dumps({
                     "success": False,
-                    "error": "subscription_data is required for create action"
+                    "error": "timesheet_data is required for create action"
                 })
             
-            # Require both Fund Manager and Compliance Officer approvals
-            required_fields = ["fund_id", "investor_id", "amount", "request_assigned_to", "request_date", "fund_manager_approval", "compliance_officer_approval"]
-            missing_fields = [field for field in required_fields if field not in subscription_data]
+            # Validate required fields
+            required_fields = ["employee_id", "work_date", "clock_in_time", "clock_out_time"]
+            missing_fields = [field for field in required_fields if field not in timesheet_data]
             if missing_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Missing required fields for subscription creation: {', '.join(missing_fields)}. Both Fund Manager and Compliance Officer approvals are required."
+                    "error": f"Halt: Employee not found or inactive - missing fields: {', '.join(missing_fields)}"
                 })
             
-            # Updated allowed fields to include compliance_officer_approval
-            allowed_fields = ["fund_id", "investor_id", "amount", "request_assigned_to", "request_date", "status", "approval_date", "notify_investor", "fund_manager_approval", "compliance_officer_approval"]
-            invalid_fields = [field for field in subscription_data.keys() if field not in allowed_fields]
+            # Validate that employee exists and has active status
+            employee_id = str(timesheet_data["employee_id"])
+            if employee_id not in employees:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Employee not found or inactive"
+                })
+            
+            employee = employees[employee_id]
+            if employee.get("employment_status") != "active":
+                return json.dumps({
+                    "success": False,
+                    "error": f"Halt: Employee not found or inactive"
+                })
+            
+            # Validate that clock_in_time is before clock_out_time
+            clock_in_time = timesheet_data["clock_in_time"]
+            clock_out_time = timesheet_data["clock_out_time"]
+            if not is_valid_time_order(clock_in_time, clock_out_time):
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid work date or times - clock_in_time must be before clock_out_time"
+                })
+            
+            # Validate break_duration_minutes if provided
+            break_duration = timesheet_data.get("break_duration_minutes", 0)
+            try:
+                break_duration = int(break_duration)
+                if break_duration < 0:
+                    return json.dumps({
+                        "success": False,
+                        "error": "Halt: Invalid break duration - break_duration_minutes must be non-negative"
+                    })
+            except (ValueError, TypeError):
+                return json.dumps({
+                    "success": False,
+                    "error": "Halt: Invalid break duration - invalid break_duration_minutes format"
+                })
+            
+            # Validate only allowed fields are present
+            allowed_fields = ["employee_id", "work_date", "clock_in_time", "clock_out_time", 
+                            "break_duration_minutes", "project_code", "total_hours", "status"]
+            invalid_fields = [field for field in timesheet_data.keys() if field not in allowed_fields]
             if invalid_fields:
                 return json.dumps({
                     "success": False,
-                    "error": f"Invalid fields for subscription creation: {', '.join(invalid_fields)}"
+                    "error": f"Invalid fields for timesheet creation: {', '.join(invalid_fields)}"
                 })
             
-            # Extract and validate core fields
-            fund_id = subscription_data["fund_id"]
-            investor_id = subscription_data["investor_id"]
-            amount = subscription_data["amount"]
-            request_assigned_to = subscription_data["request_assigned_to"]
-            request_date = subscription_data["request_date"]
-            status = subscription_data.get("status", "pending")
+            # Generate new timesheet ID
+            new_timesheet_id = generate_id(employee_timesheets)
             
-            # Validate fund exists
-            if str(fund_id) not in funds:
-                return json.dumps({"success": False, "error": f"Fund {fund_id} not found"})
+            # Calculate total hours if not provided
+            total_hours = timesheet_data.get("total_hours")
+            if total_hours is None:
+                total_hours = calculate_total_hours(clock_in_time, clock_out_time, break_duration)
             
-            # Validate investor exists
-            if str(investor_id) not in investors:
-                return json.dumps({"success": False, "error": f"Investor {investor_id} not found"})
-            
-            # Validate assigned user exists
-            if str(request_assigned_to) not in users:
-                return json.dumps({"success": False, "error": f"User {request_assigned_to} not found"})
-            
-            # Check for duplicate subscriptions
-            for subscription in subscriptions.values():
-                if (subscription.get("fund_id") == fund_id and 
-                    subscription.get("investor_id") == investor_id):
-                    return json.dumps({
-                        "success": False,
-                        "error": f"Subscription already exists for investor {investor_id} and fund {fund_id}."
-                    })
-            
-            # Validate amount is positive
-            try:
-                if float(amount) <= 0:
-                    return json.dumps({"success": False, "error": "Subscription amount must be positive"})
-            except ValueError:
-                return json.dumps({"success": False, "error": "Invalid amount format"})
-            
-            # Validate status enum
-            if status not in ["pending", "approved", "cancelled"]:
-                return json.dumps({"success": False, "error": "Invalid status"})
-            
-            # Validate date formats
-            date_error = validate_date_format(request_date, "request_date")
-            if date_error:
-                return json.dumps({"success": False, "error": date_error})
-            
-            if "approval_date" in subscription_data:
-                date_error = validate_date_format(subscription_data["approval_date"], "approval_date")
-                if date_error:
-                    return json.dumps({"success": False, "error": date_error})
-            
-            # Validate both approval fields
-            bool_error = validate_boolean_field(subscription_data["fund_manager_approval"], "fund_manager_approval")
-            if bool_error:
-                return json.dumps({"success": False, "error": bool_error})
-            
-            bool_error = validate_boolean_field(subscription_data["compliance_officer_approval"], "compliance_officer_approval")
-            if bool_error:
-                return json.dumps({"success": False, "error": bool_error})
-            
-            if "notify_investor" in subscription_data:
-                bool_error = validate_boolean_field(subscription_data["notify_investor"], "notify_investor")
-                if bool_error:
-                    return json.dumps({"success": False, "error": bool_error})
-            
-            # Generate new subscription ID and create record
-            new_subscription_id = generate_id(subscriptions)
-            new_subscription = {
-                "subscription_id": str(new_subscription_id) if new_subscription_id else None, "fund_id": str(fund_id) if fund_id else None, "investor_id": str(investor_id) if investor_id else None,
-                "amount": amount, "status": status, "request_assigned_to": request_assigned_to,
-                "request_date": request_date, "approval_date": subscription_data.get("approval_date"),
-                "updated_at": "2025-10-01T00:00:00"
+            # Create timesheet entry with required information
+            new_timesheet = {
+                "timesheet_id": str(new_timesheet_id),
+                "employee_id": employee_id,
+                "work_date": timesheet_data["work_date"],
+                "clock_in_time": clock_in_time,
+                "clock_out_time": clock_out_time,
+                "break_duration_minutes": break_duration,
+                "total_hours": total_hours,
+                "project_code": timesheet_data.get("project_code"),
+                "approved_by": None,
+                "status": timesheet_data.get("status", "draft"),  # Default to draft if not specified
+                "created_at": "2025-10-01T12:00:00",
+                "updated_at": "2025-10-01T12:00:00"
             }
-            subscriptions[str(new_subscription_id)] = new_subscription
+            
+            employee_timesheets[str(new_timesheet_id)] = new_timesheet
             
             return json.dumps({
-                "success": True, "action": "create", "subscription_id": str(new_subscription_id),
-                "message": f"Subscription {new_subscription_id} created successfully.",
-                "subscription_data": new_subscription
+                "success": True,
+                "action": "create",
+                "timesheet_id": str(new_timesheet_id),
+                "message": f"Timesheet entry {new_timesheet_id} created successfully",
+                "timesheet_data": new_timesheet
             })
         
         elif action == "update":
-            if not subscription_id or subscription_id not in subscriptions:
-                return json.dumps({"success": False, "error": f"Subscription {subscription_id} not found"})
-            
-            if not subscription_data:
-                return json.dumps({"success": False, "error": "subscription_data is required for update action"})
-            
-            # Require both approvals for updates
-            missing_approvals = []
-            if "fund_manager_approval" not in subscription_data:
-                missing_approvals.append("fund_manager_approval")
-            if "compliance_officer_approval" not in subscription_data:
-                missing_approvals.append("compliance_officer_approval")
-            
-            if missing_approvals:
-                return json.dumps({
-                    "success": False, 
-                    "error": f"Missing required approvals: {', '.join(missing_approvals)}. Both Fund Manager and Compliance Officer approvals are required."
-                })
-            
-            # Validate both approval fields
-            bool_error = validate_boolean_field(subscription_data["fund_manager_approval"], "fund_manager_approval")
-            if bool_error:
-                return json.dumps({"success": False, "error": bool_error})
-            
-            bool_error = validate_boolean_field(subscription_data["compliance_officer_approval"], "compliance_officer_approval")
-            if bool_error:
-                return json.dumps({"success": False, "error": bool_error})
-            
-            # Update subscription record
-            current_subscription = subscriptions[subscription_id]
-            updated_subscription = current_subscription.copy()
-            for key, value in subscription_data.items():
-                if key not in ["fund_manager_approval", "compliance_officer_approval"]:
-                    updated_subscription[key] = value
-            
-            updated_subscription["updated_at"] = "2025-10-01T00:00:00"
-            subscriptions[subscription_id] = updated_subscription
-            
-            return json.dumps({
-                "success": True, "action": "update", "subscription_id": str(subscription_id),
-                "message": f"Subscription {subscription_id} updated successfully.",
-                "subscription_data": updated_subscription
-            })
-        
-        elif action == "cancel":
-            if not subscription_id or subscription_id not in subscriptions:
-                return json.dumps({"success": False, "error": f"Subscription {subscription_id} not found"})
-            
-            # Require both approvals for cancellation
-            if not subscription_data:
+            if not timesheet_id:
                 return json.dumps({
                     "success": False,
-                    "error": "subscription_data with fund_manager_approval and compliance_officer_approval is required for cancel action"
+                    "error": "timesheet_id is required for update action"
                 })
             
-            missing_approvals = []
-            if "fund_manager_approval" not in subscription_data:
-                missing_approvals.append("fund_manager_approval")
-            if "compliance_officer_approval" not in subscription_data:
-                missing_approvals.append("compliance_officer_approval")
-            
-            if missing_approvals:
+            if timesheet_id not in employee_timesheets:
                 return json.dumps({
                     "success": False,
-                    "error": f"Missing required approvals: {', '.join(missing_approvals)}. Both Fund Manager and Compliance Officer approvals are required for cancellation."
+                    "error": f"Halt: Timesheet not found"
                 })
-
-            # Validate both approval fields
-            bool_error = validate_boolean_field(subscription_data["fund_manager_approval"], "fund_manager_approval")
-            if bool_error:
-                return json.dumps({"success": False, "error": bool_error})
             
-            bool_error = validate_boolean_field(subscription_data["compliance_officer_approval"], "compliance_officer_approval")
-            if bool_error:
-                return json.dumps({"success": False, "error": bool_error})
+            if not timesheet_data:
+                return json.dumps({
+                    "success": False,
+                    "error": "timesheet_data is required for update action"
+                })
             
-            subscription = subscriptions[subscription_id]
-            if subscription.get("status") == "cancelled":
-                return json.dumps({"success": False, "error": "Subscription is already cancelled"})
+            # Validate at least one optional field is provided
+            update_fields = ["clock_in_time", "clock_out_time", "break_duration_minutes", "total_hours", 
+                           "project_code", "status", "approved_by"]
+            provided_fields = [field for field in update_fields if field in timesheet_data]
+            if not provided_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": "At least one optional field must be provided for updates"
+                })
             
-            subscription["status"] = "cancelled"
-            subscription["updated_at"] = "2025-10-01T00:00:00"
+            # Get current timesheet for validation
+            current_timesheet = employee_timesheets[timesheet_id]
+            
+            # Validate only allowed fields for updates
+            invalid_fields = [field for field in timesheet_data.keys() if field not in update_fields]
+            if invalid_fields:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Invalid fields for timesheet update: {', '.join(invalid_fields)}"
+                })
+            
+            # Validate status if provided
+            if "status" in timesheet_data:
+                valid_statuses = ["draft", "submitted", "approved", "rejected"]
+                if timesheet_data["status"] not in valid_statuses:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Timesheet approval/correction failed - status must be one of: {', '.join(valid_statuses)}"
+                    })
+            
+            # Validate time order if both clock times are being updated
+            if "clock_in_time" in timesheet_data or "clock_out_time" in timesheet_data:
+                clock_in = timesheet_data.get("clock_in_time", current_timesheet.get("clock_in_time"))
+                clock_out = timesheet_data.get("clock_out_time", current_timesheet.get("clock_out_time"))
+                
+                if clock_in and clock_out and not is_valid_time_order(clock_in, clock_out):
+                    return json.dumps({
+                        "success": False,
+                        "error": "Halt: Timesheet approval/correction failed - clock_in_time must be before clock_out_time"
+                    })
+            
+            # Validate break_duration_minutes if provided
+            if "break_duration_minutes" in timesheet_data:
+                try:
+                    break_duration = int(timesheet_data["break_duration_minutes"])
+                    if break_duration < 0:
+                        return json.dumps({
+                            "success": False,
+                            "error": "Halt: Timesheet approval/correction failed - break_duration_minutes must be non-negative"
+                        })
+                except (ValueError, TypeError):
+                    return json.dumps({
+                        "success": False,
+                        "error": "Halt: Timesheet approval/correction failed - invalid break_duration_minutes format"
+                    })
+            
+            # Validate approved_by user exists if provided
+            if "approved_by" in timesheet_data and timesheet_data["approved_by"] is not None:
+                approver_id = str(timesheet_data["approved_by"])
+                if approver_id not in users:
+                    return json.dumps({
+                        "success": False,
+                        "error": f"Halt: Timesheet approval/correction failed - approver not found"
+                    })
+            
+            # Update timesheet entry
+            updated_timesheet = current_timesheet.copy()
+            for key, value in timesheet_data.items():
+                updated_timesheet[key] = value
+            
+            # Recalculate total_hours if times or break changed but total_hours not explicitly provided
+            if ("clock_in_time" in timesheet_data or "clock_out_time" in timesheet_data or 
+                "break_duration_minutes" in timesheet_data) and "total_hours" not in timesheet_data:
+                clock_in = updated_timesheet.get("clock_in_time")
+                clock_out = updated_timesheet.get("clock_out_time")
+                break_min = updated_timesheet.get("break_duration_minutes", 0)
+                if clock_in and clock_out:
+                    updated_timesheet["total_hours"] = calculate_total_hours(clock_in, clock_out, break_min)
+            
+            updated_timesheet["updated_at"] = "2025-10-01T12:00:00"
+            employee_timesheets[timesheet_id] = updated_timesheet
             
             return json.dumps({
-                "success": True, "action": "cancel", "subscription_id": str(subscription_id),
-                "message": f"Subscription {subscription_id} cancelled successfully.",
-                "subscription_data": subscription
+                "success": True,
+                "action": "update",
+                "timesheet_id": timesheet_id,
+                "message": f"Timesheet entry {timesheet_id} updated successfully",
+                "timesheet_data": updated_timesheet
             })
 
     @staticmethod
-    def create_commitment_invoke(data: Dict[str, Any], fund_id: str, investor_id: str, 
-               commitment_amount: float, commitment_date: str, 
-               status: str = "pending", compliance_officer_approval: bool = False) -> str:
-        
-        def generate_id(table: Dict[str, Any]) -> int:
-            if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
-        
-        funds = data.get("funds", {})
-        investors = data.get("investors", {})
-        commitments = data.get("commitments", {})
-        
-        # Validate required approvals first
-        if not compliance_officer_approval:
-            return json.dumps({
-                "success": False,
-                "error": "Compliance Officer approval is required for commitment creation"
-            })
-        
-        # Validate fund exists
-        if str(fund_id) not in funds:
-            return json.dumps({"error": f"Fund {fund_id} not found"})
-        
-        # Validate investor exists  
-        if str(investor_id) not in investors:
-            return json.dumps({"error": f"Investor {investor_id} not found"})
-        
-        # Validate status
-        valid_statuses = ["pending", "fulfilled"]
-        if status not in valid_statuses:
-            return json.dumps({"error": f"Invalid status. Must be one of {valid_statuses}"})
-        
-        # Check if commitment already exists for this investor-fund combination
-        for commitment in commitments.values():
-            if (commitment.get("fund_id") == fund_id and 
-                commitment.get("investor_id") == investor_id):
-                return json.dumps({"error": "An investor can have only one commitment per fund"})
-        
-        commitment_id = generate_id(commitments)
-        timestamp = "2025-10-01T00:00:00"
-        
-        new_commitment = {
-            "commitment_id": str(commitment_id) if commitment_id is not None else None,
-            "fund_id": str(fund_id) if fund_id is not None else None,
-            "investor_id": str(investor_id) if investor_id is not None else None,
-            "commitment_amount": commitment_amount,
-            "commitment_date": commitment_date,
-            "status": status,
-            "updated_at": timestamp
-        }
-        
-        commitments[str(commitment_id)] = new_commitment
-        return json.dumps(new_commitment)
-
-    @staticmethod
-    def discover_billing_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+    def discover_leave_entities_invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
         """
-        Discover billing entities: invoices and payments.
+        Discover leave entities.
         
         Supported entities:
-        - invoices: Invoice records by invoice_id, commitment_id, invoice_date, due_date, amount, status
-        - payments: Payment records by payment_id, invoice_id, subscription_id, payment_date, amount, payment_method, status
+        - leave_requests: Leave requests by leave_id, employee_id, leave_type, start_date, end_date, days_requested, status, approved_by, approval_date, remaining_balance, created_at, updated_at
         """
-        if entity_type not in ["invoices", "payments"]:
+        if entity_type not in ["leave_requests"]:
             return json.dumps({
                 "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'invoices' or 'payments'"
+                "error": f"Invalid entity_type '{entity_type}'. Must be 'leave_requests'"
             })
         
         if not isinstance(data, dict):
@@ -3201,13 +4319,7 @@ class Tools:
             })
         
         results = []
-        
-        id_field = {
-            "invoices": "invoice_id",
-            "payments": "payment_id"
-        }[entity_type]
-        
-        entities = data.get(entity_type, {})
+        entities = data.get("leave_requests", {})
         
         for entity_id, entity_data in entities.items():
             if filters:
@@ -3218,167 +4330,14 @@ class Tools:
                         match = False
                         break
                 if match:
-                    results.append({**entity_data, id_field: entity_id})
+                    results.append({**entity_data, "leave_id": entity_id})
             else:
-                results.append({**entity_data, id_field: entity_id})
+                results.append({**entity_data, "leave_id": entity_id})
         
         return json.dumps({
             "success": True,
             "entity_type": entity_type,
             "count": len(results),
             "results": results
-        })
-
-    @staticmethod
-    def execute_trade_invoke(data: Dict[str, Any], fund_id: str, instrument_id: str, 
-               quantity: float, side: str, trade_date: str, price: float,
-               fund_manager_approval: bool) -> str:
-        """
-        Execute a trade for a fund after all approvals are obtained.
-        
-        This tool performs step 3 of the Trade Execution & Post-Trade Controls SOP.
-        Prerequisites: Fund Manager approval must be verified before calling this tool.
-        """
-        
-        def generate_id(table: Dict[str, Any]) -> int:
-            if not table:
-                return 1
-            return max(int(k) for k in table.keys()) + 1
-        
-        funds = data.get("funds", {})
-        instruments = data.get("instruments", {})
-        trades = data.get("trades", {})
-        
-        # Validate required approval first
-        if not fund_manager_approval:
-            return json.dumps({
-                "success": False,
-                "error": "Fund Manager approval is required for trade execution"
-            })
-        
-        # Validate required parameters
-        if not fund_id:
-            return json.dumps({
-                "success": False,
-                "error": "fund_id is required"
-            })
-        
-        if not instrument_id:
-            return json.dumps({
-                "success": False,
-                "error": "instrument_id is required"
-            })
-        
-        if not side:
-            return json.dumps({
-                "success": False,
-                "error": "side is required"
-            })
-        
-        if not trade_date:
-            return json.dumps({
-                "success": False,
-                "error": "trade_date is required"
-            })
-        
-        # Validate fund exists
-        if str(fund_id) not in funds:
-            return json.dumps({
-                "success": False,
-                "error": f"Fund {fund_id} not found"
-            })
-        
-        # Validate instrument exists
-        if str(instrument_id) not in instruments:
-            return json.dumps({
-                "success": False,
-                "error": f"Instrument {instrument_id} not found"
-            })
-        
-        # Validate side
-        valid_sides = ["buy", "sell"]
-        if side.lower() not in valid_sides:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid side. Must be one of {valid_sides}"
-            })
-        
-        # Validate quantity
-        try:
-            quantity = float(quantity)
-            if quantity <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "Quantity must be positive"
-                })
-        except (ValueError, TypeError):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid quantity format"
-            })
-        
-        # Validate price
-        try:
-            price = float(price)
-            if price <= 0:
-                return json.dumps({
-                    "success": False,
-                    "error": "Price must be positive"
-                })
-        except (ValueError, TypeError):
-            return json.dumps({
-                "success": False,
-                "error": "Invalid price format"
-            })
-        
-        # Validate fund status is open
-        fund = funds[str(fund_id)]
-        if fund.get("status", "").lower() != "open":
-            return json.dumps({
-                "success": False,
-                "error": f"Fund {fund_id} is not open for trading"
-            })
-        
-        # Validate instrument status is active
-        instrument = instruments[str(instrument_id)]
-        if instrument.get("status", "").lower() != "active":
-            return json.dumps({
-                "success": False,
-                "error": f"Instrument {instrument_id} is not active for trading"
-            })
-        
-        # Execute the trade
-        trade_id = generate_id(trades)
-        timestamp = "2025-10-01T00:00:00"
-        
-        new_trade = {
-            "trade_id": str(trade_id),
-            "fund_id": str(fund_id),
-            "instrument_id": str(instrument_id),
-            "trade_date": trade_date,
-            "quantity": quantity,
-            "price": price,
-            "side": side.lower(),
-            "status": "executed",
-            "created_at": timestamp
-        }
-        
-        trades[str(trade_id)] = new_trade
-        
-        return json.dumps({
-            "success": True,
-            "trade_id": str(trade_id) if trade_id is not None else None,
-            "message": f"Trade {trade_id} executed successfully",
-            "trade_data": {
-                "trade_id": str(new_trade["trade_id"]) if new_trade["trade_id"] is not None else None,
-                "fund_id": str(new_trade["fund_id"]) if new_trade["fund_id"] is not None else None,
-                "instrument_id": str(new_trade["instrument_id"]) if new_trade["instrument_id"] is not None else None,
-                "quantity": new_trade["quantity"],
-                "price": new_trade["price"],
-                "side": new_trade["side"],
-                "status": new_trade["status"],
-                "trade_date": new_trade["trade_date"],
-                "created_at": new_trade["created_at"]
-            }
         })
 

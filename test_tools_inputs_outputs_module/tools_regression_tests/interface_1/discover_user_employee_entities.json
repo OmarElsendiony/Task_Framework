@@ -1,0 +1,17 @@
+{
+    "env": "hr_experts",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_benefits_entities",
+                "arguments": {
+                    "entity_type": "benefits_plans",
+                    "filters": {
+                        "expiration_date": null
+                    }
+                }
+            }
+        ]
+    }
+}
