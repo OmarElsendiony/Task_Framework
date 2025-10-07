@@ -1,0 +1,17 @@
+{
+    "env": "incident_management_experts",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_subscription_agreements",
+                "arguments": {
+                    "entity_type": "sla_agreements",
+                    "filters": {
+                        "severity_level": "P1"
+                    }
+                }
+            }
+        ]
+    }
+}

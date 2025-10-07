@@ -1,0 +1,19 @@
+{
+    "env": "incident_management_experts",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_incident_entities",
+                "arguments": {
+                    "entity_type": "incidents",
+                    "filters": {
+                        "severity": "P1",
+                        "status": "open",
+                        "category": "system_outage"
+                    }
+                }
+            }
+        ]
+    }
+}

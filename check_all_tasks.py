@@ -13,6 +13,23 @@ def find_all_task_files(base_path="week_10"):
     task_files = glob.glob(pattern, recursive=True)
     return task_files
 
+def strict_equal(obj1, obj2):
+    """Check if two objects are equal in both value and type."""
+    if type(obj1) != type(obj2):
+        return False
+    
+    if isinstance(obj1, dict):
+        if obj1.keys() != obj2.keys():
+            return False
+        return all(strict_equal(obj1[key], obj2[key]) for key in obj1.keys())
+    
+    elif isinstance(obj1, (list, tuple)):
+        if len(obj1) != len(obj2):
+            return False
+        return all(strict_equal(a, b) for a, b in zip(obj1, obj2))
+    
+    else:
+        return obj1 == obj2
 
 def run_single_task(task_file_path):
     """
@@ -46,7 +63,7 @@ def run_single_task(task_file_path):
             res = execute_api(api_name=action_name, arguments=arguments)
             # print(f"Result: {res[0] if res else 'No result'}")
             # print(action.get("output", "No output specified"))
-            sameoutput = (res[0] == action.get("output", "No output specified"))
+            sameoutput = strict_equal(res[0] if res else None, action.get("output", None))
             if not sameoutput:
                 error_msg = f"Output mismatch in action '{action_name}': expected {action.get('output', 'No output specified')}, got {res[0] if res else 'No result'}"
                 # print(f"  ERROR: {error_msg}")

@@ -1,0 +1,39 @@
+{
+  "task_file": "tools_regression_tests/interface_1/manage_clients_test2.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "update",
+        "client_id": "1",
+        "client_data": {
+          "client_type": "mid_market",
+          "contact_email": "newemail@client.com",
+          "industry": "Financial Services",
+          "status": "active"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "client_id": "1",
+          "message": "Client 1 updated successfully",
+          "client_data": {
+            "client_id": "1",
+            "client_name": "Ramos PLC",
+            "registration_number": "REG668888",
+            "contact_email": "newemail@client.com",
+            "client_type": "mid_market",
+            "industry": "Financial Services",
+            "country": "United States",
+            "status": "active",
+            "created_at": "2024-02-19T18:40:09.445091",
+            "updated_at": "2025-10-04T12:00:00"
+          }
+        },
+        200
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_file": "tools_regression_tests/interface_1/discover_escalations_test1.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "entity_type": "escalations",
+        "filters": {
+          "incident_id": "1"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "escalations",
+          "count": 1,
+          "results": [
+            {
+              "escalation_id": "1",
+              "escalation_code": "ESC-2025-00001",
+              "incident_id": "1",
+              "escalated_by_id": "47",
+              "escalated_to_id": "526",
+              "escalation_reason": "sla_breach",
+              "escalation_level": "vendor",
+              "escalated_at": "2025-02-18T05:03:14.416025",
+              "acknowledged_at": "2025-02-18T08:03:14.416025",
+              "resolved_at": "2025-02-18T12:03:14.416025",
+              "status": "resolved",
+              "created_at": "2025-02-18T05:03:14.416025"
+            }
+          ]
+        },
+        200
+      ]
+    }
+  ]
+}

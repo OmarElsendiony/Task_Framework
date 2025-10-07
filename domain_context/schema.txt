@@ -1,393 +1,391 @@
 // Use DBML to define your database structure
-// HR Management System Database Schema
-// This schema represents a comprehensive database for managing human resources operations,
-// including recruitment, payroll, employee management, compliance, and AI/LLM governance
+// Docs: https://dbml.dbdiagram.io/docs
+
+// B2B Incident Management Database Schema
+// This schema represents a comprehensive database for managing incidents,
+// clients, products, infrastructure, and operational processes
+
+Table clients {
+  client_id string [primary key]
+  client_name varchar(100) [not null]
+  registration_number varchar(100)
+  contact_email string
+  client_type enum('enterprise','mid_market','small_business','startup') [not null]
+  industry varchar(100)
+  country varchar(100)
+  status enum('active','inactive','suspended') [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+}
+
+Table vendors {
+  vendor_id string [primary key]
+  vendor_name varchar(100) [not null]
+  vendor_type enum('cloud_provider','payment_processor','software_vendor','infrastructure_provider','security_vendor') [not null]
+  contact_email varchar(100)
+  contact_phone varchar(20)
+  // escalation_contact varchar(100)
+  status enum('active','inactive','suspended') [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
 
 Table users {
   user_id string [primary key]
+  client_id string
+  vendor_id string
   first_name varchar(100) [not null]
   last_name varchar(100) [not null]
   email varchar(320) [not null, unique]
-  phone_number varchar(20)
-  role enum('hr_director','hr_manager','recruiter','payroll_administrator','hiring_manager','finance_officer','it_administrator','compliance_officer','employee') [not null]
-  status enum('active','inactive','suspended') [not null, default: 'active']
-  // last_login timestamp
-  mfa_enabled boolean [default: true]
+  phone varchar(20)
+  role enum('incident_manager','technical_support', 'account_manager','executive','vendor_contact','system_administrator', 'client_contact') [not null]
+  department varchar(100)
+  timezone varchar(50) [not null]
+  status enum('active','inactive','on_leave') [not null, default: 'active']
   created_at timestamp [not null, default: `NOW()`]
   updated_at timestamp [not null, default: `NOW()`]
 }
 
-Table departments {
-  department_id string [primary key]
-  department_name varchar(255) [not null]
-  manager_id string [not null]
-  budget decimal(15,2)
-  status enum('active','inactive') [not null, default: 'active']
+Table products {
+  product_id string [primary key]
+  product_name varchar(100) [not null]
+  product_type enum('payment_processing','banking_system','api_gateway','data_integration','reporting_platform','security_service','backup_service','monitoring_tool') [not null]
+  version varchar(50)
+  vendor_support_id string // references vendors.vendor_id
+  // internal_team_lead_id string // references users.user_id
+  status enum('active','deprecated','maintenance') [not null]
   created_at timestamp [not null, default: `NOW()`]
   updated_at timestamp [not null, default: `NOW()`]
 }
 
-Table job_positions {
-  position_id string [primary key]
-  title varchar(255) [not null]
-  department_id string [not null]
-  job_level enum('entry','junior','mid','senior','lead','manager','director','executive') [not null]
-  employment_type enum('full_time','part_time','contract','intern','temporary') [not null]
-  hourly_rate_min  decimal(12,2)
-  hourly_rate_max  decimal(12,2)
-  // required_skills text
-  status enum('open','closed','draft') [not null]
+Table infrastructure_components {
+  component_id string [primary key]
+  product_id string
+  component_name varchar(100) [not null]
+  component_type enum('sftp_server','api_endpoint','database','load_balancer','firewall','authentication_service','payment_gateway','file_storage','monitoring_system') [not null]
+  environment enum('production','staging','development','test') [not null]
+  location varchar(100)
+  port_number int
+  status enum('online','offline','maintenance','degraded') [not null]
   created_at timestamp [not null, default: `NOW()`]
   updated_at timestamp [not null, default: `NOW()`]
 }
 
-Table skills {
-  skill_id string [primary key]
-  skill_name text [not null]
-  status enum('active','inactive') [default: 'active']
-}
-
-Table job_position_skills {
-  position_id string [not null]
-  skill_id string [not null]
-  primary key (position_id, skill_id)
-}
-
-Ref: job_position_skills.position_id > job_positions.position_id
-Ref: job_position_skills.skill_id > skills.skill_id
-
-
-Table employees {
-  employee_id string [primary key]
-  user_id string [not null, unique]
-  position_id string [not null]
-  hire_date date [not null]
-  employment_status enum('active','terminated','on_leave','suspended') [not null, default: 'active']
-  manager_id string
-  date_of_birth date
-  address text
-  hourly_rate int
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table candidates {
-  candidate_id string [primary key]
-  first_name varchar(100) [not null]
-  last_name varchar(100) [not null]
-  email varchar(320) [not null]
-  phone_number varchar(20)
-  address text
-  // resume_file_path varchar(500)
-  // linkedin_profile varchar(500)
-  source enum('job_board','referral','company_website','recruiter','social_media','career_fair') [not null]
-  status enum('new','screening','interviewing','offer','hired','rejected','withdrawn') [not null, default: 'new']
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table job_applications {
-  application_id string [primary key]
-  candidate_id string [not null]
-  position_id string [not null]
-  application_date date [not null]
-  status enum('submitted','under_review','screening','interviewing','offer_made','accepted','rejected','withdrawn') [not null, default: 'submitted']
-  recruiter_id string [not null]
-  // cover_letter text
-  ai_screening_score decimal(5,2)
-  // ai_recommendations text
-  final_decision enum('hire','reject','hold') 
-  // decision_reason text
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table interviews {
-  interview_id string [primary key]
-  application_id string [not null]
-  interviewer_id string [not null]
-  interview_type enum('phone_screening','technical','behavioral','panel','final') [not null]
-  scheduled_date timestamp [not null]
-  duration_minutes integer [default: 60]
-  status enum('scheduled','completed','cancelled','no_show') [not null, default: 'scheduled']
-  overall_rating enum('excellent','good','average','below_average','poor')
-  technical_score decimal(3,1)
-  communication_score decimal(3,1)
-  cultural_fit_score decimal(3,1)
-  // notes text
-  recommendation enum('strong_hire','hire','no_hire','strong_no_hire')
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table payroll_records {
-  payroll_id string [primary key]
-  employee_id string [not null]
-  pay_period_start date [not null]
-  pay_period_end date [not null]
-  hours_worked decimal(6,2)
-  // overtime_hours decimal(6,2)
-  hourly_rate decimal(12,2) [not null]
-  // overtime_pay decimal(12,2)
-  // bonus decimal(12,2)
-  // gross_pay decimal(12,2) [not null]
-  // total_deductions decimal(12,2) [not null]   // 👈 single field
-  // net_pay decimal(12,2) [not null]
-  payment_date date
-  status enum('draft','approved','paid','cancelled') [not null, default: 'draft']
-  approved_by string
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table payroll_deductions {
-  deduction_id string [primary key]
-  payroll_id string [not null]
-  deduction_type enum('tax','insurance','retirement','garnishment','equipment','other') [not null]
-  // description varchar(255) [not null]
-  amount decimal(10,2) [not null]
-  // is_pre_tax boolean [default: false]
-  created_by string [not null]
-  created_at timestamp [not null, default: `NOW()`]
-}
-
-Table benefits_plans {
-  plan_id string [primary key]
-  plan_name varchar(255) [not null]
-  plan_type enum('health_insurance','dental','vision','life_insurance','disability','retirement_401k','pto','flexible_spending') [not null]
-  provider varchar(255)
-  // description text
-  employee_cost decimal(10,2)
-  employer_cost decimal(10,2)
-  status enum('active','inactive') [not null, default: 'active']
-  effective_date date [not null]
-  expiration_date date
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table employee_benefits {
-  enrollment_id string [primary key]
-  employee_id string [not null]
-  plan_id string [not null]
-  enrollment_date date [not null]
-  status enum('active','terminated','pending') [not null, default: 'active']
-  // employee_contribution decimal(10,2)
-  coverage_level enum('employee_only','employee_spouse','employee_children','family') [not null]
-  beneficiary_name varchar(255)
-  beneficiary_relationship varchar(100)
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table performance_reviews {
-  review_id string [primary key]
-  employee_id string [not null]
-  reviewer_id string [not null]
-  review_period_start date [not null]
-  review_period_end date [not null]
-  review_type enum('annual','quarterly','probationary','project_based') [not null]
-  overall_rating enum('exceeds_expectations','meets_expectations','below_expectations','unsatisfactory') [not null]
-  goals_achievement_score decimal(3,1)
-  communication_score decimal(3,1)
-  teamwork_score decimal(3,1)
-  leadership_score decimal(3,1)
-  technical_skills_score decimal(3,1)
-  // comments text
-  // development_goals text
-  status enum('draft','submitted','approved') [not null, default: 'draft']
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-// Table leave_requests {
-//   leave_id string [primary key]
-//   employee_id string [not null]
-//   leave_type enum('annual','sick','fmla','personal','bereavement','jury_duty') [not null]
-//   start_date date [not null]
-//   end_date date [not null]
-//   days_requested decimal(3,1) [not null]
-//   // reason text
-//   status enum('pending','approved','rejected','cancelled') [not null, default: 'pending']
-//   processed_by string
-//   processing_date timestamp
-//   remaining_balance decimal(5,1)
-//   created_at timestamp [not null, default: `NOW()`]
-//   updated_at timestamp [not null, default: `NOW()`]
-// }
-
-Table leave_requests {
-  leave_id string [primary key]
-  employee_id string [not null]
-  leave_type enum('annual','sick','fmla','personal','bereavement','jury_duty') [not null]
+Table client_subscriptions {
+  subscription_id string [primary key]
+  client_id string [not null]
+  product_id string [not null]
+  subscription_type enum('full_service','limited_service','trial','custom') [not null]
   start_date date [not null]
-  end_date date [not null]
-  days_requested decimal(3,1) [not null]
-  status enum('pending','approved','rejected','cancelled') [not null, default: 'pending']
-  approved_by string
-  approval_date timestamp
-  remaining_balance decimal(5,1) // filled after approval
+  end_date date
+  sla_tier enum('premium','standard','basic') [not null]
+  rto_hours int [not null] // Recovery Time Objective
+  status enum('active','expired','cancelled','suspended') [not null]
   created_at timestamp [not null, default: `NOW()`]
   updated_at timestamp [not null, default: `NOW()`]
 }
 
+Table sla_agreements {
+  sla_id string [primary key]
+  subscription_id string [not null]
+  severity_level enum('P1','P2','P3','P4') [not null]
+  response_time_minutes int [not null]
+  resolution_time_hours int [not null]
+  availability_percentage decimal(5,2)
+  created_at timestamp [not null, default: `NOW()`]
+}
 
-
-Table expense_reimbursements {
-  reimbursement_id string [primary key]
-  employee_id string [not null]
-  expense_date date [not null]
-  amount decimal(10,2) [not null]
-  expense_type enum('travel','meals','equipment','training','other') [not null]
-  // description text [not null]
-  receipt_file_path varchar(500)
-  status enum('submitted','approved','rejected','paid') [not null, default: 'submitted']
-  approved_by string
-  payment_date date
+Table incidents {
+  incident_id string [primary key]
+  incident_code varchar(50) [unique, not null] // e.g., 'INC-2024-00123', 'INCIDENT-001234'
+  title varchar(100) [not null]
+  reporter_id string [not null]
+  assigned_manager_id string
+  client_id string [not null]
+  component_id string
+  // vendor_id string // For vendor-related incidents
+  // vendor_ticket_id varchar(100) // Vendor's ticket reference
+  // vendor_status varchar(100) // Status from vendor side
+  // vendor_estimated_resolution timestamp // Vendor's ETA
+  severity enum('P1','P2','P3','P4') [not null]
+  status enum('open','in_progress','resolved','closed') [not null]
+  impact enum('critical','high','medium','low') [not null]
+  urgency enum('critical','high','medium','low') [not null]
+  // category enum('client_onboarding','client_support','client_escalation','data_update','system_outage','security_breach','performance_issue','integration_failure','vendor_issue') [not null]
+  
+  // Technical categories - WHAT went wrong
+  category enum(
+    'system_outage',
+    'performance_degradation',
+    'security_incident',
+    'data_corruption',
+    'integration_failure',
+    'network_issue',
+    'hardware_failure',
+    'software_bug',
+    'configuration_error',
+    'capacity_issue',
+    'backup_failure',
+    'authentication_failure',
+    'api_error',
+    'database_issue',
+    'service_unavailable'
+  ) [not null]
+  
+  // Business/operational context - WHO is affected and WHY it matters
+  detection_source enum(
+    'client_reported',
+    'internally_detected',
+    'monitoring_alert',
+    'vendor_reported',
+    'scheduled_maintenance',
+    'emergency_maintenance'
+  ) [not null]
+  
+  detected_at timestamp [not null]
+  resolved_at timestamp
+  closed_at timestamp
+  rto_breach boolean [default: false]
+  sla_breach boolean [default: false]
+  is_recurring boolean [default: false]
+  downtime_minutes int
   created_at timestamp [not null, default: `NOW()`]
   updated_at timestamp [not null, default: `NOW()`]
 }
 
-Table training_programs {
-  program_id string [primary key]
-  program_name varchar(255) [not null]
-  program_type enum('onboarding','compliance','technical','leadership','safety','diversity','ai_ethics') [not null]
-  // description text
-  duration_hours integer [not null]
-  delivery_method enum('in_person','online','hybrid','self_paced') [not null]
-  mandatory boolean [default: false]
-  status enum('active','inactive','draft') [not null, default: 'active']
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table employee_training {
-  training_record_id string [primary key]
-  employee_id string [not null]
-  program_id string [not null]
-  enrollment_date date [not null]
-  completion_date date
-  status enum('enrolled','in_progress','completed','failed','cancelled') [not null, default: 'enrolled']
-  score decimal(5,2)
-  certificate_issued boolean [default: false]
-  expiry_date date
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table audit_logs {
-  log_id string [primary key]
-  user_id string [not null]
-  action enum('create','read','update','delete','approve','reject') [not null]
-  reference_type string [not null]
-  reference_id string [not null]
-  field_name varchar(100)
-  old_value text
-  new_value text
-  timestamp timestamp [not null, default: `NOW()`]
-}
-
-
-// Table compliance_records {
-//   compliance_id string [primary key]
-//   record_type enum('eeoc_report','flsa_audit','ada_accommodation','fmla_leave','safety_incident','data_breach','ai_bias_test') [not null]
-//   employee_id string
-//   // description text [not null]
-//   compliance_officer_id string [not null]
-//   status enum('open','under_review','resolved','escalated') [not null, default: 'open']
-//   severity enum('low','medium','high','critical') [not null]
-//   due_date date
-//   // resolution_notes text
+// Table incident_updates {
+//   update_id string [primary key]
+//   incident_id string [not null]
+//   updated_by_id string [not null]
+//   update_type enum('status_change','severity_change','assignment','workaround','resolution','communication') [not null]
+//   field_name varchar(50) [not null]
+//   old_value varchar(100)
+//   new_value varchar(100)
 //   created_at timestamp [not null, default: `NOW()`]
-//   updated_at timestamp [not null, default: `NOW()`]
 // }
 
-
-Table document_storage {
-  document_id string [primary key]
-  document_name varchar(255) [not null]
-  document_type enum('contract','policy','handbook','form','certificate','report','resume','offer_letter') [not null]
-  employee_id string
-  file_path varchar(500) [not null]
-  // file_size_bytes bigint
-  upload_date timestamp [not null]
-  uploaded_by string [not null]
-  confidentiality_level enum('public','internal','confidential','restricted') [not null, default: 'internal']
-  retention_period_years integer [not null, default: 7]
-  expiry_date date
-  status enum('active','archived','deleted') [not null, default: 'active']
+Table audit_log {
+  audit_id string [primary key]
+  entity_type varchar(100) [not null] // Which table was modified (e.g., 'incidents', 'clients', 'users')
+  entity_id string [not null] // ID of the record that changed
+  operation_type enum('INSERT','UPDATE','DELETE') [not null]
+  changed_by_id string [not null] // User who made the change
+  field_name varchar(100) // Specific field that changed (can be null for multi-field updates)
+  old_value text // Previous value
+  new_value text // New value
   created_at timestamp [not null, default: `NOW()`]
 }
 
-// RELATIONSHIPS
+Table workarounds {
+  workaround_id string [primary key]
+  incident_id string [not null]
+  implemented_by_id string [not null]
+  effectiveness enum('complete','partial','minimal') [not null]
+  status enum('active','inactive','replaced') [not null]
+  implemented_at timestamp [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
 
-// User and Employee relationships
-Ref: employees.user_id > users.user_id
-Ref: employees.manager_id > employees.employee_id
-Ref: employees.position_id > job_positions.position_id
+Table root_cause_analysis {
+  rca_id string [primary key]
+  incident_id string [not null]
+  analysis_method enum('five_whys','fishbone','timeline_analysis','fault_tree') [not null]
+  conducted_by_id string [not null]
+  completed_at timestamp
+  status enum('in_progress','completed','approved') [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
 
-// Department relationships
-Ref: departments.manager_id > employees.employee_id
-Ref: job_positions.department_id > departments.department_id
+Table communications {
+  communication_id string [primary key]
+  incident_id string [not null]
+  sender_id string [not null]
+  recipient_id string
+  recipient_type enum('client','internal_team','executive','vendor','regulatory') [not null]
+  communication_type enum('email','sms','phone_call','status_page','portal_update') [not null]
+  sent_at timestamp [not null]
+  delivery_status enum('sent','delivered','failed','pending') [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
 
-// Application and Interview relationships
-Ref: job_applications.candidate_id > candidates.candidate_id
-Ref: job_applications.position_id > job_positions.position_id
-Ref: job_applications.recruiter_id > users.user_id
-Ref: interviews.application_id > job_applications.application_id
-Ref: interviews.interviewer_id > users.user_id
+Table escalations {
+  escalation_id string [primary key]
+  escalation_code varchar(50) [unique, not null] // e.g., 'ESC-2024-00789', 'ESCALATION-001234'
+  incident_id string [not null]
+  escalated_by_id string [not null]
+  escalated_to_id string [not null]
+  escalation_reason enum('sla_breach','severity_increase','resource_unavailable','executive_request','client_demand') [not null]
+  escalation_level enum('technical','management','executive','vendor') [not null]
+  escalated_at timestamp [not null]
+  acknowledged_at timestamp
+  resolved_at timestamp
+  status enum('open','acknowledged','resolved') [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
 
-// Payroll relationships
-Ref: payroll_records.employee_id > employees.employee_id
-Ref: payroll_records.approved_by > users.user_id
+Table change_requests {
+  change_id string [primary key]
+  change_code varchar(50) [unique, not null] // e.g., 'CHG-2024-00456', 'CR-001234'
+  incident_id string
+  title varchar(100) [not null]
+  change_type enum('emergency','standard','normal') [not null]
+  requested_by_id string [not null]
+  approved_by_id string
+  risk_level enum('high','medium','low') [not null]
+  scheduled_start timestamp
+  scheduled_end timestamp
+  actual_start timestamp
+  actual_end timestamp
+  status enum('requested','approved','scheduled','in_progress','completed','failed','rolled_back') [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
 
-// Benefits relationships
-Ref: employee_benefits.employee_id > employees.employee_id
-Ref: employee_benefits.plan_id > benefits_plans.plan_id
+Table rollback_requests {
+  rollback_id string [primary key]
+  rollback_code varchar(50) [unique, not null] // e.g., 'RBK-2024-00321', 'ROLLBACK-001234'
+  change_id string [not null]
+  incident_id string
+  requested_by_id string [not null]
+  approved_by_id string
+  executed_at timestamp
+  validation_completed boolean [default: false]
+  status enum('requested','approved','in_progress','completed','failed') [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
 
-// Performance and Training relationships
-Ref: performance_reviews.employee_id > employees.employee_id
-Ref: performance_reviews.reviewer_id > users.user_id
-Ref: employee_training.employee_id > employees.employee_id
-Ref: employee_training.program_id > training_programs.program_id
-
-Ref: audit_logs.user_id > users.user_id
 
 
-// Compliance and Incident relationships
-// Ref: compliance_records.employee_id > employees.employee_id
-// Ref: compliance_records.compliance_officer_id > users.user_id
+// Vendor incidents are now handled directly in the incidents table
+// with vendor_id and vendor_ticket_id fields
 
-// Document relationships
-Ref: document_storage.employee_id > employees.employee_id
-Ref: document_storage.uploaded_by > users.user_id
+Table metrics {
+  metric_id string [primary key]
+  incident_id string [not null]
+  metric_type enum('MTTA','MTTD','MTTR','MTTM','FTR') [not null]
+  value_minutes int [not null]
+  target_minutes int
+  recorded_at timestamp [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
 
-Table employee_timesheets {
-  timesheet_id string [primary key]
-  employee_id string [not null]
-  work_date date [not null]
-  clock_in_time timestamp
-  clock_out_time timestamp
-  break_duration_minutes integer [default: 0]
-  total_hours decimal(4,2)
-  // overtime_hours decimal(4,2) [default: 0]
-  project_code varchar(50)
-  // notes text
-  approved_by string
-  status enum('draft','submitted','approved','rejected') [not null, default: 'draft']
+// Table compliance_events {
+//   compliance_id string [primary key]
+//   incident_id string [not null]
+//   regulation_type enum('GDPR','HIPAA','SOX','PCI_DSS','FFIEC','CCPA','FCC','NERC') [not null]
+//   event_type enum('breach_assessment','notification_required','reporting_deadline','audit_trigger') [not null]
+//   deadline timestamp
+//   completed_at timestamp
+//   responsible_party_id string [not null]
+//   status enum('pending','in_progress','completed','overdue') [not null]
+//   created_at timestamp [not null, default: `NOW()`]
+// }
+
+Table incident_reports {
+  report_id string [primary key]
+  incident_id string [not null]
+  report_type enum('executive_summary','technical_details','business_impact','compliance_report','post_mortem') [not null]
+  generated_by_id string [not null]
+  generated_at timestamp [not null]
+  status enum('draft','completed','distributed') [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
+
+Table knowledge_base_articles {
+  article_id string [primary key]
+  // article_code varchar(50) [unique, not null] // e.g., 'KB-00741'
+  incident_id string
+  title varchar(100) [not null]
+  article_type enum('troubleshooting','resolution_steps','prevention_guide','faq') [not null]
+  created_by_id string [not null]
+  reviewed_by_id string
+  category enum(
+    'authentication_issues',
+    'payment_processing', 
+    'api_integration',
+    'data_synchronization',
+    'system_outages',
+    'performance_degradation',
+    'security_incidents',
+    'backup_recovery',
+    'user_management',
+    'billing_issues',
+    'compliance_procedures',
+    'vendor_escalations',
+    'configuration_changes',
+    'monitoring_alerts',
+    'network_connectivity',
+    'database_issues',
+    'file_transfer_problems',
+    'reporting_errors',
+    'mobile_app_issues',
+    'browser_compatibility',
+    'third_party_integrations',
+    'scheduled_maintenance',
+    'emergency_procedures',
+    'client_onboarding',
+    'account_provisioning',
+    'sla_management',
+    'incident_response',
+    'change_management',
+    'capacity_planning',
+    'disaster_recovery'
+  )
+  view_count int [default: 0]
+  status enum('draft','published','archived') [not null]
   created_at timestamp [not null, default: `NOW()`]
   updated_at timestamp [not null, default: `NOW()`]
 }
 
-// Additional relationships for new tables
-Ref: employee_timesheets.employee_id > employees.employee_id
-Ref: employee_timesheets.approved_by > users.user_id
+Table post_incident_reviews {
+  pir_id string [primary key]
+  incident_id string [not null]
+  scheduled_date timestamp [not null]
+  facilitator_id string [not null]
+  timeline_accuracy_rating int
+  communication_effectiveness_rating int
+  technical_response_rating int
+  status enum('scheduled','completed','cancelled') [not null]
+  created_at timestamp [not null, default: `NOW()`]
+}
 
-Ref: payroll_deductions.payroll_id > payroll_records.payroll_id
-Ref: payroll_deductions.created_by > users.user_id
-
-Ref: leave_requests.employee_id > employees.employee_id
-Ref: leave_requests.approved_by > users.user_id
-
-Ref: expense_reimbursements.employee_id > employees.employee_id
-Ref: expense_reimbursements.approved_by > users.user_id
+// Relationships
+Ref: users.client_id > clients.client_id
+Ref: users.vendor_id > vendors.vendor_id
+// Ref: products.internal_team_lead_id > users.user_id
+Ref: products.vendor_support_id > vendors.vendor_id
+Ref: client_subscriptions.client_id > clients.client_id
+Ref: client_subscriptions.product_id > products.product_id
+Ref: sla_agreements.subscription_id > client_subscriptions.subscription_id
+Ref: incidents.reporter_id > users.user_id
+Ref: incidents.assigned_manager_id > users.user_id
+Ref: incidents.client_id > clients.client_id
+Ref: incidents.component_id > infrastructure_components.component_id
+// Ref: incidents.vendor_id > vendors.vendor_id
+// Ref: incident_updates.incident_id > incidents.incident_id
+// Ref: incident_updates.updated_by_id > users.user_id
+Ref: workarounds.incident_id > incidents.incident_id
+Ref: workarounds.implemented_by_id > users.user_id
+Ref: root_cause_analysis.incident_id > incidents.incident_id
+Ref: root_cause_analysis.conducted_by_id > users.user_id
+Ref: communications.incident_id > incidents.incident_id
+Ref: communications.sender_id > users.user_id
+Ref: escalations.incident_id > incidents.incident_id
+Ref: escalations.escalated_by_id > users.user_id
+Ref: escalations.escalated_to_id > users.user_id
+Ref: change_requests.incident_id > incidents.incident_id
+Ref: change_requests.requested_by_id > users.user_id
+Ref: change_requests.approved_by_id > users.user_id
+Ref: rollback_requests.change_id > change_requests.change_id
+Ref: rollback_requests.incident_id > incidents.incident_id
+Ref: rollback_requests.requested_by_id > users.user_id
+Ref: rollback_requests.approved_by_id > users.user_id
+Ref: metrics.incident_id > incidents.incident_id
+// Ref: compliance_events.incident_id > incidents.incident_id
+// Ref: compliance_events.responsible_party_id > users.user_id
+Ref: incident_reports.incident_id > incidents.incident_id
+Ref: incident_reports.generated_by_id > users.user_id
+Ref: knowledge_base_articles.incident_id > incidents.incident_id
+Ref: knowledge_base_articles.created_by_id > users.user_id
+Ref: knowledge_base_articles.reviewed_by_id > users.user_id
+Ref: post_incident_reviews.incident_id > incidents.incident_id
+Ref: post_incident_reviews.facilitator_id > users.user_id
+Ref: infrastructure_components.product_id > products.product_id

@@ -1,7 +1,7 @@
 import os
 from collections import Counter
 
-base_path = "week_11"  # change to your root directory
+base_path = "week_11_new"  # change to your root directory
 
 numbers = []
 

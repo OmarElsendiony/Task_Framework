@@ -1,0 +1,41 @@
+{
+  "task_file": "tools_regression_tests/interface_1/manage_clients_test1.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "client_data": {
+          "client_name": "Global Tech Solutions Inc",
+          "client_type": "enterprise",
+          "country": "United States",
+          "registration_number": "REG-2025-9876",
+          "contact_email": "contact@globaltechsolutions.com",
+          "industry": "Technology",
+          "status": "active"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "client_id": "121",
+          "message": "Client 121 created successfully",
+          "client_data": {
+            "client_id": "121",
+            "client_name": "Global Tech Solutions Inc",
+            "client_type": "enterprise",
+            "country": "United States",
+            "status": "active",
+            "created_at": "2025-10-04T12:00:00",
+            "updated_at": "2025-10-04T12:00:00",
+            "registration_number": "REG-2025-9876",
+            "contact_email": "contact@globaltechsolutions.com",
+            "industry": "Technology"
+          }
+        },
+        200
+      ]
+    }
+  ]
+}
