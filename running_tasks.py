@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-""" Flask Application """
 import json
 import os
 import ast
@@ -144,7 +143,7 @@ def env_interface(environment: str, interface: str, envs_path="envs"):
         session["environment"] = environment
         session["interface"] = interface
         session["data"] = data
-            # print("data", g.data)
+        # print("data", g.data)
         
         # print(session["environment"], session["interface"])
         if environment and interface:
@@ -223,6 +222,7 @@ class Tools:
     # session["tools_class_code"] = class_code 
     return namespace['Tools']
 
+import typing
 
 def execute_api_utility(api_name, arguments):
     tools_instance = create_tools_class(session.get("imports_set", []), session.get("invoke_methods", []))
@@ -230,30 +230,54 @@ def execute_api_utility(api_name, arguments):
     # arguments = arguments_processing(arguments)
     # print(dir(tools_instance))
     if hasattr(tools_instance, api_name):
+        # annot = (getattr(tools_instance, api_name).__annotations__)
+        # # print(annot)
+        # for argument_name, argument_value in arguments.items():
+        #     type_arg_func = typing.get_origin(annot[argument_name]) or annot[argument_name]
+        #     type_arg_passed = type(argument_value)
+        #     if type_arg_func is typing.Union:
+        #         # For Union types (including Optional), get all allowed types
+        #         allowed_types = typing.get_args(type_arg_func)
+        #         # Remove NoneType for the isinstance check
+        #         allowed_types = tuple(t for t in allowed_types if t is not type(None))
+                
+        #         # Check if value is None (allowed for Optional)
+        #         if argument_value is None and type(None) in typing.get_args(type_arg_func):
+        #             continue
+                
+        #         # Check if value matches any of the allowed types
+        #         if allowed_types and not isinstance(argument_value, allowed_types):
+        #             raise TypeError(f"Type mismatch for argument '{argument_name}': expected {type_arg_func}, got {type(argument_value)}, value: {argument_value}")
+        #     else:
+        #         if type_arg_func != type_arg_passed:
+        #             print(annot[argument_name])
+        #             # print(f"Type mismatch for argument '{argument_name}': expected {type_arg_func}, got {type_arg_passed}")
+        #             raise TypeError(f"Type mismatch for argument '{argument_name}': expected {type_arg_func}, got {type_arg_passed}, value: {argument_value}")
+        
         result = getattr(tools_instance, api_name)(data=session["data"], **arguments)
         # print(f"Result from API {api_name}: {result}")
         return result
     else:
         raise AttributeError(f"API {api_name} not found")
 
-def arguments_processing(arguments):
-    cleaned_arguments = {}
-    for argument, argument_value in arguments.items():
-        # Skip empty values
-        if argument_value == '':
-            continue
+# def arguments_processing(arguments):
+#     cleaned_arguments = {}
+#     for argument, argument_value in arguments.items():
+#         # Skip empty values
+#         if argument_value == '':
+#             continue
 
-        # Skip IDs (do not modify or parse)
-        if "id" == argument.lower() or "_id" in argument.lower() or "_by" in argument.lower() or "name" in argument.lower() or "_to" in argument.lower() or argument.lower() == "new_value" or argument.lower() == "old_value":
-            cleaned_arguments[argument] = argument_value
-            continue
-        # Try to evaluate literal (e.g., convert "True" → True, "123" → 123)
-        try:
-            cleaned_arguments[argument] = ast.literal_eval(argument_value)
-        except (ValueError, SyntaxError):
-            cleaned_arguments[argument] = argument_value
+#         # Skip IDs (do not modify or parse)
+#         if "id" == argument.lower() or "_id" in argument.lower() or "_by" in argument.lower() or "name" in argument.lower() or "_to" in argument.lower() or argument.lower() == "new_value" or argument.lower() == "old_value":
+#             cleaned_arguments[argument] = argument_value
+#             continue
+#         # Try to evaluate literal (e.g., convert "True" → True, "123" → 123)
+#         try:
+#             cleaned_arguments[argument] = ast.literal_eval(argument_value)
+#         except (ValueError, SyntaxError):
+#             cleaned_arguments[argument] = argument_value
 
-    return cleaned_arguments
+#     return cleaned_arguments
 
 
 

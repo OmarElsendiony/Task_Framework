@@ -132,7 +132,6 @@ def run_all_tasks(base_path="week_11_new"):
         if (task_number + 1) % 10 == 0:
             print(f"Processed {task_number + 1}/{len(task_files)} tasks...")
         # print()  # Add spacing between tasks
-            # return
     
     # Write error log
     if failed_tasks:
