@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>📊 Test Run Summary</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h2>{{ summary.total_tasks }}</h2>
+        <p>Total Tasks</p>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+        <h2>{{ summary.passed }}</h2>
+        <p>Passed</p>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+        <h2>{{ summary.failed }}</h2>
+        <p>Failed</p>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+        <h2>{{ summary.pass_rate }}</h2>
+        <p>Pass Rate</p>
+    </div>
+</div>
+
+<h2>Test Results</h2>
+<table>
+    <tr>
+        <th>Task</th>
+        <th>Status</th>
+        <th>Actions</th>
+        <th>Error</th>
+    </tr>
+    {% for test in summary.test_results %}
+    <tr>
+        <td>{{ test.name }}</td>
+        <td>
+            {% if test.success %}
+                <span class="status-badge status-passed">✓ Passed</span>
+            {% else %}
+                <span class="status-badge status-failed">✗ Failed</span>
+            {% endif %}
+        </td>
+        <td>{{ test.actions_count }}</td>
+        <td>{{ test.error if test.error else '—' }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<p style="color: #666; margin-top: 20px;">
+    <strong>Started:</strong> {{ summary.start_time }}<br>
+    <strong>Ended:</strong> {{ summary.end_time }}
+</p>
+
+<a href="{{ url_for('index') }}"><button type="button">⬅ Back to Tests</button></a>
+{% endblock %}

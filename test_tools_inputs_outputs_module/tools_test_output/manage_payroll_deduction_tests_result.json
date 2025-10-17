@@ -1,0 +1,51 @@
+{
+  "task_file": "tools_regression_tests\\interface_1\\manage_payroll_deduction_tests.json",
+  "timestamp": "2025-10-17T12:42:57.019959",
+  "actions": [
+    {
+      "index": 0,
+      "name": "manage_payroll_deduction",
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "1",
+          "deduction_type": "tax",
+          "amount": 125.75,
+          "created_by": "payroll_admin_001"
+        }
+      },
+      "success": false,
+      "output": {
+        "success": false,
+        "error": "Halt: Creator not found"
+      },
+      "error": "Halt: Creator not found",
+      "status_code": 200
+    },
+    {
+      "index": 1,
+      "name": "manage_payroll_deduction",
+      "arguments": {
+        "action": "create",
+        "deduction_data": {
+          "payroll_id": "2",
+          "deduction_type": "insurance",
+          "amount": 89.5,
+          "created_by": "hr_manager_002"
+        }
+      },
+      "success": false,
+      "output": {
+        "success": false,
+        "error": "Halt: Creator not found"
+      },
+      "error": "Halt: Creator not found",
+      "status_code": 200
+    }
+  ],
+  "error": "Some actions failed: manage_payroll_deduction, manage_payroll_deduction",
+  "envs_path": "E:/turing-tau/amazon-tau-bench-tasks/envs",
+  "environment": "hr_experts",
+  "interface": 1,
+  "functions_loaded": 35
+}
