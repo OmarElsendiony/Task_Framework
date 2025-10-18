@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>⚙️ Settings</h1>
+<form method="POST">
+    <label><strong>Environment Path:</strong></label>
+    <input type="text" name="envs_path" value="{{ current_path }}" placeholder="envs" required>
+    <p style="color: #666; font-size: 14px; margin-top: -15px;">
+        Specify the path to your environments directory (e.g., "envs", "../envs", "/absolute/path/to/envs")
+    </p>
+    <button type="submit">💾 Save Settings</button>
+</form>
+<a href="{{ url_for('index') }}"><button type="button">⬅ Back</button></a>
+{% endblock %}

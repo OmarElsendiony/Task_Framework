@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Viewing: {{ file }}</h1>
+<pre>{{ content }}</pre>
+<a href="{{ url_for('index') }}">⬅ Back</a>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>🧪 Available JSON Tasks</h1>
+<p style="color: #666; margin-bottom: 10px;">Environment Path: <strong>{{ envs_path }}</strong> (<a href="{{ url_for('settings') }}">change</a>)</p>
+
+<!-- Interface Filter -->
+<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <form method="POST" action="{{ url_for('select_interface') }}" style="display: flex; align-items: center; gap: 10px;">
+        <label style="font-weight: 600; margin: 0;">📁 Filter by Interface:</label>
+        <select name="interface" style="width: auto; margin: 0;" onchange="this.form.submit()">
+            <option value="all" {% if not selected_interface %}selected{% endif %}>All Interfaces</option>
+            {% for interface in available_interfaces %}
+            <option value="{{ interface }}" {% if selected_interface == interface %}selected{% endif %}>{{ interface }}</option>
+            {% endfor %}
+        </select>
+        {% if selected_interface %}
+        <span class="status-badge" style="background: #667eea; color: white;">Filtering: {{ selected_interface }}</span>
+        {% endif %}
+    </form>
+</div>
+
+{% if files %}
+<table>
+    <tr>
+        <th>Interface</th>
+        <th>File</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    {% for f in files %}
+    <tr>
+        <td><span class="status-badge" style="background: #17a2b8; color: white;">{{ f.interface }}</span></td>
+        <td>{{ f.name }}</td>
+        <td>
+            {% if f.status == 'passed' %}
+                <span class="status-badge status-passed">✓ Passed</span>
+            {% elif f.status == 'failed' %}
+                <span class="status-badge status-failed">✗ Failed</span>
+            {% else %}
+                <span class="status-badge status-pending">Not Run</span>
+            {% endif %}
+        </td>
+        <td>
+            <form action="{{ url_for('run_single', task_path=f.path) }}" method="post" style="display:inline;">
+                <button type="submit">▶ Run</button>
+            </form>
+            <a href="{{ url_for('view_task', task_path=f.path) }}"><button type="button">👁 View</button></a>
+            {% if f.status %}
+            <a href="{{ url_for('view_results', task_path=f.path) }}"><button type="button">📊 Results</button></a>
+            {% endif %}
+            <form action="{{ url_for('delete', task_path=f.path) }}" method="post" style="display:inline;">
+                <button type="submit" class="danger" onclick="return confirm('Delete this file?')">🗑 Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<form action="{{ url_for('run_all') }}" method="post">
+    <button type="submit" class="run-all">▶▶ Run All {% if selected_interface %}in {{ selected_interface }}{% else %}Tasks{% endif %}</button>
+</form>
+{% else %}
+<p>No JSON task files found{% if selected_interface %} in {{ selected_interface }}{% endif %}. <a href="{{ url_for('create') }}">Create one</a>.</p>
+{% endif %}
+{% endblock %}

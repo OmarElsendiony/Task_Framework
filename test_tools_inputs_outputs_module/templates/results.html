@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>📊 Test Results: {{ task_path }}</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h2>{{ total_actions }}</h2>
+        <p>Total Actions</p>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+        <h2>{{ passed_actions }}</h2>
+        <p>Passed</p>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+        <h2>{{ failed_actions }}</h2>
+        <p>Failed</p>
+    </div>
+</div>
+
+{% if result.error %}
+<div class="error-box">
+    <strong>❌ Test Error:</strong><br>
+    {{ result.error }}
+</div>
+{% endif %}
+
+<h2 style="margin-top: 30px;">Action Details</h2>
+{% for action in result.actions %}
+<div class="action-card {% if not action.success %}failed{% endif %}">
+    <h3>
+        {% if action.success %}
+            ✅ Action {{ action.index + 1 }}: {{ action.name }}
+        {% else %}
+            ❌ Action {{ action.index + 1 }}: {{ action.name }}
+        {% endif %}
+    </h3>
+    
+    <p><strong>Arguments:</strong></p>
+    <pre style="background: white; padding: 10px; margin: 10px 0;">{{ action.arguments | tojson(indent=2) }}</pre>
+    
+    {% if action.success %}
+        <p><strong>✓ Output:</strong></p>
+        <pre style="background: white; padding: 10px; margin: 10px 0;">{{ action.output | tojson(indent=2) }}</pre>
+    {% else %}
+        <div class="error-box">
+            <strong>Error:</strong> {{ action.error }}<br>
+            {% if action.traceback %}
+            <details style="margin-top: 10px;">
+                <summary style="cursor: pointer;">Show Traceback</summary>
+                <pre style="background: white; padding: 10px; margin-top: 10px;">{{ action.traceback }}</pre>
+            </details>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endfor %}
+
+<div style="margin-top: 30px;">
+    <a href="{{ url_for('index') }}"><button type="button">⬅ Back to Tests</button></a>
+    <a href="{{ url_for('view_task', task_path=task_path) }}"><button type="button">👁 View Task JSON</button></a>
+</div>
+{% endblock %}

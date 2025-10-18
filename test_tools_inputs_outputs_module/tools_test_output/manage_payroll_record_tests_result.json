@@ -1,0 +1,74 @@
+{
+  "task_file": "tools_regression_tests\\interface_1\\manage_payroll_record_tests.json",
+  "timestamp": "2025-10-17T12:42:57.736715",
+  "actions": [
+    {
+      "index": 0,
+      "name": "manage_payroll_record",
+      "arguments": {
+        "action": "create",
+        "payroll_data": {
+          "employee_id": "1",
+          "pay_period_start": "2025-10-01",
+          "pay_period_end": "2025-10-15",
+          "hourly_rate": 25.5,
+          "hours_worked": 80.0,
+          "payment_date": "2025-10-20",
+          "status": "approved",
+          "approved_by": "payroll_admin_001"
+        }
+      },
+      "success": false,
+      "output": {
+        "success": false,
+        "error": "Halt: No approved timesheet hours found"
+      },
+      "error": "Halt: No approved timesheet hours found",
+      "status_code": 200
+    },
+    {
+      "index": 1,
+      "name": "manage_payroll_record",
+      "arguments": {
+        "action": "update",
+        "payroll_id": "1",
+        "payroll_data": {
+          "pay_period_start": "2025-10-16",
+          "pay_period_end": "2025-10-31",
+          "hours_worked": 85.5,
+          "hourly_rate": 26.0,
+          "payment_date": "2025-11-05",
+          "status": "paid",
+          "approved_by": "finance_officer_001"
+        }
+      },
+      "success": true,
+      "output": {
+        "success": true,
+        "action": "update",
+        "payroll_id": "1",
+        "message": "Payroll record 1 corrected successfully",
+        "payroll_data": {
+          "payroll_id": "1",
+          "employee_id": "2",
+          "pay_period_start": "2025-10-16",
+          "pay_period_end": "2025-10-31",
+          "hours_worked": 85.5,
+          "hourly_rate": 26.0,
+          "payment_date": "2025-11-05",
+          "status": "paid",
+          "approved_by": "finance_officer_001",
+          "created_at": "2024-10-02T23:53:05",
+          "updated_at": "2025-10-01T12:00:00"
+        }
+      },
+      "error": null,
+      "status_code": 200
+    }
+  ],
+  "error": "Some actions failed: manage_payroll_record",
+  "envs_path": "E:/turing-tau/amazon-tau-bench-tasks/envs",
+  "environment": "hr_experts",
+  "interface": 1,
+  "functions_loaded": 35
+}
