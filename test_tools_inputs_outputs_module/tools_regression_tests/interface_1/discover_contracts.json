@@ -1,0 +1,30 @@
+{
+    "env": "incident_management_redos",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_contracts",
+                "arguments": {
+                    "entity_type": "sla_agreements",
+                    "filters": {
+                        "sla_id": "1",
+                        "client_id": "1",
+                        "tier": "basic",
+                        "support_coverage": "24x7",
+                        "effective_date": "2025-09-19",
+                        "expiration_date": null,
+                        "created_by": "14",
+                        "status": "active"
+                    }
+                }
+            },
+            {
+                "name": "discover_contracts",
+                "arguments": {
+                    "entity_type": "sla_agreements"
+                }
+            }
+        ]
+    }
+}

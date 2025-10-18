@@ -1,0 +1,71 @@
+{
+  "task_file": "tools_regression_tests/interface_2/tools_regression_tests/interface_1/manage_contracts.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "entity_data": {
+          "client_id": "1",
+          "tier": "premium",
+          "support_coverage": "24x7",
+          "effective_date": "2025-11-01",
+          "expiration_date": "2026-10-31",
+          "created_by": "14",
+          "status": "active"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "sla_id": "26",
+          "sla_data": {
+            "sla_id": "26",
+            "client_id": "1",
+            "tier": "premium",
+            "support_coverage": "24x7",
+            "effective_date": "2025-11-01",
+            "expiration_date": "2026-10-31",
+            "created_by": "14",
+            "created_at": "2025-10-01T00:00:00",
+            "updated_at": "2025-10-01T00:00:00",
+            "status": "active"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "entity_id": "1",
+        "entity_data": {
+          "tier": "standard",
+          "support_coverage": "business_hours",
+          "expiration_date": "2027-10-31"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "sla_id": "1",
+          "sla_data": {
+            "sla_id": "1",
+            "client_id": "1",
+            "tier": "standard",
+            "support_coverage": "business_hours",
+            "effective_date": "2025-09-19",
+            "expiration_date": "2027-10-31",
+            "created_by": "14",
+            "created_at": "2025-09-19T06:01:39",
+            "updated_at": "2025-10-01T00:00:00",
+            "status": "active"
+          }
+        },
+        200
+      ]
+    }
+  ]
+}

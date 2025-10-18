@@ -1,0 +1,54 @@
+{
+  "task_file": "tools_regression_tests/interface_1/assess_incident_severity.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "complete_outage": true,
+        "no_workaround": true,
+        "enterprise_impact": true,
+        "affected_parties_count": 8,
+        "regulatory_implications": true,
+        "high_priority_customer": true,
+        "recurrent_incident": true,
+        "major_degradation": true,
+        "workaround_available": false,
+        "multiple_departments": true,
+        "sla_breach_risk": true,
+        "single_department": false,
+        "moderate_degradation": false,
+        "minimal_workaround": false
+      },
+      "output": [
+        {
+          "severity": "P1"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "complete_outage": false,
+        "no_workaround": false,
+        "enterprise_impact": false,
+        "affected_parties_count": 2,
+        "regulatory_implications": false,
+        "high_priority_customer": false,
+        "recurrent_incident": false,
+        "major_degradation": false,
+        "workaround_available": true,
+        "multiple_departments": false,
+        "sla_breach_risk": false,
+        "single_department": true,
+        "moderate_degradation": true,
+        "minimal_workaround": true
+      },
+      "output": [
+        {
+          "severity": "P3"
+        },
+        200
+      ]
+    }
+  ]
+}

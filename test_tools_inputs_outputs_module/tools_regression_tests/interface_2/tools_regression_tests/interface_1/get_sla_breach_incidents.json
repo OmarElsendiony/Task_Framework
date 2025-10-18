@@ -1,0 +1,20 @@
+{
+    "env": "incident_management_redos",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "get_sla_breach_incidents",
+                "arguments": {
+                    "status": "resolved"
+                }
+            },
+            {
+                "name": "get_sla_breach_incidents",
+                "arguments": {
+                    "status": "closed"
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "env": "incident_management_redos",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "manage_approval_requests",
+                "arguments": {
+                    "action": "create",
+                    "reference_id": "1",
+                    "reference_type": "escalation",
+                    "requested_by": "98",
+                    "requested_action": "create_escalation",
+                    "approver": "368"
+                }
+            },
+            {
+                "name": "manage_approval_requests",
+                "arguments": {
+                    "action": "update",
+                    "approval_id": "1",
+                    "status": "approved"
+                }
+            }
+        ]
+    }
+}

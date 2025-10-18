@@ -1,0 +1,41 @@
+{
+    "env": "incident_management_redos",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "manage_improvement",
+                "arguments": {
+                    "entity_type": "root_cause_analyses",
+                    "action": "create",
+                    "improvement_data": {
+                        "associated_incident_id": "1",
+                        "rca_title": "RCA Report: INC0000001 - Storage System Failure Analysis",
+                        "assigned_to": "114",
+                        "due_date": "2025-10-31",
+                        "reported_by": "447",
+                        "analysis_method": "5_whys",
+                        "status": "assigned"
+                    }
+                }
+            },
+            {
+                "name": "manage_improvement",
+                "arguments": {
+                    "entity_type": "post_incident_reviews",
+                    "action": "create",
+                    "improvement_data": {
+                        "incident_id": "1",
+                        "scheduled_date": "2025-10-10",
+                        "facilitator": "59",
+                        "review_notes": "Comprehensive review of incident response and resolution process",
+                        "lessons_learned": "Need to improve monitoring alerts and escalation procedures",
+                        "action_items": "1. Update monitoring thresholds 2. Review escalation matrix 3. Conduct training",
+                        "status": "scheduled",
+                        "created_by": "439"
+                    }
+                }
+            }
+        ]
+    }
+}

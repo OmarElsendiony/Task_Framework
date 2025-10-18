@@ -1,0 +1,57 @@
+{
+  "task_file": "tools_regression_tests/interface_3/tools_regression_tests/interface_1/manage_escalations.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "escalation_data": {
+          "incident_id": "1",
+          "escalated_from": "303",
+          "escalated_to": "3",
+          "escalation_reason": "Unable to resolve within SLA timeframe. Escalating for additional support resources.",
+          "approver": "4",
+          "status": "pending"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Halt: User escalated_from must be active"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "escalation_id": "1",
+        "escalation_data": {
+          "status": "approved",
+          "approver": "4",
+          "responded_at": "2025-10-01T15:30:00"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "escalation_id": "1",
+          "message": "Escalation 1 updated successfully",
+          "escalation_data": {
+            "escalation_id": "1",
+            "incident_id": "1",
+            "escalated_from": "303",
+            "escalated_to": "3",
+            "escalation_reason": "Unable to resolve within SLA timeframe. Escalating for additional support resources.",
+            "status": "approved",
+            "requested_at": "2025-09-25T12:41:06",
+            "responded_at": "2025-10-01T15:30:00",
+            "approver": "4"
+          }
+        },
+        200
+      ]
+    }
+  ]
+}

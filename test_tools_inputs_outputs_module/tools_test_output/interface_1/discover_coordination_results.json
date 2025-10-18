@@ -1,0 +1,55 @@
+{
+  "task_file": "tools_regression_tests/interface_1/discover_coordination.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "entity_type": "escalations",
+        "filters": {
+          "escalation_id": "1",
+          "incident_id": "1",
+          "escalated_from": "303",
+          "escalated_to": "3",
+          "escalation_reason": "Unable to resolve within SLA timeframe. Escalating for additional support resources.",
+          "approver": "4",
+          "status": "pending",
+          "requested_at": "2025-09-25",
+          "responded_at": null
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "escalations",
+          "count": 0,
+          "results": []
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "entity_type": "bridges",
+        "filters": {
+          "bridge_id": "1",
+          "bridge_number": "BRG0000001",
+          "incident_id": "6",
+          "bridge_type": "technical",
+          "bridge_host": "31",
+          "start_time": "2025-10-05",
+          "end_time": null,
+          "status": "active"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "bridges",
+          "count": 0,
+          "results": []
+        },
+        200
+      ]
+    }
+  ]
+}

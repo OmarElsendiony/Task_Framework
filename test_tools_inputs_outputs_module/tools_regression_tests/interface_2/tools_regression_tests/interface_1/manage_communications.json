@@ -1,0 +1,35 @@
+{
+    "env": "incident_management_redos",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "manage_communications",
+                "arguments": {
+                    "action": "create",
+                    "communication_data": {
+                        "incident_id": "1",
+                        "communication_type": "status_update",
+                        "recipient_type": "client",
+                        "sender": "213",
+                        "recipient": "20",
+                        "delivery_method": "email",
+                        "message_content": "Your incident INC0000001 is currently being investigated by our technical team. We will provide updates every 30 minutes.",
+                        "delivery_status": "pending"
+                    }
+                }
+            },
+            {
+                "name": "manage_communications",
+                "arguments": {
+                    "action": "update",
+                    "communication_id": "1",
+                    "communication_data": {
+                        "delivery_status": "delivered",
+                        "sent_at": "2025-10-01T14:30:00"
+                    }
+                }
+            }
+        ]
+    }
+}

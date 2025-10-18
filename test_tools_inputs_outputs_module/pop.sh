@@ -1,172 +1,78 @@
 #!/bin/bash
 
-# Create directory structure
-mkdir -p tools_regression_tests/interface_1
+# Create directory
+mkdir -p tools_regression_tests/interface_2
 
-# Generate test files for each function
-echo "Generating test cases for HR Management System functions..."
-
-# 1. ManagePerformanceReview Tests
-cat > tools_regression_tests/interface_1/manage_performance_review_tests.json << 'EOF'
+# Test 1: DiscoverWorkflows - communications
+cat > tools_regression_tests/interface_2/discover_workflows_1.json << 'EOF'
 {
-    "env": "hr_experts",
-    "interface_num": 1,
+    "env": "incident_management_redo",
+    "interface_num": 2,
     "task": {
         "actions": [
             {
-                "name": "manage_performance_review",
+                "name": "discover_workflows",
                 "arguments": {
-                    "action": "create",
-                    "review_data": {
-                        "employee_id": "1",
-                        "reviewer_id": "2",
-                        "review_period_start": "2025-01-01",
-                        "review_period_end": "2025-12-31",
-                        "review_type": "annual",
-                        "overall_rating": "meets_expectations"
+                    "entity_type": "communications",
+                    "filters": {
+                        "incident_id": "INC001",
+                        "communication_type": "status_update",
+                        "recipient_type": "client",
+                        "delivery_method": "email",
+                        "delivery_status": "delivered",
+                        "sent_at": "2025-10-01"
                     }
                 }
             },
             {
-                "name": "manage_performance_review",
+                "name": "discover_workflows",
                 "arguments": {
-                    "action": "create",
-                    "review_data": {
-                        "employee_id": "2",
-                        "reviewer_id": "3",
-                        "review_period_start": "2025-01-01",
-                        "review_period_end": "2025-03-31",
-                        "review_type": "quarterly",
-                        "overall_rating": "exceeds_expectations",
-                        "goals_achievement_score": 8.5,
-                        "communication_score": 9.0,
-                        "teamwork_score": 8.0,
-                        "leadership_score": 7.5,
-                        "technical_skills_score": 9.2
+                    "entity_type": "communications",
+                    "filters": {
+                        "sender": "user_123",
+                        "recipient": "user_456",
+                        "message_content": "urgent",
+                        "delivery_status": "pending"
+                    }
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 2: DiscoverWorkflows - approval_requests
+cat > tools_regression_tests/interface_2/discover_workflows_2.json << 'EOF'
+{
+    "env": "incident_management_redo",
+    "interface_num": 2,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_workflows",
+                "arguments": {
+                    "entity_type": "approval_requests",
+                    "filters": {
+                        "reference_id": "CHG001",
+                        "reference_type": "change",
+                        "requested_by": "user_789",
+                        "approver": "user_101",
+                        "status": "pending",
+                        "requested_at": "2025-10-02"
                     }
                 }
             },
             {
-                "name": "manage_performance_review",
+                "name": "discover_workflows",
                 "arguments": {
-                    "action": "create",
-                    "review_data": {
-                        "employee_id": "3",
-                        "reviewer_id": "1",
-                        "review_period_start": "2025-06-01",
-                        "review_period_end": "2025-08-31",
-                        "review_type": "probationary",
-                        "overall_rating": "below_expectations"
-                    }
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "update",
-                    "review_id": "1",
-                    "review_data": {
-                        "overall_rating": "exceeds_expectations",
-                        "hr_manager_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "update",
-                    "review_id": "2",
-                    "review_data": {
+                    "entity_type": "approval_requests",
+                    "filters": {
+                        "reference_type": "escalation",
+                        "requested_action": "approve_bridge",
                         "status": "approved",
-                        "hr_manager_approval": true
+                        "responded_at": "2025-10-03",
+                        "created_at": "2025-10-01"
                     }
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "create",
-                    "review_data": {
-                        "employee_id": "999",
-                        "reviewer_id": "2",
-                        "review_period_start": "2025-01-01",
-                        "review_period_end": "2025-12-31",
-                        "review_type": "annual",
-                        "overall_rating": "meets_expectations"
-                    }
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "create",
-                    "review_data": {
-                        "employee_id": "1",
-                        "reviewer_id": "2",
-                        "review_period_start": "2025-12-31",
-                        "review_period_end": "2025-01-01",
-                        "review_type": "annual",
-                        "overall_rating": "meets_expectations"
-                    }
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "create",
-                    "review_data": {
-                        "employee_id": "1",
-                        "reviewer_id": "2",
-                        "review_type": "annual",
-                        "overall_rating": "meets_expectations"
-                    }
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "create",
-                    "review_data": {
-                        "employee_id": "1",
-                        "reviewer_id": "2",
-                        "review_period_start": "2025-01-01",
-                        "review_period_end": "2025-12-31",
-                        "review_type": "invalid_type",
-                        "overall_rating": "meets_expectations"
-                    }
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "update",
-                    "review_id": "999",
-                    "review_data": {
-                        "overall_rating": "exceeds_expectations",
-                        "hr_manager_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "update",
-                    "review_id": "1",
-                    "review_data": {
-                        "status": "approved"
-                    }
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "invalid_action"
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "create"
                 }
             }
         ]
@@ -174,166 +80,39 @@ cat > tools_regression_tests/interface_1/manage_performance_review_tests.json <<
 }
 EOF
 
-# 2. ManageInterview Tests
-cat > tools_regression_tests/interface_1/manage_interview_tests.json << 'EOF'
+# Test 3: DiscoverImprovement - root_cause_analyses
+cat > tools_regression_tests/interface_2/discover_improvement_1.json << 'EOF'
 {
-    "env": "hr_experts",
-    "interface_num": 1,
+    "env": "incident_management_redo",
+    "interface_num": 2,
     "task": {
         "actions": [
             {
-                "name": "manage_interview",
+                "name": "discover_improvement",
                 "arguments": {
-                    "action": "create",
-                    "interview_data": {
-                        "application_id": "1",
-                        "interviewer_id": "2",
-                        "interview_type": "phone screening",
-                        "scheduled_date": "2025-11-15T14:00:00"
+                    "entity_type": "root_cause_analyses",
+                    "filters": {
+                        "rca_id": "RCA001",
+                        "incident_id": "INC001",
+                        "assigned_to": "user_123",
+                        "analysis_method": "5_whys",
+                        "status": "completed",
+                        "due_date": "2025-10-10",
+                        "completed_at": "2025-10-05"
                     }
                 }
             },
             {
-                "name": "manage_interview",
+                "name": "discover_improvement",
                 "arguments": {
-                    "action": "create",
-                    "interview_data": {
-                        "application_id": "2",
-                        "interviewer_id": "3",
-                        "interview_type": "technical",
-                        "scheduled_date": "2025-12-20T10:30:00",
-                        "duration_minutes": 90
+                    "entity_type": "root_cause_analyses",
+                    "filters": {
+                        "rca_number": "RCA0001234",
+                        "rca_title": "Database Outage Analysis",
+                        "root_cause_summary": "memory leak",
+                        "approved_by": "user_456",
+                        "updated_at": "2025-10-06"
                     }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "create",
-                    "interview_data": {
-                        "application_id": "3",
-                        "interviewer_id": "1",
-                        "interview_type": "final",
-                        "scheduled_date": "2026-01-10T16:00:00",
-                        "duration_minutes": 45
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "update",
-                    "interview_id": "1",
-                    "interview_data": {
-                        "overall_rating": "excellent",
-                        "technical_score": 9.0,
-                        "communication_score": 8.5,
-                        "cultural_fit_score": 9.2,
-                        "recommendation": "strong hire"
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "update",
-                    "interview_id": "2",
-                    "interview_data": {
-                        "overall_rating": "below_average",
-                        "recommendation": "no hire"
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "create",
-                    "interview_data": {
-                        "application_id": "999",
-                        "interviewer_id": "2",
-                        "interview_type": "phone screening",
-                        "scheduled_date": "2025-11-15T14:00:00"
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "create",
-                    "interview_data": {
-                        "application_id": "1",
-                        "interviewer_id": "2",
-                        "interview_type": "phone screening",
-                        "scheduled_date": "2024-01-15T14:00:00"
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "create",
-                    "interview_data": {
-                        "application_id": "1",
-                        "interviewer_id": "2",
-                        "interview_type": "invalid_type",
-                        "scheduled_date": "2025-11-15T14:00:00"
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "create",
-                    "interview_data": {
-                        "application_id": "1",
-                        "interviewer_id": "2",
-                        "interview_type": "phone screening",
-                        "scheduled_date": "2025-11-15T14:00:00",
-                        "duration_minutes": -30
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "update",
-                    "interview_id": "999",
-                    "interview_data": {
-                        "overall_rating": "excellent"
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "update",
-                    "interview_id": "1",
-                    "interview_data": {
-                        "technical_score": 15.0
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "create",
-                    "interview_data": {
-                        "interviewer_id": "2",
-                        "interview_type": "phone screening",
-                        "scheduled_date": "2025-11-15T14:00:00"
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "invalid_action"
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "create"
                 }
             }
         ]
@@ -341,168 +120,37 @@ cat > tools_regression_tests/interface_1/manage_interview_tests.json << 'EOF'
 }
 EOF
 
-# 3. ManageBenefitsPlan Tests
-cat > tools_regression_tests/interface_1/manage_benefits_plan_tests.json << 'EOF'
+# Test 4: DiscoverImprovement - post_incident_reviews
+cat > tools_regression_tests/interface_2/discover_improvement_2.json << 'EOF'
 {
-    "env": "hr_experts",
-    "interface_num": 1,
+    "env": "incident_management_redo",
+    "interface_num": 2,
     "task": {
         "actions": [
             {
-                "name": "manage_benefits_plan",
+                "name": "discover_improvement",
                 "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Premium Health Insurance",
-                        "plan_type": "health insurance",
-                        "effective_date": "2025-01-01",
-                        "hr_director_approval": true
+                    "entity_type": "post_incident_reviews",
+                    "filters": {
+                        "review_id": "PIR001",
+                        "incident_id": "INC002",
+                        "scheduled_date": "2025-10-15",
+                        "facilitator": "user_789",
+                        "status": "scheduled",
+                        "created_at": "2025-10-04"
                     }
                 }
             },
             {
-                "name": "manage_benefits_plan",
+                "name": "discover_improvement",
                 "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Dental Plus",
-                        "plan_type": "dental",
-                        "provider": "DentalCorp",
-                        "employee_cost": 25.50,
-                        "employer_cost": 75.00,
-                        "effective_date": "2025-01-01",
-                        "expiration_date": "2025-12-31",
-                        "finance_officer_approval": true
+                    "entity_type": "post_incident_reviews",
+                    "filters": {
+                        "review_notes": "communication breakdown",
+                        "lessons_learned": "improve monitoring",
+                        "action_items": "update runbooks",
+                        "status": "completed"
                     }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Vision Care Basic",
-                        "plan_type": "vision",
-                        "effective_date": "2025-06-01",
-                        "status": "inactive",
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "update",
-                    "plan_id": "1",
-                    "plan_data": {
-                        "employee_cost": 50.00,
-                        "employer_cost": 150.00,
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "update",
-                    "plan_id": "2",
-                    "plan_data": {
-                        "status": "inactive",
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "401k Plan",
-                        "plan_type": "retirement",
-                        "effective_date": "2025-01-01"
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Invalid Plan",
-                        "plan_type": "invalid_type",
-                        "effective_date": "2025-01-01",
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Backward Dates Plan",
-                        "plan_type": "health insurance",
-                        "effective_date": "2025-12-31",
-                        "expiration_date": "2025-01-01",
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Negative Cost Plan",
-                        "plan_type": "dental",
-                        "employee_cost": -10.00,
-                        "effective_date": "2025-01-01",
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "update",
-                    "plan_id": "999",
-                    "plan_data": {
-                        "employee_cost": 50.00,
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "update",
-                    "plan_id": "1",
-                    "plan_data": {
-                        "employee_cost": 50.00
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_type": "health insurance",
-                        "effective_date": "2025-01-01",
-                        "hr_director_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "invalid_action"
-                }
-            },
-            {
-                "name": "manage_benefits_plan",
-                "arguments": {
-                    "action": "create"
                 }
             }
         ]
@@ -510,173 +158,38 @@ cat > tools_regression_tests/interface_1/manage_benefits_plan_tests.json << 'EOF
 }
 EOF
 
-# 4. ManagePayrollRecord Tests
-cat > tools_regression_tests/interface_1/manage_payroll_record_tests.json << 'EOF'
+# Test 5: DiscoverPerformance - performance_metrics
+cat > tools_regression_tests/interface_2/discover_performance_1.json << 'EOF'
 {
-    "env": "hr_experts",
-    "interface_num": 1,
+    "env": "incident_management_redo",
+    "interface_num": 2,
     "task": {
         "actions": [
             {
-                "name": "manage_payroll_record",
+                "name": "discover_performance",
                 "arguments": {
-                    "action": "create",
-                    "payroll_data": {
-                        "employee_id": "1",
-                        "pay_period_start": "2025-10-01",
-                        "pay_period_end": "2025-10-15",
-                        "hourly_rate": 25.50,
-                        "finance_officer_approval": true
+                    "entity_type": "performance_metrics",
+                    "filters": {
+                        "metric_id": "MET001",
+                        "incident_id": "INC001",
+                        "metric_type": "MTTR",
+                        "calculated_value_minutes": 120,
+                        "sla_target_minutes": 180,
+                        "recorded_by": "user_123",
+                        "recorded_date": "2025-10-04"
                     }
                 }
             },
             {
-                "name": "manage_payroll_record",
+                "name": "discover_performance",
                 "arguments": {
-                    "action": "create",
-                    "payroll_data": {
-                        "employee_id": "2",
-                        "pay_period_start": "2025-10-01",
-                        "pay_period_end": "2025-10-15",
-                        "hourly_rate": 30.00,
-                        "payment_date": "2025-10-20",
-                        "approved_by": "finance_manager",
-                        "finance_officer_approval": true
+                    "entity_type": "performance_metrics",
+                    "filters": {
+                        "metric_type": "MTTA",
+                        "calculated_value_minutes": 30,
+                        "sla_target_minutes": 60,
+                        "recorded_date": "2025-10-03"
                     }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "create",
-                    "payroll_data": {
-                        "employee_id": "3",
-                        "pay_period_start": "2025-09-16",
-                        "pay_period_end": "2025-09-30",
-                        "hourly_rate": 22.75,
-                        "status": "draft",
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "update",
-                    "payroll_id": "1",
-                    "payroll_data": {
-                        "hours_worked": 80.0,
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "update",
-                    "payroll_id": "2",
-                    "payroll_data": {
-                        "status": "paid",
-                        "payment_date": "2025-10-22",
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "create",
-                    "payroll_data": {
-                        "employee_id": "999",
-                        "pay_period_start": "2025-10-01",
-                        "pay_period_end": "2025-10-15",
-                        "hourly_rate": 25.50,
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "create",
-                    "payroll_data": {
-                        "employee_id": "1",
-                        "pay_period_start": "2025-10-15",
-                        "pay_period_end": "2025-10-01",
-                        "hourly_rate": 25.50,
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "create",
-                    "payroll_data": {
-                        "employee_id": "1",
-                        "pay_period_start": "2025-10-01",
-                        "pay_period_end": "2025-10-15",
-                        "hourly_rate": -5.00,
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "create",
-                    "payroll_data": {
-                        "employee_id": "1",
-                        "pay_period_start": "2025-10-01",
-                        "pay_period_end": "2025-10-15",
-                        "hourly_rate": 25.50
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "update",
-                    "payroll_id": "999",
-                    "payroll_data": {
-                        "hours_worked": 40.0,
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "update",
-                    "payroll_id": "1",
-                    "payroll_data": {
-                        "hours_worked": -10.0,
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "create",
-                    "payroll_data": {
-                        "pay_period_start": "2025-10-01",
-                        "pay_period_end": "2025-10-15",
-                        "hourly_rate": 25.50,
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "invalid_action"
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "create"
                 }
             }
         ]
@@ -684,194 +197,34 @@ cat > tools_regression_tests/interface_1/manage_payroll_record_tests.json << 'EO
 }
 EOF
 
-# 5. ManagePayrollDeduction Tests
-cat > tools_regression_tests/interface_1/manage_payroll_deduction_tests.json << 'EOF'
+# Test 6: DiscoverPerformance - performance_metrics with different filters
+cat > tools_regression_tests/interface_2/discover_performance_2.json << 'EOF'
 {
-    "env": "hr_experts",
-    "interface_num": 1,
+    "env": "incident_management_redo",
+    "interface_num": 2,
     "task": {
         "actions": [
             {
-                "name": "manage_payroll_deduction",
+                "name": "discover_performance",
                 "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "tax",
-                        "amount": 150.75,
-                        "created_by": "1",
-                        "payroll_administrator_approval": true
+                    "entity_type": "performance_metrics",
+                    "filters": {
+                        "incident_id": "INC002",
+                        "metric_type": "MTTD",
+                        "calculated_value_minutes": 45,
+                        "recorded_by": "user_456"
                     }
                 }
             },
             {
-                "name": "manage_payroll_deduction",
+                "name": "discover_performance",
                 "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "2",
-                        "deduction_type": "insurance",
-                        "amount": 85.00,
-                        "created_by": "2",
-                        "finance_officer_approval": true
+                    "entity_type": "performance_metrics",
+                    "filters": {
+                        "metric_type": "FTR",
+                        "sla_target_minutes": 95,
+                        "recorded_date": "2025-10-02"
                     }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "retirement",
-                        "amount": 200.00,
-                        "created_by": "3",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "3",
-                        "deduction_type": "equipment",
-                        "amount": 50.25,
-                        "created_by": "1",
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "update",
-                    "deduction_id": "1",
-                    "deduction_data": {
-                        "amount": 175.00,
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "update",
-                    "deduction_id": "2",
-                    "deduction_data": {
-                        "deduction_type": "other",
-                        "finance_officer_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "999",
-                        "deduction_type": "tax",
-                        "amount": 150.75,
-                        "created_by": "1",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "tax",
-                        "amount": 150.75,
-                        "created_by": "999",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "invalid_type",
-                        "amount": 150.75,
-                        "created_by": "1",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "tax",
-                        "amount": -50.00,
-                        "created_by": "1",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "tax",
-                        "amount": 150.75,
-                        "created_by": "1"
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "update",
-                    "deduction_id": "999",
-                    "deduction_data": {
-                        "amount": 175.00,
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "update",
-                    "deduction_id": "1",
-                    "deduction_data": {
-                        "amount": 175.00
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "deduction_type": "tax",
-                        "amount": 150.75,
-                        "created_by": "1",
-                        "payroll_administrator_approval": true
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "invalid_action"
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create"
                 }
             }
         ]
@@ -879,166 +232,167 @@ cat > tools_regression_tests/interface_1/manage_payroll_deduction_tests.json << 
 }
 EOF
 
-# 6. ManageEmployeeBenefits Tests
-cat > tools_regression_tests/interface_1/manage_employee_benefits_tests.json << 'EOF'
+# Test 7: DiscoverAudit - audit_trails
+cat > tools_regression_tests/interface_2/discover_audit_1.json << 'EOF'
 {
-    "env": "hr_experts",
-    "interface_num": 1,
+    "env": "incident_management_redo",
+    "interface_num": 2,
     "task": {
         "actions": [
             {
-                "name": "manage_employee_benefits",
+                "name": "discover_audit",
                 "arguments": {
-                    "action": "create",
-                    "benefits_data": {
-                        "employee_id": "1",
-                        "plan_id": "1",
-                        "enrollment_date": "2025-01-15",
-                        "coverage_level": "employee only"
+                    "entity_type": "audit_trails",
+                    "filters": {
+                        "audit_id": "AUD001",
+                        "reference_id": "INC001",
+                        "reference_type": "incident",
+                        "action": "update",
+                        "user_id": "user_123",
+                        "field_name": "status",
+                        "created_at": "2025-10-04"
                     }
                 }
             },
             {
-                "name": "manage_employee_benefits",
+                "name": "discover_audit",
                 "arguments": {
-                    "action": "create",
-                    "benefits_data": {
-                        "employee_id": "2",
-                        "plan_id": "2",
-                        "enrollment_date": "2025-02-01",
-                        "coverage_level": "family coverage",
-                        "beneficiary_name": "Jane Doe",
-                        "beneficiary_relationship": "spouse"
+                    "entity_type": "audit_trails",
+                    "filters": {
+                        "reference_type": "user",
+                        "action": "create",
+                        "user_id": "user_456",
+                        "old_value": "null",
+                        "new_value": "active"
                     }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "create",
-                    "benefits_data": {
-                        "employee_id": "3",
-                        "plan_id": "3",
-                        "enrollment_date": "2025-03-10",
-                        "coverage_level": "employee plus children",
-                        "status": "pending"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "update",
-                    "enrollment_id": "1",
-                    "benefits_data": {
-                        "coverage_level": "employee plus spouse",
-                        "beneficiary_name": "John Smith",
-                        "beneficiary_relationship": "spouse"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "update",
-                    "enrollment_id": "2",
-                    "benefits_data": {
-                        "status": "terminated"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "create",
-                    "benefits_data": {
-                        "employee_id": "999",
-                        "plan_id": "1",
-                        "enrollment_date": "2025-01-15",
-                        "coverage_level": "employee only"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "create",
-                    "benefits_data": {
-                        "employee_id": "1",
-                        "plan_id": "999",
-                        "enrollment_date": "2025-01-15",
-                        "coverage_level": "employee only"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "create",
-                    "benefits_data": {
-                        "employee_id": "1",
-                        "plan_id": "1",
-                        "enrollment_date": "2026-01-15",
-                        "coverage_level": "employee only"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "create",
-                    "benefits_data": {
-                        "employee_id": "1",
-                        "plan_id": "1",
-                        "enrollment_date": "2025-01-15",
-                        "coverage_level": "invalid_level"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "update",
-                    "enrollment_id": "999",
-                    "benefits_data": {
-                        "coverage_level": "employee plus spouse"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "update",
-                    "enrollment_id": "2",
-                    "benefits_data": {
-                        "status": "active"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "create",
-                    "benefits_data": {
-                        "plan_id": "1",
-                        "enrollment_date": "2025-01-15",
-                        "coverage_level": "employee only"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "invalid_action"
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "create"
                 }
             }
         ]
     }
 }
 EOF
+
+# Test 8: DiscoverAudit - audit_trails with different filters
+cat > tools_regression_tests/interface_2/discover_audit_2.json << 'EOF'
+{
+    "env": "incident_management_redo",
+    "interface_num": 2,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_audit",
+                "arguments": {
+                    "entity_type": "audit_trails",
+                    "filters": {
+                        "reference_id": "CHG001",
+                        "reference_type": "change",
+                        "action": "delete",
+                        "field_name": "risk_level",
+                        "old_value": "high",
+                        "new_value": "null"
+                    }
+                }
+            },
+            {
+                "name": "discover_audit",
+                "arguments": {
+                    "entity_type": "audit_trails",
+                    "filters": {
+                        "user_id": "user_789",
+                        "action": "create",
+                        "reference_type": "communication",
+                        "created_at": "2025-10-03"
+                    }
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 9: DiscoverChangeControl - change_requests
+cat > tools_regression_tests/interface_2/discover_change_control_1.json << 'EOF'
+{
+    "env": "incident_management_redo",
+    "interface_num": 2,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_change_control",
+                "arguments": {
+                    "entity_type": "change_requests",
+                    "filters": {
+                        "change_id": "CHG001",
+                        "incident_id": "INC001",
+                        "title": "Database Patch",
+                        "change_type": "emergency",
+                        "risk_level": "high",
+                        "requested_by": "user_123",
+                        "approved_by": "user_456",
+                        "status": "approved",
+                        "implementation_date": "2025-10-05",
+                        "created_at": "2025-10-01"
+                    }
+                }
+            },
+            {
+                "name": "discover_change_control",
+                "arguments": {
+                    "entity_type": "change_requests",
+                    "filters": {
+                        "change_number": "CHG0001234",
+                        "description": "security update",
+                        "risk_level": "medium",
+                        "status": "completed",
+                        "updated_at": "2025-10-06"
+                    }
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 10: DiscoverChangeControl - rollback_requests
+cat > tools_regression_tests/interface_2/discover_change_control_2.json << 'EOF'
+{
+    "env": "incident_management_redo",
+    "interface_num": 2,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_change_control",
+                "arguments": {
+                    "entity_type": "rollback_requests",
+                    "filters": {
+                        "rollback_id": "RBK001",
+                        "change_id": "CHG001",
+                        "incident_id": "INC001",
+                        "title": "Rollback Failed Patch",
+                        "requested_by": "user_123",
+                        "approved_by": "user_456",
+                        "rollback_reason": "performance degradation",
+                        "status": "completed",
+                        "executed_at": "2025-10-06",
+                        "created_at": "2025-10-05"
+                    }
+                }
+            },
+            {
+                "name": "discover_change_control",
+                "arguments": {
+                    "entity_type": "rollback_requests",
+                    "filters": {
+                        "rollback_number": "RBK0001234",
+                        "rollback_reason": "system instability",
+                        "status": "requested",
+                        "executed_at": "2025-10-04"
+                    }
+                }
+            }
+        ]
+    }
+}
+EOF
+
+echo "Created 10 test files in tools_regression_tests/interface_2/"

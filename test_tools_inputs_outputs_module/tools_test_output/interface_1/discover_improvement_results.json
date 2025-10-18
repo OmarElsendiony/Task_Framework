@@ -1,0 +1,54 @@
+{
+  "task_file": "tools_regression_tests/interface_1/discover_improvement.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "entity_type": "root_cause_analyses",
+        "filters": {
+          "rca_id": "1",
+          "rca_number": "RCA0000001",
+          "rca_title": "RCA Report: INC0000001 - Storage System Failure",
+          "associated_incident_id": "1",
+          "assigned_to": "114",
+          "analysis_method": "5_whys",
+          "root_cause_summary": null,
+          "status": "in_progress",
+          "completed_at": null,
+          "approved_by": null,
+          "reported_by": "447"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "root_cause_analyses",
+          "count": 0,
+          "results": []
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "entity_type": "post_incident_reviews",
+        "filters": {
+          "review_id": "1",
+          "incident_id": "1",
+          "scheduled_date": "2025-10-10",
+          "facilitator": "59",
+          "status": "completed"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "post_incident_reviews",
+          "count": 0,
+          "results": []
+        },
+        200
+      ]
+    }
+  ]
+}

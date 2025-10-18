@@ -1,0 +1,71 @@
+{
+  "task_file": "tools_regression_tests/interface_3/tools_regression_tests/interface_1/manage_users.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "user_data": {
+          "first_name": "John",
+          "last_name": "Smith",
+          "email": "john.smith@techcorp.com",
+          "role": "technical_support",
+          "timezone": "America/New_York",
+          "status": "active",
+          "client_id": "1"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "user_id": "701",
+          "user_data": {
+            "user_id": "701",
+            "first_name": "John",
+            "last_name": "Smith",
+            "email": "john.smith@techcorp.com",
+            "role": "technical_support",
+            "timezone": "America/New_York",
+            "status": "active",
+            "client_id": "1",
+            "created_at": "2025-10-01T00:00:00",
+            "updated_at": "2025-10-01T00:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "user_id": "1",
+        "user_data": {
+          "role": "incident_manager",
+          "timezone": "America/Los_Angeles",
+          "status": "active"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "user_id": "1",
+          "user_data": {
+            "user_id": "1",
+            "first_name": "Melissa",
+            "last_name": "Jones",
+            "email": "melissa.jones@outlook.com",
+            "role": "incident_manager",
+            "timezone": "America/Los_Angeles",
+            "status": "active",
+            "client_id": null,
+            "created_at": "2025-04-21T09:22:17",
+            "updated_at": "2025-10-01T00:00:00"
+          }
+        },
+        200
+      ]
+    }
+  ]
+}

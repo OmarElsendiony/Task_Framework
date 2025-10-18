@@ -1,0 +1,32 @@
+{
+  "task_file": "tools_regression_tests/interface_1/check_authorization.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create_escalation",
+        "requester_email": "melissa.jones@outlook.com"
+      },
+      "output": [
+        {
+          "authorized": true,
+          "message": "User with role 'incident_manager' is directly authorized to perform action 'create_escalation'"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update_rollback_request",
+        "requester_email": "melissa.jones@outlook.com"
+      },
+      "output": [
+        {
+          "authorized": true,
+          "message": "User with role 'incident_manager' is directly authorized to perform action 'update_rollback_request'"
+        },
+        200
+      ]
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "task_file": "tools_regression_tests/interface_3/tools_regression_tests/interface_1/manage_incidents.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "incident_data": {
+          "title": "Database Connection Timeout Issues",
+          "description": "Multiple users reporting timeout errors when connecting to the primary database server",
+          "category": "Database",
+          "severity": "P2",
+          "impact": "high",
+          "urgency": "high",
+          "status": "open",
+          "reported_by": "347",
+          "assigned_to": "114",
+          "detection_time": "2025-10-01T09:15:00",
+          "problem_id": "1"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "incident_id": "201",
+          "incident_data": {
+            "incident_id": "201",
+            "problem_id": "1",
+            "incident_number": "INC0000201",
+            "title": "Database Connection Timeout Issues",
+            "description": "Multiple users reporting timeout errors when connecting to the primary database server",
+            "category": "Database",
+            "severity": "P2",
+            "impact": "high",
+            "urgency": "high",
+            "status": "open",
+            "reported_by": "347",
+            "assigned_to": "114",
+            "detection_time": "2025-10-01T09:15:00",
+            "acknowledged_at": null,
+            "resolved_at": null,
+            "closed_at": null,
+            "created_at": "2025-10-01T00:00:00",
+            "updated_at": "2025-10-01T00:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "incident_id": "1",
+        "incident_data": {
+          "status": "resolved",
+          "assigned_to": "114",
+          "resolved_at": "2025-10-01T14:30:00"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "incident_id": "1",
+          "incident_data": {
+            "incident_id": "1",
+            "problem_id": null,
+            "incident_number": "INC0000001",
+            "title": "Software bug: Intermittent application errors",
+            "description": "Minor software issue affecting application. UI rendering inconsistency reported by users. Low priority fix scheduled for next sprint.",
+            "category": "software",
+            "severity": "P3",
+            "impact": "medium",
+            "urgency": "medium",
+            "status": "resolved",
+            "reported_by": "347",
+            "assigned_to": "114",
+            "detection_time": "2025-09-25T12:15:49",
+            "acknowledged_at": null,
+            "resolved_at": "2025-10-01T14:30:00",
+            "closed_at": null,
+            "created_at": "2025-09-25T12:26:49",
+            "updated_at": "2025-10-01T00:00:00"
+          }
+        },
+        200
+      ]
+    }
+  ]
+}

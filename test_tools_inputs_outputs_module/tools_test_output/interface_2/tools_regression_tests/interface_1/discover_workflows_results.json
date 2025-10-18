@@ -1,0 +1,54 @@
+{
+  "task_file": "tools_regression_tests/interface_2/tools_regression_tests/interface_1/discover_workflows.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "entity_type": "communications",
+        "filters": {
+          "communication_id": "1",
+          "incident_id": "1",
+          "communication_type": "escalation_notice",
+          "recipient_type": "internal",
+          "sender": "213",
+          "recipient": "20",
+          "delivery_method": "sms",
+          "message_content": "Incident INC0000001 has been escalated. Immediate attention required.",
+          "delivery_status": "delivered"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "communications",
+          "count": 0,
+          "results": []
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "entity_type": "approval_requests",
+        "filters": {
+          "approval_id": "1",
+          "reference_id": "1",
+          "reference_type": "escalation",
+          "requested_by": "98",
+          "requested_action": "create_escalation",
+          "approver": "368",
+          "status": "denied"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "approval_requests",
+          "count": 0,
+          "results": []
+        },
+        200
+      ]
+    }
+  ]
+}

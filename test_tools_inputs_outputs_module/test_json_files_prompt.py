@@ -63,6 +63,9 @@ def main():
     
     args = argparser.parse_args()
     env = args.env
+    if env is None:
+        print("Environment not specified. Use --env to specify the environment.")
+        return
     # interface = args.interface
     
     

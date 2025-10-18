@@ -1,0 +1,65 @@
+{
+  "task_file": "tools_regression_tests/interface_1/discover_assets.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "entity_type": "configuration_items",
+        "filters": {
+          "ci_id": "1",
+          "ci_name": "Application-193-lA80",
+          "ci_type": "application",
+          "environment": "testing",
+          "operational_status": "operational",
+          "responsible_owner": "466"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "configuration_items",
+          "count": 1,
+          "results": [
+            {
+              "ci_id": "1",
+              "ci_name": "Application-193-lA80",
+              "ci_type": "application",
+              "environment": "testing",
+              "operational_status": "operational",
+              "responsible_owner": "466",
+              "created_at": "2025-10-15T14:30:08",
+              "updated_at": "2025-10-16T21:59:24"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "entity_type": "ci_client_assignments",
+        "filters": {
+          "assignment_id": "1",
+          "ci_id": "1",
+          "client_id": "12"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "entity_type": "ci_client_assignments",
+          "count": 1,
+          "results": [
+            {
+              "assignment_id": "1",
+              "ci_id": "1",
+              "client_id": "12",
+              "created_at": "2025-10-15T14:30:08"
+            }
+          ]
+        },
+        200
+      ]
+    }
+  ]
+}

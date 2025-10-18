@@ -1,0 +1,35 @@
+{
+    "env": "incident_management_redos",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "manage_users",
+                "arguments": {
+                    "action": "create",
+                    "user_data": {
+                        "first_name": "John",
+                        "last_name": "Smith",
+                        "email": "john.smith@techcorp.com",
+                        "role": "technical_support",
+                        "timezone": "America/New_York",
+                        "status": "active",
+                        "client_id": "1"
+                    }
+                }
+            },
+            {
+                "name": "manage_users",
+                "arguments": {
+                    "action": "update",
+                    "user_id": "1",
+                    "user_data": {
+                        "role": "incident_manager",
+                        "timezone": "America/Los_Angeles",
+                        "status": "active"
+                    }
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,61 @@
+{
+  "task_file": "tools_regression_tests/interface_2/tools_regression_tests/interface_1/manage_approval_requests.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "reference_id": "1",
+        "reference_type": "escalation",
+        "requested_by": "98",
+        "requested_action": "create_escalation",
+        "approver": "368"
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "create",
+          "approval_id": "201",
+          "approval_data": {
+            "approval_id": "201",
+            "reference_id": "1",
+            "reference_type": "escalation",
+            "requested_by": "98",
+            "requested_action": "create_escalation",
+            "approver": "368",
+            "status": "pending",
+            "requested_at": "2025-10-01T12:00:00",
+            "responded_at": null
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "approval_id": "1",
+        "status": "approved"
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "approval_id": "1",
+          "approval_data": {
+            "approval_id": "1",
+            "reference_id": "1",
+            "reference_type": "escalation",
+            "requested_by": "80",
+            "requested_action": "create_escalation",
+            "approver": null,
+            "status": "approved",
+            "requested_at": "2025-09-25T12:53:17",
+            "responded_at": "2025-10-01T12:00:00"
+          }
+        },
+        200
+      ]
+    }
+  ]
+}

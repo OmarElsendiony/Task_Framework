@@ -66,10 +66,9 @@ def run_single_task(task_file_path):
         return False, error_msg
 
 
-def run_all_tasks(base_path="tools_regression_tests", output_path="tools_test_output"):  
+def run_all_tasks(base_path="tools_regression_tests"):  
     """
     Find and run all task.json files, logging errors to a file.
-    Preserves directory structure from base_path in output_path.
     """
     # Find all task files
     task_files = find_all_task_files(base_path)
@@ -78,27 +77,15 @@ def run_all_tasks(base_path="tools_regression_tests", output_path="tools_test_ou
         print("No task.json files found in the directory structure.")
         return
 
+    # successful_tasks = []
+    # failed_tasks = []
+    
     # Process each task file
     for task_file in task_files:
         success, results = run_single_task(task_file)
-        
-        # Get the relative path from base_path
-        relative_path = os.path.relpath(task_file, base_path)
-        
-        # Get the directory structure and filename
-        relative_dir = os.path.dirname(relative_path)
-        filename = os.path.basename(task_file)
-        
-        # Create output directory structure
-        output_dir = os.path.join(output_path, relative_dir)
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # Create output filename (replace .json with _results.json)
-        output_filename = f"{os.path.splitext(filename)[0]}_results.json"
-        output_file_path = os.path.join(output_dir, output_filename)
-        
-        # Write results
-        with open(output_file_path, "w") as f:
+        # print(os.path.basename(os.path.dirname(task_file)))
+        # print(os.path.basename((task_file)))
+        with open(f"tools_test_output/{os.path.basename((task_file)).split('.')[0]}_results.json", "w") as f:
             json.dump({
                 "task_file": task_file,
                 "success": success,
@@ -107,11 +94,9 @@ def run_all_tasks(base_path="tools_regression_tests", output_path="tools_test_ou
         
 
 if __name__ == "__main__":
-    output_path = "tools_test_output"
+    if os.path.exists("tools_test_output/"):
+        shutil.rmtree('tools_test_output/', ignore_errors=True)
     
-    if os.path.exists(output_path):
-        shutil.rmtree(output_path, ignore_errors=True)
-    
-    os.makedirs(output_path, exist_ok=True)
+    os.makedirs("tools_test_output/", exist_ok=True)
 
-    run_all_tasks(base_path="tools_regression_tests", output_path=output_path)
+    run_all_tasks(base_path="tools_regression_tests")

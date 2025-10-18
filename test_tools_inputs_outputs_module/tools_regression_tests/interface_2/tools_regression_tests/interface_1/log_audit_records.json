@@ -1,0 +1,29 @@
+{
+    "env": "incident_management_redos",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "log_audit_records",
+                "arguments": {
+                    "reference_id": "42",
+                    "reference_type": "user",
+                    "action": "update",
+                    "user_id": "301",
+                    "field_name": "email",
+                    "old_value": "jonathan77@example.com",
+                    "new_value": "jessicabell@example.org"
+                }
+            },
+            {
+                "name": "log_audit_records",
+                "arguments": {
+                    "reference_id": "1",
+                    "reference_type": "incident",
+                    "action": "create",
+                    "user_id": "1"
+                }
+            }
+        ]
+    }
+}

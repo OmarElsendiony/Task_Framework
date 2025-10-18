@@ -1,0 +1,61 @@
+{
+  "task_file": "tools_regression_tests/interface_3/tools_regression_tests/interface_1/manage_problem_tickets.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "action": "create",
+        "problem_data": {
+          "problem_number": "PRB0000001",
+          "title": "Recurring Database Performance Issues",
+          "description": "Systematic analysis of recurring database performance degradation affecting multiple applications",
+          "category": "database",
+          "status": "open",
+          "reported_by": "347",
+          "assigned_to": "114",
+          "detected_at": "2025-10-01T08:00:00"
+        }
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Problem with number 'PRB0000001' already exists."
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "action": "update",
+        "problem_id": "1",
+        "problem_data": {
+          "status": "investigating",
+          "resolved_at": "2025-10-15T16:00:00"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "action": "update",
+          "problem_id": "1",
+          "problem_data": {
+            "problem_id": "1",
+            "problem_number": "PRB0000001",
+            "title": "Mobile app crash on startup",
+            "description": "Pattern of mobile application crashes on cold start. Affects specific device models. 3 users reporting issue across multiple clients.",
+            "status": "investigating",
+            "category": "software",
+            "reported_by": "409",
+            "assigned_to": "156",
+            "detected_at": "2025-09-17T13:28:47",
+            "resolved_at": "2025-10-15T16:00:00",
+            "closed_at": null,
+            "created_at": "2025-09-03T14:45:48",
+            "updated_at": "2025-10-01T00:00:00"
+          }
+        },
+        200
+      ]
+    }
+  ]
+}

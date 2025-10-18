@@ -1,0 +1,34 @@
+{
+    "env": "incident_management_redos",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "manage_escalations",
+                "arguments": {
+                    "action": "create",
+                    "escalation_data": {
+                        "incident_id": "1",
+                        "escalated_from": "303",
+                        "escalated_to": "3",
+                        "escalation_reason": "Unable to resolve within SLA timeframe. Escalating for additional support resources.",
+                        "approver": "4",
+                        "status": "pending"
+                    }
+                }
+            },
+            {
+                "name": "manage_escalations",
+                "arguments": {
+                    "action": "update",
+                    "escalation_id": "1",
+                    "escalation_data": {
+                        "status": "approved",
+                        "approver": "4",
+                        "responded_at": "2025-10-01T15:30:00"
+                    }
+                }
+            }
+        ]
+    }
+}

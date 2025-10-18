@@ -1,0 +1,35 @@
+{
+    "env": "incident_management_redos",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "manage_contracts",
+                "arguments": {
+                    "action": "create",
+                    "entity_data": {
+                        "client_id": "1",
+                        "tier": "premium",
+                        "support_coverage": "24x7",
+                        "effective_date": "2025-11-01",
+                        "expiration_date": "2026-10-31",
+                        "created_by": "14",
+                        "status": "active"
+                    }
+                }
+            },
+            {
+                "name": "manage_contracts",
+                "arguments": {
+                    "action": "update",
+                    "entity_id": "1",
+                    "entity_data": {
+                        "tier": "standard",
+                        "support_coverage": "business_hours",
+                        "expiration_date": "2027-10-31"
+                    }
+                }
+            }
+        ]
+    }
+}
