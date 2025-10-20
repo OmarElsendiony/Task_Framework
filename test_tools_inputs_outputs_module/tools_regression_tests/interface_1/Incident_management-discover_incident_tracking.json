@@ -1,0 +1,53 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "discover_incident_tracking",
+        "arguments": {
+          "entity_type": "incidents"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"incidents\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_incident_tracking",
+        "arguments": {
+          "entity_type": "work_notes",
+          "filters": {
+            "created_by": "466"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"work_notes\"",
+            "\"note_id\": \"2\"",
+            "\"created_by\": \"466\""
+          ]
+        }
+      },
+      {
+        "name": "discover_incident_tracking",
+        "arguments": {
+          "entity_type": "invalid_incident_entity"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid entity_type 'invalid_incident_entity'"
+          ]
+        }
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,68 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_communications",
+        "arguments": {
+          "action": "create",
+          "communication_data": {
+            "incident_id": "1",
+            "communication_type": "status_update",
+            "recipient_type": "internal",
+            "message_content": "Incident 1 status updated to investigating.",
+            "sender": "1",
+            "delivery_method": "email"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "created successfully",
+            "\"communication_id\""
+          ]
+        }
+      },
+      {
+        "name": "manage_communications",
+        "arguments": {
+          "action": "update",
+          "communication_id": "1",
+          "communication_data": {
+            "delivery_status": "sent"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "Communication 1 updated successfully",
+            "\"delivery_status\": \"sent\""
+          ]
+        }
+      },
+      {
+        "name": "manage_communications",
+        "arguments": {
+          "action": "create",
+          "communication_data": {
+            "communication_type": "status_update",
+            "recipient_type": "internal",
+            "message_content": "Missing incident and problem ticket example.",
+            "sender": "1",
+            "delivery_method": "email"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Halt: Either 'incident_id' or 'problem_ticket_id' must be provided"
+          ]
+        }
+      }
+    ]
+  }
+}
+

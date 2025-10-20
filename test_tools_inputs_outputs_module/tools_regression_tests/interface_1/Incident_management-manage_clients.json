@@ -1,0 +1,65 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_clients",
+        "arguments": {
+          "action": "create",
+          "client_data": {
+            "client_name": "Acme Corporation",
+            "company_type": "enterprise",
+            "support_coverage": "24x7",
+            "preferred_communication": "email",
+            "primary_address": "123 Main St",
+            "registration_number": "ACME-001"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "Acme Corporation",
+            "\"client_id\""
+          ]
+        }
+      },
+      {
+        "name": "manage_clients",
+        "arguments": {
+          "action": "create",
+          "client_data": {
+            "client_name": "Acme Corporation",
+            "company_type": "enterprise",
+            "support_coverage": "24x7",
+            "preferred_communication": "email"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Client with name 'Acme Corporation' already exists."
+          ]
+        }
+      },
+      {
+        "name": "manage_clients",
+        "arguments": {
+          "action": "update",
+          "client_id": "CLI999",
+          "client_data": {
+            "support_coverage": "business_hours"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Client 'CLI999' not found"
+          ]
+        }
+      }
+    ]
+  }
+}
+

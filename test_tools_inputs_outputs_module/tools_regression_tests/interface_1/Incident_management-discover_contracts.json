@@ -1,0 +1,53 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "discover_contracts",
+        "arguments": {
+          "entity_type": "sla_agreements"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"sla_agreements\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_contracts",
+        "arguments": {
+          "entity_type": "sla_agreements",
+          "filters": {
+            "client_id": "3"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"sla_agreements\"",
+            "\"client_id\": \"3\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_contracts",
+        "arguments": {
+          "entity_type": "unknown_contract_entity"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid entity_type 'unknown_contract_entity'"
+          ]
+        }
+      }
+    ]
+  }
+}
+

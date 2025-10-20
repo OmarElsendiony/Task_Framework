@@ -1,0 +1,68 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_work_notes",
+        "arguments": {
+          "action": "create",
+          "note_data": {
+            "incident_id": "1",
+            "note_text": "Investigating network latency - initial findings logged.",
+            "note_type": "progress_update",
+            "created_by": "1"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"create\"",
+            "\"note_id\"",
+            "\"note_data\"",
+            "progress_update"
+          ]
+        }
+      },
+      {
+        "name": "manage_work_notes",
+        "arguments": {
+          "action": "create",
+          "note_data": {
+            "note_text": "This note has no incident or problem reference.",
+            "note_type": "troubleshooting",
+            "created_by": "1"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Halt: Either 'incident_id' or 'problem_ticket_id' must be provided"
+          ]
+        }
+      },
+      {
+        "name": "manage_work_notes",
+        "arguments": {
+          "action": "update",
+          "note_id": "1",
+          "note_data": {
+            "note_text": "Updated note: added troubleshooting steps.",
+            "note_type": "troubleshooting"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"update\"",
+            "\"note_id\": \"1\"",
+            "troubleshooting"
+          ]
+        }
+      }
+    ]
+  }
+}
+

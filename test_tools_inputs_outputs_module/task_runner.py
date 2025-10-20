@@ -85,7 +85,12 @@ def run_single_task(task_file_path, envs_path="envs"):
                 "success": False,
                 "output": None,
                 "error": None,
-                "status_code": None
+                "status_code": None,
+                # expectation fields populated below if present
+                "expected": action.get("expected"),
+                "expected_match": None,
+                "actual_text": None,
+                "mismatch_reasons": None
             }
             
             try:
@@ -97,23 +102,146 @@ def run_single_task(task_file_path, envs_path="envs"):
                 action_result["status_code"] = status_code
                 action_result["output"] = api_response
                 
+                # Detect if API returned an 'error' field (but do NOT immediately mark failure;
+                # we'll consider expectations before deciding)
+                api_has_error = False
+                api_error_msg = None
+                if isinstance(api_response, list) and len(api_response) > 0:
+                    if isinstance(api_response[0], dict) and "error" in api_response[0]:
+                        api_has_error = True
+                        api_error_msg = api_response[0]["error"]
+                elif isinstance(api_response, dict) and "error" in api_response:
+                    api_has_error = True
+                    api_error_msg = api_response["error"]
+
+                # Normalize a textual representation of the API output for expectation checks
+                api_text = None
+                try:
+                    if isinstance(api_response, str):
+                        api_text = api_response
+                    elif isinstance(api_response, dict):
+                        # prefer a 'text' field if present
+                        if "text" in api_response and isinstance(api_response["text"], str):
+                            api_text = api_response["text"]
+                        else:
+                            api_text = json.dumps(api_response, ensure_ascii=False)
+                    elif isinstance(api_response, list):
+                        # try first element's text or dump entire list
+                        if len(api_response) > 0 and isinstance(api_response[0], dict) and "text" in api_response[0]:
+                            api_text = api_response[0]["text"]
+                        else:
+                            api_text = json.dumps(api_response, ensure_ascii=False)
+                    else:
+                        api_text = str(api_response)
+                except Exception:
+                    api_text = str(api_response)
+
+                action_result["actual_text"] = api_text
+
+                # Start by treating status_code==200 as optimistic success
                 if status_code == 200:
                     action_result["success"] = True
-                    # Check if API returned an error in the response
-                    if isinstance(api_response, list) and len(api_response) > 0:
-                        if isinstance(api_response[0], dict) and "error" in api_response[0]:
-                            action_result["success"] = False
-                            action_result["error"] = api_response[0]["error"]
-                    elif isinstance(api_response, dict) and "error" in api_response:
-                        action_result["success"] = False
-                        action_result["error"] = api_response["error"]
                 else:
-                    action_result["error"] = api_response.get("message", "API execution failed")
-                
+                    # Non-200 -> treat as failure regardless of expectations
+                    action_result["error"] = api_response.get("message", "API execution failed") if isinstance(api_response, dict) else str(api_response)
+                    action_result["success"] = False
+
+                # If an expectation is provided, validate it against the API output
+                expected = action.get("expected")
+                expected_ok = True
+                mismatch_reasons = []
+                if expected:
+                    # exact text match
+                    expected_text = expected.get("expected_text")
+                    if expected_text is not None:
+                        if (api_text or "").strip() != expected_text.strip():
+                            expected_ok = False
+                            mismatch_reasons.append("expected_text_mismatch")
+
+                    # substring checks
+                    expected_contains = expected.get("expected_contains", [])
+                    for substr in expected_contains:
+                        if substr.lower() not in (api_text or "").lower():
+                            expected_ok = False
+                            mismatch_reasons.append(f"missing_substring:{substr}")
+
+                    # severity semantic check (if API returns dict with severity)
+                    expected_severity = expected.get("severity")
+                    if expected_severity is not None:
+                        found_sev = None
+                        if isinstance(api_response, dict) and "severity" in api_response:
+                            found_sev = api_response.get("severity")
+                        else:
+                            # try to parse severity from text
+                            txt = (api_text or "").lower()
+                            if expected_severity.lower() in txt:
+                                found_sev = expected_severity
+                        if found_sev is None or str(found_sev).lower() != str(expected_severity).lower():
+                            expected_ok = False
+                            mismatch_reasons.append(f"severity_mismatch(expected={expected_severity}, found={found_sev})")
+
+                    # (Optional) boolean 'authorized' check if present in expected
+                    expected_authorized = expected.get("authorized")
+                    if expected_authorized is not None:
+                        actual_authorized = None
+                        if isinstance(api_response, dict) and "authorized" in api_response:
+                            actual_authorized = api_response.get("authorized")
+                        else:
+                            try:
+                                parsed = json.loads(api_text) if api_text else None
+                                if isinstance(parsed, dict) and "authorized" in parsed:
+                                    actual_authorized = parsed.get("authorized")
+                            except Exception:
+                                actual_authorized = None
+
+                        if actual_authorized is None:
+                            expected_ok = False
+                            mismatch_reasons.append(f"authorized_missing_in_response(expected={expected_authorized})")
+                        else:
+                            try:
+                                if bool(actual_authorized) != bool(expected_authorized):
+                                    expected_ok = False
+                                    mismatch_reasons.append(f"authorized_mismatch(expected={expected_authorized}, found={actual_authorized})")
+                            except Exception:
+                                expected_ok = False
+                                mismatch_reasons.append(f"authorized_mismatch(expected={expected_authorized}, found={actual_authorized})")
+
+                    action_result["expected_match"] = expected_ok
+                    action_result["mismatch_reasons"] = mismatch_reasons or None
+
+                else:
+                    # no expectation provided
+                    action_result["expected_match"] = None
+
+                # Decide final success:
+                # - Non-200 status already failed above.
+                # - If API included an 'error' field:
+                #     * If there's an expectation and it matched -> consider passed (clear error)
+                #     * Otherwise -> fail and surface API error message
+                # - If expectations exist and did not match -> fail
+                if status_code == 200:
+                    if api_has_error:
+                        if expected is not None and action_result.get("expected_match"):
+                            # expectation matched the error response -> treat as success
+                            action_result["success"] = True
+                            action_result["error"] = None
+                        else:
+                            action_result["success"] = False
+                            action_result["error"] = api_error_msg
+                    # If expectations were provided but did not match, mark failure
+                    if expected is not None and action_result.get("expected_match") is False:
+                        action_result["success"] = False
+                        action_result["error"] = f"Expectation mismatch: {', '.join(mismatch_reasons)}"
+                    # If expectation matched, ensure success True and clear any previously set error
+                    if expected is not None and action_result.get("expected_match"):
+                        action_result["success"] = True
+                        action_result["error"] = None
+
             except Exception as e:
                 action_result["error"] = str(e)
                 action_result["traceback"] = traceback.format_exc()
-            
+                action_result["success"] = False
+
             result["actions"].append(action_result)
         
         # Determine overall success
@@ -198,8 +326,30 @@ def run_all_tasks(base_path="tools_regression_tests", output_dir="tools_test_out
         # Save individual test result
         output_file = os.path.join(output_dir, f"{task_name}_result.json")
         with open(output_file, "w") as f:
-            json.dump(result, f, indent=2)
-        
+            json.dump(result, f, indent=2, ensure_ascii=False)
+
+        # Print per-action comparison (Actual vs Expected) so you can compare quickly
+        print("  Actions:")
+        for a in result.get("actions", []):
+            idx_a = a.get("index")
+            name = a.get("name")
+            status_icon = "✅" if a.get("success") else "❌"
+            print(f"    - Action[{idx_a}] {name}: {status_icon}")
+            print(f"        Actual: {a.get('actual_text')}")
+            if a.get("expected") is not None:
+                print(f"        Expected: {json.dumps(a.get('expected'), ensure_ascii=False)}")
+                print(f"        Expected match: {a.get('expected_match')}")
+                if a.get("mismatch_reasons"):
+                    print(f"        Mismatches: {', '.join(a.get('mismatch_reasons'))}")
+            else:
+                # show raw output if no structured expectation provided
+                if a.get("output") is not None:
+                    try:
+                        raw = json.dumps(a.get("output"), ensure_ascii=False)
+                    except Exception:
+                        raw = str(a.get("output"))
+                    print(f"        Output (raw): {raw}")
+
         # Add to summary
         summary["test_results"].append({
             "file": task_file,
@@ -216,8 +366,8 @@ def run_all_tasks(base_path="tools_regression_tests", output_dir="tools_test_out
     # Save summary report
     summary_file = os.path.join(output_dir, "summary.json")
     with open(summary_file, "w") as f:
-        json.dump(summary, f, indent=2)
-    
+        json.dump(summary, f, indent=2, ensure_ascii=False)
+
     # Print summary
     print("\n" + "="*60)
     print("📊 TEST SUMMARY")
@@ -230,3 +380,4 @@ def run_all_tasks(base_path="tools_regression_tests", output_dir="tools_test_out
     print(f"\n📁 Results saved to: {output_dir}/")
     
     return summary
+

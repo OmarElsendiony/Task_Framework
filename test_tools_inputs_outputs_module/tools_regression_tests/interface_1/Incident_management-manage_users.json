@@ -1,0 +1,71 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_users",
+        "arguments": {
+          "action": "create",
+          "user_data": {
+            "first_name": "Alice",
+            "last_name": "Walker",
+            "email": "alice.walker@example.com",
+            "role": "client_contact",
+            "timezone": "UTC",
+            "client_id": "3"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"create\"",
+            "\"user_id\"",
+            "alice.walker@example.com"
+          ]
+        }
+      },
+      {
+        "name": "manage_users",
+        "arguments": {
+          "action": "create",
+          "user_data": {
+            "first_name": "Bob",
+            "last_name": "NoEmail",
+            "role": "technical_support",
+            "timezone": "UTC"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Missing required fields",
+            "email"
+          ]
+        }
+      },
+      {
+        "name": "manage_users",
+        "arguments": {
+          "action": "update",
+          "user_id": "1",
+          "user_data": {
+            "timezone": "America/New_York",
+            "status": "active"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"update\"",
+            "\"user_id\": \"1\"",
+            "\"timezone\": \"America/New_York\""
+          ]
+        }
+      }
+    ]
+  }
+}
+
