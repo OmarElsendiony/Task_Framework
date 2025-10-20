@@ -1,0 +1,38 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "assess_incident_severity",
+        "arguments": {
+          "complete_outage": true
+        },
+        "expected": {
+          "severity": "P4"
+        }
+      },
+      {
+        "name": "assess_incident_severity",
+        "arguments": {
+          "complete_outage": true,
+            "no_workaround": true
+        },
+        "expected": {
+          "severity": "P1"
+        }
+      },
+      {
+        "name": "assess_incident_severity",
+        "arguments": {
+          "single_department": true,
+          "moderate_degradation": true,
+          "minimal_workaround": true
+        },
+        "expected": {
+          "severity": "P3"
+        }
+      }
+    ]
+  }
+}

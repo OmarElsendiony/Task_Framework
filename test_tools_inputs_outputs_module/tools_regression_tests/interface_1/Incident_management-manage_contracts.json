@@ -1,0 +1,66 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_contracts",
+        "arguments": {
+          "action": "create",
+          "entity_data": {
+            "client_id": "3",
+            "tier": "standard",
+            "support_coverage": "business_hours",
+            "effective_date": "2025-10-01",
+            "created_by": "1"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"sla_id\"",
+            "\"sla_data\"",
+            "\"client_id\": \"3\""
+          ]
+        }
+      },
+      {
+        "name": "manage_contracts",
+        "arguments": {
+          "action": "create",
+          "entity_data": {
+            "client_id": "999",
+            "tier": "standard",
+            "support_coverage": "business_hours",
+            "effective_date": "2025-10-01",
+            "created_by": "1"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Client not found"
+          ]
+        }
+      },
+      {
+        "name": "manage_contracts",
+        "arguments": {
+          "action": "update",
+          "entity_id": "999",
+          "entity_data": {
+            "tier": "premium"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "SLA agreement 999 not found"
+          ]
+        }
+      }
+    ]
+  }
+}
+

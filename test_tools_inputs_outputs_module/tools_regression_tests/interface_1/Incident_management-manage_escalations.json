@@ -1,0 +1,65 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_escalations",
+        "arguments": {
+          "action": "create",
+          "escalation_data": {
+            "incident_id": "1",
+            "escalated_from": "1",
+            "escalated_to": "3",
+            "escalation_reason": "Database outage affecting clients"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"create\"",
+            "\"escalation_id\"",
+            "created successfully"
+          ]
+        }
+      },
+      {
+        "name": "manage_escalations",
+        "arguments": {
+          "action": "create",
+          "escalation_data": {
+            "incident_id": "1",
+            "escalation_reason": "Missing escalated_to example",
+            "escalated_from": "1"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Halt: Missing required fields"
+          ]
+        }
+      },
+      {
+        "name": "manage_escalations",
+        "arguments": {
+          "action": "update",
+          "escalation_id": "1",
+          "escalation_data": {
+            "status": "approved"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"action\": \"update\"",
+            "Escalation 1 updated successfully",
+            "\"status\": \"approved\""
+          ]
+        }
+      }
+    ]
+  }
+}
+

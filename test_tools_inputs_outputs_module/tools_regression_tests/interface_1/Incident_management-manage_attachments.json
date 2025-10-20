@@ -1,0 +1,75 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_attachments",
+        "arguments": {
+          "action": "create",
+          "attachment_data": {
+            "reference_id": "1",
+            "reference_type": "incident",
+            "file_name": "screenshot.png",
+            "file_url": "https://storage.example.com/files/screenshot.png",
+            "file_type": "image/png",
+            "file_size_bytes": 102400,
+            "uploaded_by": "1"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"attachment_id\"",
+            "\"attachment_data\"",
+            "screenshot.png"
+          ]
+        }
+      },
+      {
+        "name": "manage_attachments",
+        "arguments": {
+          "action": "create",
+          "attachment_data": {
+            "reference_id": "1",
+            "reference_type": "invalid_ref",
+            "file_name": "doc.pdf",
+            "file_url": "https://storage.example.com/files/doc.pdf",
+            "file_type": "application/pdf",
+            "file_size_bytes": 2048,
+            "uploaded_by": "1"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid reference_type 'invalid_ref'"
+          ]
+        }
+      },
+      {
+        "name": "manage_attachments",
+        "arguments": {
+          "action": "create",
+          "attachment_data": {
+            "reference_id": "1",
+            "reference_type": "incident",
+            "file_name": "log.txt",
+            "file_url": "https://storage.example.com/files/log.txt",
+            "file_type": "text/plain",
+            "file_size_bytes": 512,
+            "uploaded_by": "999"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Uploaded by user '999' not found"
+          ]
+        }
+      }
+    ]
+  }
+}
+

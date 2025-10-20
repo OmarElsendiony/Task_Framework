@@ -1,0 +1,66 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_assets",
+        "arguments": {
+          "action": "create",
+          "entity_type": "configuration_items",
+          "entity_data": {
+            "ci_name": "web-server-01",
+            "ci_type": "server",
+            "environment": "production",
+            "operational_status": "operational",
+            "responsible_owner": "1"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"ci_id\"",
+            "\"ci_data\"",
+            "web-server-01"
+          ]
+        }
+      },
+      {
+        "name": "manage_assets",
+        "arguments": {
+          "action": "create",
+          "entity_type": "ci_client_assignments",
+          "entity_data": {
+            "ci_id": "CI_NON_EXISTENT",
+            "client_id": "3"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Configuration item 'CI_NON_EXISTENT' not found."
+          ]
+        }
+      },
+      {
+        "name": "manage_assets",
+        "arguments": {
+          "action": "update",
+          "entity_type": "configuration_items",
+          "entity_id": "CI999",
+          "entity_data": {
+            "operational_status": "degraded"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Configuration item 'CI999' not found."
+          ]
+        }
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,32 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "check_authorization",
+        "arguments": {
+          "action": "create_incident",
+          "requester_email": "melissa.jones@outlook.com"
+        },
+        "expected": {
+          "authorized": true,
+          "expected_contains": ["directly authorized"]
+        }
+      },
+      {
+        "name": "check_authorization",
+        "arguments": {
+          "action": "close_incident",
+          "requester_email": "john.butler@techcorp.com"
+        },
+        "expected": {
+          "authorized": false,
+          "expected_contains": [
+            "is not authorized"
+          ]
+        }
+      }
+    ]
+  }
+}

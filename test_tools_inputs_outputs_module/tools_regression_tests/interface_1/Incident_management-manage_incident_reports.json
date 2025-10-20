@@ -1,0 +1,64 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_incident_reports",
+        "arguments": {
+          "action": "create",
+          "incident_id": "1",
+          "report_title": "Post incident review for INC0000001",
+          "report_type": "post_incident_review",
+          "report_content": "Detailed RCA and mitigation steps.",
+          "generated_by": "1"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"create\"",
+            "\"report_id\"",
+            "\"report_number\"",
+            "\"report_data\""
+          ]
+        }
+      },
+      {
+        "name": "manage_incident_reports",
+        "arguments": {
+          "action": "create",
+          "incident_id": "1",
+          "report_title": "Incomplete report",
+          "report_type": "client_impact",
+          "report_content": "Missing generated_by to trigger validation"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Missing required fields",
+            "generated_by"
+          ]
+        }
+      },
+      {
+        "name": "manage_incident_reports",
+        "arguments": {
+          "action": "update",
+          "report_id": "1",
+          "report_status": "completed"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"update\"",
+            "\"report_id\": \"1\"",
+            "\"report_status\": \"completed\""
+          ]
+        }
+      }
+    ]
+  }
+}
+

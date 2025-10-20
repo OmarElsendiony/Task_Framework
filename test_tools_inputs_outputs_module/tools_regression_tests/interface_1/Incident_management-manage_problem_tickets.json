@@ -1,0 +1,74 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_problem_tickets",
+        "arguments": {
+          "action": "create",
+          "problem_data": {
+            "problem_number": "PRB-2025-001",
+            "title": "Intermittent service degradation",
+            "description": "Multiple incidents indicate a recurring networking issue.",
+            "category": "network",
+            "reported_by": "1",
+            "assigned_to": "3",
+            "detected_at": "2025-10-07T10:30:00"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"create\"",
+            "\"problem_id\"",
+            "\"problem_data\""
+          ]
+        }
+      },
+      {
+        "name": "manage_problem_tickets",
+        "arguments": {
+          "action": "create",
+          "problem_data": {
+            "problem_number": "PRB-2025-001",
+            "title": "Duplicate problem number test",
+            "description": "Should trigger duplicate problem_number validation",
+            "category": "software",
+            "reported_by": "1",
+            "assigned_to": "2",
+            "detected_at": "2025-10-07T11:00:00"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Problem with number 'PRB-2025-001' already exists."
+          ]
+        }
+      },
+      {
+        "name": "manage_problem_tickets",
+        "arguments": {
+          "action": "update",
+          "problem_id": "PRB1",
+          "problem_data": {
+            "status": "resolved",
+            "resolved_at": "2025-10-07T12:00:00"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"update\"",
+            "\"problem_id\": \"PRB1\"",
+            "\"status\": \"resolved\""
+          ]
+        }
+      }
+    ]
+  }
+}
+

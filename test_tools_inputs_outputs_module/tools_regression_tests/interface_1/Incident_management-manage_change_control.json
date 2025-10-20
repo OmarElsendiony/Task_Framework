@@ -1,0 +1,66 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_change_control",
+        "arguments": {
+          "action": "create",
+          "change_request_data": {
+            "title": "Patch web server OS",
+            "description": "Apply security patch to web servers",
+            "change_type": "normal",
+            "risk_level": "medium",
+            "requested_by": "1"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"change_id\"",
+            "\"change_request_data\"",
+            "Patch web server OS"
+          ]
+        }
+      },
+      {
+        "name": "manage_change_control",
+        "arguments": {
+          "action": "update",
+          "change_id": "999",
+          "change_request_data": {
+            "status": "approved"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Change request '999' not found"
+          ]
+        }
+      },
+      {
+        "name": "manage_change_control",
+        "arguments": {
+          "action": "create",
+          "change_request_data": {
+            "title": "Bad change",
+            "description": "Invalid type example",
+            "change_type": "unsupported_type",
+            "risk_level": "low",
+            "requested_by": "1"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid change_type 'unsupported_type'"
+          ]
+        }
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,68 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_work_orders",
+        "arguments": {
+          "action": "create",
+          "work_order_data": {
+            "work_order_number": "WO-1001",
+            "title": "Replace faulty NIC on server",
+            "description": "Swap out NIC on web-server-01",
+            "assigned_to": "1",
+            "scheduled_date": "2025-10-10T09:00:00",
+            "status": "pending"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"create\"",
+            "\"work_order_id\"",
+            "WO-1001"
+          ]
+        }
+      },
+      {
+        "name": "manage_work_orders",
+        "arguments": {
+          "action": "create",
+          "work_order_data": {
+            "work_order_number": "WO-1001",
+            "title": "Duplicate WO number test",
+            "description": "Should trigger duplicate validation",
+            "assigned_to": "1",
+            "scheduled_date": "2025-10-11T10:00:00"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Work order with number 'WO-1001' already exists."
+          ]
+        }
+      },
+      {
+        "name": "manage_work_orders",
+        "arguments": {
+          "action": "update",
+          "work_order_id": "WO999",
+          "work_order_data": {
+            "status": "completed",
+            "completed_at": "2025-10-10T11:00:00"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Work order 'WO999' not found"
+          ]
+        }
+      }
+    ]
+  }
+}
+

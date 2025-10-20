@@ -1,0 +1,61 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "log_audit_records",
+        "arguments": {
+          "reference_id": "1",
+          "reference_type": "user",
+          "action": "create",
+          "user_id": "1"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"audit_id\"",
+            "\"audit_data\""
+          ]
+        }
+      },
+      {
+        "name": "log_audit_records",
+        "arguments": {
+          "reference_id": "1",
+          "reference_type": "user",
+          "action": "update",
+          "user_id": "1",
+          "field_name": "role",
+          "old_value": "client_contact",
+          "new_value": "incident_manager"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"audit_id\"",
+            "\"audit_data\""
+          ]
+        }
+      },
+      {
+        "name": "log_audit_records",
+        "arguments": {
+          "reference_id": "1",
+          "reference_type": "invalid_type",
+          "action": "create",
+          "user_id": "1"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid reference_type 'invalid_type'"
+          ]
+        }
+      }
+    ]
+  }
+}
+
