@@ -1,0 +1,44 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_skill",
+        "arguments": {
+          "operation": "enable",
+          "skill_id": "1"
+        },
+        "expected": {
+          "success": true,
+          "operation": "enable",
+          "expected_contains": ["enablement_status", "enabled_date", "skill_id"]
+        }
+      },
+      {
+        "name": "manage_skill",
+        "arguments": {
+          "operation": "disable",
+          "skill_id": "2"
+        },
+        "expected": {
+          "success": true,
+          "operation": "disable",
+          "expected_contains": ["enablement_status", "disabled_date", "skill_id"]
+        }
+      },
+      {
+        "name": "manage_skill",
+        "arguments": {
+          "operation": "search",
+          "skill_name": "Hue"
+        },
+        "expected": {
+          "success": true,
+          "operation": "search",
+          "expected_contains": ["matching_skills", "results_count", "Hue"]
+        }
+      }
+    ]
+  }
+}

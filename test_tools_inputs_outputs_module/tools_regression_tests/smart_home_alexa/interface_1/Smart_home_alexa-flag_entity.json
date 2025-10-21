@@ -1,0 +1,59 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "flag_entity",
+        "arguments": {
+          "flag_type": "device_for_attention",
+          "entity_id": "1",
+          "flag_data": {
+            "reason": "security breach detected",
+            "priority": "high",
+            "issue_type": "security"
+          }
+        },
+        "expected": {
+          "success": true,
+          "flag_type": "device_for_attention",
+          "expected_contains": ["alert_id", "priority", "security"]
+        }
+      },
+      {
+        "name": "flag_entity",
+        "arguments": {
+          "flag_type": "critical_issue",
+          "entity_id": "2",
+          "flag_data": {
+            "reason": "firmware corruption",
+            "issue_description": "firmware checksum mismatch",
+            "requires_immediate_action": true
+          }
+        },
+        "expected": {
+          "success": true,
+          "flag_type": "critical_issue",
+          "expected_contains": ["CRITICAL", "requires_immediate_action", "alert_id"]
+        }
+      },
+      {
+        "name": "flag_entity",
+        "arguments": {
+          "flag_type": "device_for_attention",
+          "entity_id": "3",
+          "flag_data": {
+            "reason": "intermittent disconnects",
+            "priority": "medium",
+            "issue_type": "connectivity"
+          }
+        },
+        "expected": {
+          "success": true,
+          "flag_type": "device_for_attention",
+          "expected_contains": ["intermittent", "connectivity", "alert_created"]
+        }
+      }
+    ]
+  }
+}

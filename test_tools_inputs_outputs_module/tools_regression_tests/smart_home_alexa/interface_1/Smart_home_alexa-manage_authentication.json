@@ -1,0 +1,47 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_authentication",
+        "arguments": {
+          "operation": "generate_verification_code",
+          "user_id": "1",
+          "authentication_method": "authenticator_app"
+        },
+        "expected": {
+          "success": true,
+          "operation": "generate_verification_code",
+          "expected_contains": ["verification_code", "verification_session", "authentication_method"]
+        }
+      },
+      {
+        "name": "manage_authentication",
+        "arguments": {
+          "operation": "validate_code",
+          "user_id": "1",
+          "verification_code": "123456"
+        },
+        "expected": {
+          "success": true,
+          "operation": "validate_code",
+          "expected_contains": ["verification_status", "valid"]
+        }
+      },
+      {
+        "name": "manage_authentication",
+        "arguments": {
+          "operation": "generate_backup_codes",
+          "user_id": "2",
+          "operation_data": { "count": 5 }
+        },
+        "expected": {
+          "success": true,
+          "operation": "generate_backup_codes",
+          "expected_contains": ["backup_codes", "codes_generated"]
+        }
+      }
+    ]
+  }
+}

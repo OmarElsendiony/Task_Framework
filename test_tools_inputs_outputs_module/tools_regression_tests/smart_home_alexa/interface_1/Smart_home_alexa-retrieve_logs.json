@@ -1,0 +1,44 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "retrieve_logs",
+        "arguments": {
+          "retrieval_type": "device_operations",
+          "retrieval_criteria": { "device_id": "1" }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["device_id", "operations", "total_operations"]
+        }
+      },
+      {
+        "name": "retrieve_logs",
+        "arguments": {
+          "retrieval_type": "routine_executions",
+          "retrieval_criteria": { "routine_id": "3" }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["routine_id", "total_executions", "successful_executions"]
+        }
+      },
+      {
+        "name": "retrieve_logs",
+        "arguments": {
+          "retrieval_type": "access_logs_by_date_range",
+          "retrieval_criteria": {
+            "start_datetime": "2025-10-01T00:00:00Z",
+            "end_datetime": "2025-10-16T23:59:59Z"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["start_datetime", "end_datetime", "total_logs"]
+        }
+      }
+    ]
+  }
+}

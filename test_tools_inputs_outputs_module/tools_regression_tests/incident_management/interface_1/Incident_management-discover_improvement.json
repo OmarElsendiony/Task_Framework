@@ -1,0 +1,54 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "discover_improvement",
+        "arguments": {
+          "entity_type": "root_cause_analyses"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"root_cause_analyses\"",
+            "\"rca_id\":",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_improvement",
+        "arguments": {
+          "entity_type": "post_incident_reviews",
+          "filters": {
+            "incident_id": "3"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"post_incident_reviews\"",
+            "\"review_id\": \"3\"",
+            "\"incident_id\": \"3\""
+          ]
+        }
+      },
+      {
+        "name": "discover_improvement",
+        "arguments": {
+          "entity_type": "unknown_improvement_entity"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid entity_type 'unknown_improvement_entity'"
+          ]
+        }
+      }
+    ]
+  }
+}
+

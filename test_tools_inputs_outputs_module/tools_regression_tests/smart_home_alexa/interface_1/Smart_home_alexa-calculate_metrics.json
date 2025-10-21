@@ -1,0 +1,50 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "calculate_metrics",
+        "arguments": {
+          "metric_type": "system_uptime",
+          "metric_data": {
+            "total_devices": 100,
+            "online_devices": 99
+          }
+        },
+        "expected": {
+          "success": true,
+          "metric_type": "system_uptime"
+        }
+      },
+      {
+        "name": "calculate_metrics",
+        "arguments": {
+          "metric_type": "percentage",
+          "metric_data": {
+            "numerator": 12,
+            "denominator": 100
+          }
+        },
+        "expected": {
+          "success": true,
+          "metric_type": "percentage",
+          "percentage": 12.0
+        }
+      },
+      {
+        "name": "calculate_metrics",
+        "arguments": {
+          "metric_type": "device_health_score",
+          "metric_data": {
+            "device_id": "7"
+          }
+        },
+        "expected": {
+          "success": true,
+          "metric_type": "device_health_score"
+        }
+      }
+    ]
+  }
+}

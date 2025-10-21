@@ -1,0 +1,35 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "archive_data",
+        "arguments": {
+          "archive_type": "device_logs",
+          "entity_id": "1",
+          "retention_days": 365
+        },
+        "expected": {"success": true, "archive_type": "device_logs", "device_id": "1"}
+      },
+      {
+        "name": "archive_data",
+        "arguments": {
+          "archive_type": "user_logs",
+          "entity_id": "11",
+          "retention_days": 180
+        },
+        "expected": {"success": true, "archive_type": "user_logs", "user_id": "11"}
+      },
+      {
+        "name": "archive_data",
+        "arguments": {
+          "archive_type": "device_logs",
+          "entity_id": "9999",
+          "retention_days": 90
+        },
+        "expected": {"success": false, "error_contains": "Device not found"}
+      }
+    ]
+  }
+}

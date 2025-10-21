@@ -1,0 +1,49 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "discover_change_control",
+        "arguments": {
+          "entity_type": "change_requests"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"change_requests\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_change_control",
+        "arguments": {
+          "entity_type": "rollback_requests"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"rollback_requests\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_change_control",
+        "arguments": {
+          "entity_type": "unknown_entity"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid entity_type 'unknown_entity'"
+          ]
+        }
+      }
+    ]
+  }
+}
+

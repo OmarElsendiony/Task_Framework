@@ -1,0 +1,49 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "validate_input",
+        "arguments": {
+          "validation_type": "field",
+          "field_name": "email_address",
+          "field_value": "user@example.com"
+        },
+        "expected": {
+          "valid": true,
+          "expected_contains": ["valid", "email_address"]
+        }
+      },
+      {
+        "name": "validate_input",
+        "arguments": {
+          "validation_type": "entity",
+          "entity_type": "users",
+          "entity_data": {
+            "user_name": "Test User",
+            "email_address": "invalid-email",
+            "role": "Admin",
+            "permission_level": "full_control"
+          }
+        },
+        "expected": {
+          "valid": false,
+          "expected_contains": ["Invalid email format", "errors"]
+        }
+      },
+      {
+        "name": "validate_input",
+        "arguments": {
+          "validation_type": "enum",
+          "field_name": "role",
+          "field_value": "Household_Member"
+        },
+        "expected": {
+          "valid": true,
+          "expected_contains": ["valid", "role"]
+        }
+      }
+    ]
+  }
+}

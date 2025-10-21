@@ -1,0 +1,61 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "categorize_data",
+        "arguments": {
+          "categorization_type": "device_health",
+          "categorization_data": {
+            "devices": [
+              {"device_id": "1", "health_score": 92},
+              {"device_id": "2", "health_score": 75},
+              {"device_id": "3", "health_score": 45}
+            ]
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["categorization_type", "device_health", "summary", "healthy", "warning", "critical"]
+        }
+      },
+      {
+        "name": "categorize_data",
+        "arguments": {
+          "categorization_type": "logs_by_type",
+          "categorization_data": {
+            "logs": [
+              {"log_id": "L1", "action_type": "device_update"},
+              {"log_id": "L2", "action_type": "device_update"},
+              {"log_id": "L3", "action_type": "user_update"},
+              {"log_id": "L4", "action_type": "device_add"}
+            ]
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["categorization_type", "logs_by_type", "categories", "device_update", "user_update"]
+        }
+      },
+      {
+        "name": "categorize_data",
+        "arguments": {
+          "categorization_type": "response_performance",
+          "categorization_data": {
+            "response_times": {
+              "1": 120,
+              "2": 450,
+              "3": 800,
+              "4": 1500
+            }
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["categorization_type", "response_performance", "excellent", "good", "acceptable", "poor"]
+        }
+      }
+    ]
+  }
+}

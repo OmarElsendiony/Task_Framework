@@ -1,0 +1,47 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "filter_data",
+        "arguments": {
+          "filter_type": "devices_by_status",
+          "filter_criteria": {
+            "status": "online"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["filter_type", "devices_by_status", "devices_found", "devices"]
+        }
+      },
+      {
+        "name": "filter_data",
+        "arguments": {
+          "filter_type": "devices_by_type",
+          "filter_criteria": {
+            "device_type": "camera"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["filter_type", "devices_by_type", "device_type", "devices_found"]
+        }
+      },
+      {
+        "name": "filter_data",
+        "arguments": {
+          "filter_type": "devices_by_battery",
+          "filter_criteria": {
+            "threshold": 20
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["filter_type", "devices_by_battery", "threshold", "devices_found"]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_incidents_problems_configuration_items",
+        "arguments": {
+          "action": "create",
+          "entity_type": "incident_ci",
+          "association_data": {
+            "incident_id": "1",
+            "ci_id": "2"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"create\"",
+            "\"association_id\"",
+            "\"association_data\""
+          ]
+        }
+      },
+      {
+        "name": "manage_incidents_problems_configuration_items",
+        "arguments": {
+          "action": "create",
+          "entity_type": "incident_ci",
+          "association_data": {
+            "incident_id": "1",
+            "ci_id": "2"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "already exists"
+          ]
+        }
+      },
+      {
+        "name": "manage_incidents_problems_configuration_items",
+        "arguments": {
+          "action": "update",
+          "entity_type": "incident_ci",
+          "association_id": "1",
+          "association_data": {
+            "ci_id": "CI999"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Configuration item 'CI999' not found"
+          ]
+        }
+      }
+    ]
+  }
+}
+

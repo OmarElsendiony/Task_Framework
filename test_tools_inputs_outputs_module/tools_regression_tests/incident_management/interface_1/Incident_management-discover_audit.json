@@ -1,0 +1,52 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "discover_audit",
+        "arguments": {
+          "entity_type": "audit_trails"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"audit_trails\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_audit",
+        "arguments": {
+          "entity_type": "audit_trails",
+          "filters": {
+            "user_id": "1"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"audit_trails\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_audit",
+        "arguments": {
+          "entity_type": "invalid_entity"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid entity_type 'invalid_entity'"
+          ]
+        }
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,44 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "generate_access_codes",
+        "arguments": {
+          "code_type": "guest_access",
+          "generation_parameters": { "user_id": "5", "expires_in_hours": 24 }
+        },
+        "expected": {
+          "success": true,
+          "code_type": "guest_access",
+          "expected_contains": ["guest_access_code", "generated_at"]
+        }
+      },
+      {
+        "name": "generate_access_codes",
+        "arguments": {
+          "code_type": "backup_identifier",
+          "generation_parameters": { "timestamp": "2025-10-16T14:30:00" }
+        },
+        "expected": {
+          "success": true,
+          "code_type": "backup_identifier",
+          "expected_contains": ["backup_id", "timestamp"]
+        }
+      },
+      {
+        "name": "generate_access_codes",
+        "arguments": {
+          "code_type": "guest_access",
+          "generation_parameters": { "user_id": "13", "expires_in_hours": 2 }
+        },
+        "expected": {
+          "success": true,
+          "code_type": "guest_access",
+          "expected_contains": ["guest_access_code"]
+        }
+      }
+    ]
+  }
+}

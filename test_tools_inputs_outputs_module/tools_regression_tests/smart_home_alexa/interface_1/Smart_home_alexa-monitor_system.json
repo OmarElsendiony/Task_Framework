@@ -1,0 +1,44 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "monitor_system",
+        "arguments": {
+          "monitoring_type": "health_summary"
+        },
+        "expected": {
+          "success": true,
+          "monitoring_type": "health_summary",
+          "expected_contains": ["overall_health_score", "health_status", "device_statistics"]
+        }
+      },
+      {
+        "name": "monitor_system",
+        "arguments": {
+          "monitoring_type": "activity_summary",
+          "monitoring_parameters": {
+            "time_period": "last_24_hours"
+          }
+        },
+        "expected": {
+          "success": true,
+          "monitoring_type": "activity_summary",
+          "expected_contains": ["total_operations", "success_rate", "top_operations"]
+        }
+      },
+      {
+        "name": "monitor_system",
+        "arguments": {
+          "monitoring_type": "update_summary"
+        },
+        "expected": {
+          "success": true,
+          "monitoring_type": "update_summary",
+          "expected_contains": ["devices_needing_update", "update_coverage"]
+        }
+      }
+    ]
+  }
+}

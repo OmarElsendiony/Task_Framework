@@ -1,0 +1,54 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "query_entities",
+        "arguments": {
+          "entity_type": "devices",
+          "user_id": "1",
+          "filters": {
+            "group_id": "2"
+          },
+          "limit": 50
+        },
+        "expected": {
+          "success": true,
+          "entity_type": "devices",
+          "expected_contains": ["entity_type", "results", "total_count"]
+        }
+      },
+      {
+        "name": "query_entities",
+        "arguments": {
+          "entity_type": "users",
+          "user_id": "1",
+          "filters": {
+            "role": "Admin"
+          }
+        },
+        "expected": {
+          "success": true,
+          "entity_type": "users",
+          "expected_contains": ["results", "total_count"]
+        }
+      },
+      {
+        "name": "query_entities",
+        "arguments": {
+          "entity_type": "routines",
+          "user_id": "1",
+          "filters": {
+            "status": "enabled"
+          }
+        },
+        "expected": {
+          "success": true,
+          "entity_type": "routines",
+          "expected_contains": ["results", "total_count", "returned_count"]
+        }
+      }
+    ]
+  }
+}

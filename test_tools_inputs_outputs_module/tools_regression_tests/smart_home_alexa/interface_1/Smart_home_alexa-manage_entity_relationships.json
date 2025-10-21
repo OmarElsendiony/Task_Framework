@@ -1,0 +1,54 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_entity_relationships",
+        "arguments": {
+          "operation": "assign",
+          "relationship_type": "device_to_group",
+          "source_entity_id": "15",
+          "target_entity_id": "7",
+          "user_id": "1"
+        },
+        "expected": {
+          "success": true,
+          "relationship_type": "device_to_group",
+          "expected_contains": ["assign", "device_to_group", "device_id", "group_id"]
+        }
+      },
+      {
+        "name": "manage_entity_relationships",
+        "arguments": {
+          "operation": "remove",
+          "relationship_type": "device_to_group",
+          "source_entity_id": "15",
+          "target_entity_id": "7",
+          "user_id": "1"
+        },
+        "expected": {
+          "success": true,
+          "relationship_type": "device_to_group",
+          "expected_contains": ["remove", "device_to_group", "device_id", "group_id"]
+        }
+      },
+      {
+        "name": "manage_entity_relationships",
+        "arguments": {
+          "operation": "assign",
+          "relationship_type": "user_device_permissions",
+          "source_entity_id": "2",
+          "target_entity_id": "15",
+          "user_id": "1",
+          "relationship_data": { "permission_level": "restricted" }
+        },
+        "expected": {
+          "success": true,
+          "relationship_type": "user_device_permissions",
+          "expected_contains": ["permission_level", "restricted", "user_id", "device_id"]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_coordinations",
+        "arguments": {
+          "entity_type": "bridge",
+          "action": "create",
+          "bridge_data": {
+            "incident_id": "1",
+            "bridge_type": "major_incident",
+            "bridge_host": "1"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"bridge\"",
+            "\"action\": \"create\"",
+            "\"bridge_id\"",
+            "BRG"
+          ]
+        }
+      },
+      {
+        "name": "manage_coordinations",
+        "arguments": {
+          "entity_type": "bridge",
+          "action": "create",
+          "bridge_data": {
+            "incident_id": "1",
+            "bridge_type": "invalid_type",
+            "bridge_host": "1"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid bridge_type 'invalid_type'"
+          ]
+        }
+      },
+      {
+        "name": "manage_coordinations",
+        "arguments": {
+          "entity_type": "bridge_participant",
+          "action": "create",
+          "participant_data": {
+            "bridge_id": "1",
+            "user_id": "3",
+            "role_in_bridge": "technical_support"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"bridge_participant\"",
+            "\"action\": \"create\"",
+            "\"participant_id\""
+          ]
+        }
+      }
+    ]
+  }
+}
+

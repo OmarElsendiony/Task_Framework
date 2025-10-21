@@ -1,0 +1,55 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_audit_logs",
+        "arguments": {
+          "operation": "create_log",
+          "operation_data": {
+            "action_type": "create_routine",
+            "entity_type": "routine",
+            "entity_id": "1",
+            "outcome": "success",
+            "user_id": "1"
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "create_log",
+          "expected_contains": ["log_id", "operation", "create_log"]
+        }
+      },
+      {
+        "name": "manage_audit_logs",
+        "arguments": {
+          "operation": "get_logs_by_date_range",
+          "operation_data": {
+            "start_datetime": "2025-10-01T00:00:00Z",
+            "end_datetime": "2025-10-16T23:59:59Z"
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "get_logs_by_date_range",
+          "expected_contains": ["total_logs", "by_action_type"]
+        }
+      },
+      {
+        "name": "manage_audit_logs",
+        "arguments": {
+          "operation": "categorize_logs",
+          "operation_data": {
+            "categorization_type": "by_action"
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "categorize_logs",
+          "expected_contains": ["categories", "total_categories"]
+        }
+      }
+    ]
+  }
+}

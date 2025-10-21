@@ -1,0 +1,53 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "discover_parties",
+        "arguments": {
+          "entity_type": "clients"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"clients\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_parties",
+        "arguments": {
+          "entity_type": "users",
+          "filters": {
+            "user_id": "71"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"users\"",
+            "\"user_id\": \"71\"",
+            "\"results\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_parties",
+        "arguments": {
+          "entity_type": "unknown_party"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid entity_type 'unknown_party'"
+          ]
+        }
+      }
+    ]
+  }
+}
+

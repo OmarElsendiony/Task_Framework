@@ -1,0 +1,53 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "discover_coordination",
+        "arguments": {
+          "entity_type": "escalations"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"escalations\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_coordination",
+        "arguments": {
+          "entity_type": "bridges",
+          "filters": {
+            "bridge_type": "major_incident"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"bridges\"",
+            "\"bridge_type\": \"major_incident\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_coordination",
+        "arguments": {
+          "entity_type": "invalid_coordination_entity"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid entity_type 'invalid_coordination_entity'"
+          ]
+        }
+      }
+    ]
+  }
+}
+

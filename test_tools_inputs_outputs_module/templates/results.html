@@ -38,11 +38,29 @@
     <p><strong>Arguments:</strong></p>
     <pre style="background: white; padding: 10px; margin: 10px 0;">{{ action.arguments | tojson(indent=2) }}</pre>
     
-    {% if action.success %}
-        <p><strong>✓ Output:</strong></p>
-        <pre style="background: white; padding: 10px; margin: 10px 0;">{{ action.output | tojson(indent=2) }}</pre>
-    {% else %}
-        <div class="error-box">
+    <p><strong>Actual Output (raw):</strong></p>
+    <pre style="background: white; padding: 10px; margin: 10px 0;">{{ action.output | tojson(indent=2) }}</pre>
+
+    {% if action.expected %}
+        <p><strong>Expected:</strong></p>
+        <pre style="background: #f8f9fa; padding: 10px; margin: 10px 0;">{{ action.expected | tojson(indent=2) }}</pre>
+
+        <p><strong>Expectation Match:</strong>
+            {% if action.expected_match %}
+                ✅ Matched
+            {% else %}
+                ❌ Not matched
+            {% endif %}
+        </p>
+
+        {% if action.mismatch_reasons %}
+            <p><strong>Mismatches:</strong></p>
+            <pre style="background: #fff3f3; padding: 10px; margin: 10px 0;">{{ action.mismatch_reasons | tojson(indent=2) }}</pre>
+        {% endif %}
+    {% endif %}
+
+    {% if not action.success %}
+        <div class="error-box" style="margin-top: 10px;">
             <strong>Error:</strong> {{ action.error }}<br>
             {% if action.traceback %}
             <details style="margin-top: 10px;">

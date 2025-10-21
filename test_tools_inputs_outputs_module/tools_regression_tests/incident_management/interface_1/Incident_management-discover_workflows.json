@@ -1,0 +1,53 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "discover_workflows",
+        "arguments": {
+          "entity_type": "communications"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"communications\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_workflows",
+        "arguments": {
+          "entity_type": "approval_requests",
+          "filters": {
+            "requested_by": "1"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"approval_requests\"",
+            "\"approval_id\":",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_workflows",
+        "arguments": {
+          "entity_type": "invalid_workflow_entity"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid entity_type 'invalid_workflow_entity'"
+          ]
+        }
+      }
+    ]
+  }
+}
+

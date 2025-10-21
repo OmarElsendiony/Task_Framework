@@ -1,0 +1,94 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "batch_manage_entities",
+        "arguments": {
+          "operations": [
+            {
+              "operation_id": "create_group_office",
+              "operation": "create",
+              "entity_type": "group",
+              "entity_data": {
+                "group_name": "Office",
+                "group_type": "location",
+                "description": "Office devices and zones"
+              }
+            }
+          ],
+          "user_id": "1",
+          "stop_on_error": false,
+          "validate_references": true
+        },
+        "expected": {
+          "batch_success": true,
+          "success_count": 1
+        }
+      },
+      {
+        "name": "batch_manage_entities",
+        "arguments": {
+          "operations": [
+            {
+              "operation_id": "create_device_1",
+              "operation": "create",
+              "entity_type": "device",
+              "entity_data": {
+                "device_name": "Office Light 1",
+                "device_type": "light",
+                "manufacturer": "Philips",
+                "model": "Hue",
+                "mac_address": "AA:BB:CC:DD:EE:01",
+                "connectivity_method": "Zigbee",
+                "group_id": "$create_group_office"
+              }
+            },
+            {
+              "operation_id": "create_device_2",
+              "operation": "create",
+              "entity_type": "device",
+              "entity_data": {
+                "device_name": "Office Light 2",
+                "device_type": "light",
+                "manufacturer": "Philips",
+                "model": "Hue",
+                "mac_address": "AA:BB:CC:DD:EE:02",
+                "connectivity_method": "Zigbee",
+                "group_id": "$create_group_office"
+              }
+            }
+          ],
+          "user_id": "1",
+          "stop_on_error": false,
+          "validate_references": true
+        },
+        "expected": {
+          "batch_success": true,
+          "success_count": 2
+        }
+      },
+      {
+        "name": "batch_manage_entities",
+        "arguments": {
+          "operations": [
+            {
+              "operation_id": "delete_group_office",
+              "operation": "delete",
+              "entity_type": "group",
+              "entity_id": "$create_group_office"
+            }
+          ],
+          "user_id": "1",
+          "stop_on_error": true,
+          "validate_references": true
+        },
+        "expected": {
+          "batch_success": true,
+          "success_count": 1
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "get_sla_breach_incidents",
+        "arguments": {},
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"breach_incidents\""
+          ]
+        }
+      },
+      {
+        "name": "get_sla_breach_incidents",
+        "arguments": {
+          "client_id": "1"
+        },
+        "expected": {
+          "breach_incidents": [],
+          "count": 0,
+          "success": true
+        }
+      },
+      {
+        "name": "get_sla_breach_incidents",
+        "arguments": {
+          "start_date": "2100-01-01",
+          "end_date": "2100-12-31"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"count\": 0"
+          ]
+        }
+      }
+    ]
+  }
+}
+

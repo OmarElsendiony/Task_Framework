@@ -1,0 +1,69 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_improvements",
+        "arguments": {
+          "entity_type": "root_cause_analyses",
+          "action": "create",
+          "improvement_data": {
+            "rca_title": "Root cause analysis without incident",
+            "assigned_to": "1",
+            "due_date": "2025-11-01",
+            "reported_by": "1"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Halt: Either 'incident_id' or 'problem_ticket_id' must be provided"
+          ]
+        }
+      },
+      {
+        "name": "manage_improvements",
+        "arguments": {
+          "entity_type": "post_incident_reviews",
+          "action": "create",
+          "improvement_data": {
+            "incident_id": "8",
+            "scheduled_date": "2025-11-15",
+            "facilitator": "1",
+            "review_notes": "Review notes example",
+            "lessons_learned": "Lesson A, Lesson B",
+            "action_items": "Action1; Action2",
+            "created_by": "1"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "Post incident review",
+            "\"review_id\""
+          ]
+        }
+      },
+      {
+        "name": "manage_improvements",
+        "arguments": {
+          "entity_type": "root_cause_analyses",
+          "action": "update",
+          "rca_id": "999",
+          "improvement_data": {
+            "status": "completed"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Halt: RCA not found"
+          ]
+        }
+      }
+    ]
+  }
+}
+

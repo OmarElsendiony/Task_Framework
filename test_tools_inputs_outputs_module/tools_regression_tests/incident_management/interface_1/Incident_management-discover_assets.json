@@ -1,0 +1,51 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "discover_assets",
+        "arguments": {
+          "entity_type": "configuration_items"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"configuration_items\""
+          ]
+        }
+      },
+      {
+        "name": "discover_assets",
+        "arguments": {
+          "entity_type": "ci_client_assignments",
+          "filters": {
+            "client_id": "3"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"entity_type\": \"ci_client_assignments\"",
+            "\"count\":"
+          ]
+        }
+      },
+      {
+        "name": "discover_assets",
+        "arguments": {
+          "entity_type": "unknown_entity"
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid entity_type 'unknown_entity'"
+          ]
+        }
+      }
+    ]
+  }
+}
+

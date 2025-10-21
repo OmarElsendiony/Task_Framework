@@ -1,0 +1,77 @@
+{
+  "env": "incident_management_redos",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_incidents",
+        "arguments": {
+          "action": "create",
+          "incident_data": {
+            "title": "Database latency spike",
+            "description": "High latency observed on DB cluster affecting queries.",
+            "category": "database",
+            "severity": "P2",
+            "impact": "medium",
+            "urgency": "medium",
+            "reported_by": "1",
+            "detection_time": "2025-10-07T11:45:00"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"create\"",
+            "\"incident_id\"",
+            "\"incident_data\""
+          ]
+        }
+      },
+      {
+        "name": "manage_incidents",
+        "arguments": {
+          "action": "create",
+          "incident_data": {
+            "title": "Bad severity example",
+            "description": "Testing invalid severity handling",
+            "category": "network",
+            "severity": "PX",
+            "impact": "low",
+            "urgency": "low",
+            "reported_by": "1",
+            "detection_time": "2025-10-07T12:00:00"
+          }
+        },
+        "expected": {
+          "success": false,
+          "expected_contains": [
+            "Invalid severity 'PX'",
+            "Must be one of"
+          ]
+        }
+      },
+      {
+        "name": "manage_incidents",
+        "arguments": {
+          "action": "update",
+          "incident_id": "1",
+          "incident_data": {
+            "status": "resolved",
+            "resolved_at": "2025-10-07T13:00:00"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": [
+            "\"success\": true",
+            "\"action\": \"update\"",
+            "\"incident_id\": \"1\"",
+            "\"status\": \"resolved\""
+          ]
+        }
+      }
+    ]
+  }
+}
+

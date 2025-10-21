@@ -1,0 +1,47 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_firmware",
+        "arguments": {
+          "operation": "discover_updates",
+          "update_scope": "all_devices"
+        },
+        "expected": {
+          "success": true,
+          "operation": "discover_updates",
+          "expected_contains": ["available_updates", "update_scope"]
+        }
+      },
+      {
+        "name": "manage_firmware",
+        "arguments": {
+          "operation": "initialize_tracking"
+        },
+        "expected": {
+          "success": true,
+          "operation": "initialize_tracking",
+          "expected_contains": ["firmware_tracking", "initialized_at"]
+        }
+      },
+      {
+        "name": "manage_firmware",
+        "arguments": {
+          "operation": "update_tracking",
+          "operation_data": {
+            "updates_in_progress": [
+              { "device_id": "3", "status": "in_progress" }
+            ]
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "update_tracking",
+          "expected_contains": ["tracking_data", "updates_in_progress"]
+        }
+      }
+    ]
+  }
+}

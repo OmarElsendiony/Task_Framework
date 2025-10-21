@@ -1,0 +1,44 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "analyze_patterns",
+        "arguments": {
+          "analysis_type": "activity_patterns",
+          "analysis_data": {
+            "logs": [
+              {"log_id": "1", "timestamp": "2025-10-16T08:00:00", "user_id": "11", "action_type": "turn_on", "entity_id": "15", "outcome": "success"},
+              {"log_id": "2", "timestamp": "2025-10-16T08:05:00", "user_id": "11", "action_type": "set_temperature", "entity_id": "9", "outcome": "success"},
+              {"log_id": "3", "timestamp": "2025-10-16T20:00:00", "user_id": "4", "action_type": "turn_on", "entity_id": "15", "outcome": "success"}
+            ]
+          }
+        },
+        "expected": {"success": true, "total_logs": 3}
+      },
+      {
+        "name": "analyze_patterns",
+        "arguments": {
+          "analysis_type": "error_patterns",
+          "analysis_data": {
+            "logs": [
+              {"log_id": "10", "timestamp": "2025-10-15T12:00:00", "entity_id": "1", "entity_type": "device", "outcome": "failure", "error_message": "ERR_165"},
+              {"log_id": "11", "timestamp": "2025-10-15T12:05:00", "entity_id": "1", "entity_type": "device", "outcome": "failure", "error_message": "ERR_165"},
+              {"log_id": "12", "timestamp": "2025-10-15T12:10:00", "entity_id": "2", "entity_type": "device", "outcome": "failure", "error_message": "NET_TIMEOUT"}
+            ]
+          }
+        },
+        "expected": {"success": true, "total_failures": 3, "unique_error_types": 2}
+      },
+      {
+        "name": "analyze_patterns",
+        "arguments": {
+          "analysis_type": "connection_diagnostic",
+          "analysis_data": {"device_id": "1"}
+        },
+        "expected": {"success": true, "analysis_type": "connection_diagnostic", "device_id": "1"}
+      }
+    ]
+  }
+}
