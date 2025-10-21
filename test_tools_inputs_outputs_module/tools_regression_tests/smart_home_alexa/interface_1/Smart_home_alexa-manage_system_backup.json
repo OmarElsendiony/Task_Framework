@@ -1,0 +1,81 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_system_backup",
+        "arguments": {
+          "operation": "create_file",
+          "backup_id": "bkup-001",
+          "operation_data": {
+            "included_tables": [
+              "devices",
+              "users",
+              "routines"
+            ]
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "create_file",
+          "expected_contains": [
+            "backup_id",
+            "file_path",
+            "file_size",
+            "total_records"
+          ]
+        }
+      },
+      {
+        "name": "manage_system_backup",
+        "arguments": {
+          "operation": "calculate_checksum",
+          "operation_data": {
+            "backup_content": {
+              "sample": "backup content for checksum"
+            }
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "calculate_checksum",
+          "expected_contains": [
+            "checksum",
+            "SHA-256"
+          ]
+        }
+      },
+      {
+        "name": "manage_system_backup",
+        "arguments": {
+          "operation": "create_record",
+          "backup_id": "bkup-001",
+          "operation_data": {
+            "file_size": 12345,
+            "storage_location": "s3://smart-home-backups/bkup-001.json",
+            "backup_location_type": "cloud",
+            "checksum": "placeholder-checksum",
+            "created_by_user_id": "1",
+            "backup_manifest": {
+              "tables": [
+                "devices",
+                "users",
+                "routines"
+              ]
+            }
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "create_record",
+          "expected_contains": [
+            "backup_record",
+            "backup_id",
+            "storage_location"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "diagnose_device",
+        "arguments": {
+          "diagnostic_type": "connection",
+          "device_id": "1",
+          "diagnostic_scope": "single_device"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["device_id", "1", "issues_detected"]
+        }
+      },
+      {
+        "name": "diagnose_device",
+        "arguments": {
+          "diagnostic_type": "performance",
+          "device_id": "10",
+          "diagnostic_scope": "single_device"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["device_id", "10", "issues_detected", "recommendations"]
+        }
+      },
+      {
+        "name": "diagnose_device",
+        "arguments": {
+          "diagnostic_type": "health",
+          "device_id": "6",
+          "diagnostic_scope": "single_device"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["device_id", "6", "No issues detected"]
+        }
+      }
+    ]
+  }
+}

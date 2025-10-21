@@ -1,0 +1,52 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_routine_config",
+        "arguments": {
+          "operation": "backup",
+          "routine_id": "1"
+        },
+        "expected": {
+          "success": true,
+          "operation": "backup",
+          "expected_contains": ["backup_data", "routine_id", "backup_timestamp"]
+        }
+      },
+      {
+        "name": "manage_routine_config",
+        "arguments": {
+          "operation": "update_schedule",
+          "routine_id": "1",
+          "backup_data": { "new_schedule": "weekdays" }
+        },
+        "expected": {
+          "success": true,
+          "operation": "update_schedule",
+          "expected_contains": ["previous_schedule", "new_schedule", "weekdays"]
+        }
+      },
+      {
+        "name": "manage_routine_config",
+        "arguments": {
+          "operation": "restore",
+          "routine_id": "1",
+          "backup_data": {
+            "routine_id": "1",
+            "routine_name": "Morning Routine",
+            "routine_type": "comfort",
+            "device_actions": "[]",
+            "schedule_recurrence": "daily"
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "restore",
+          "expected_contains": ["restored_fields", "previous_config", "Configuration restored"]
+        }
+      }
+    ]
+  }
+}

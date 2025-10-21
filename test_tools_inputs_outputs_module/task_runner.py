@@ -8,20 +8,41 @@ from running_tasks import env_interface, execute_api, clear_session
 
 
 def get_available_interfaces(base_path="tools_regression_tests"):
-    """Get list of interface folders (subdirectories containing JSON files)"""
+    """Get list of interface folders (subdirectories containing JSON files).
+    Supports both:
+      - tools_regression_tests/interface_1
+      - tools_regression_tests/domain_name/interface_1
+    Returns relative paths (relative to base_path) pointing to the interface directories,
+    e.g. ['interface_1', 'domain_name/interface_1'].
+    """
     if not os.path.exists(base_path):
         return []
     
-    interfaces = []
-    for item in os.listdir(base_path):
-        item_path = os.path.join(base_path, item)
-        if os.path.isdir(item_path):
-            # Check if this folder contains any JSON files
-            json_files = glob.glob(os.path.join(item_path, "*.json"))
-            if json_files:
-                interfaces.append(item)
-    
-    return sorted(interfaces)
+    interfaces = set()
+    # Walk the directory tree and find dirs that contain JSON files.
+    for root, dirs, files in os.walk(base_path):
+        json_files = [f for f in files if f.endswith(".json")]
+        if not json_files:
+            continue
+        # Determine interface folder: prefer path segments that start with 'interface_'
+        rel = os.path.relpath(root, base_path)
+        parts = rel.split(os.sep) if rel != "." else []
+        iface_index = None
+        for i, p in enumerate(parts):
+            if p.startswith("interface_"):
+                iface_index = i
+        if iface_index is not None:
+            # include everything up to and including the interface_ segment
+            iface_path = os.path.join(*parts[: iface_index + 1])
+            interfaces.add(iface_path)
+        else:
+            # No explicit interface_ folder found; use the directory relative path
+            # (useful if tests live directly in domain folder or root)
+            interfaces.add(rel if rel != "." else "")
+
+    # Normalize and sort; filter out empty string entries (representing root) for clarity
+    result = sorted([i for i in interfaces if i])
+    return result
 
 
 def find_all_task_files(base_path="tools_regression_tests"):
@@ -333,7 +354,7 @@ def run_all_tasks(base_path="tools_regression_tests", output_dir="tools_test_out
         for a in result.get("actions", []):
             idx_a = a.get("index")
             name = a.get("name")
-            status_icon = "✅" if a.get("success") else "❌"
+            status_icon = "��" if a.get("success") else "❌"
             print(f"    - Action[{idx_a}] {name}: {status_icon}")
             print(f"        Actual: {a.get('actual_text')}")
             if a.get("expected") is not None:
@@ -380,4 +401,3 @@ def run_all_tasks(base_path="tools_regression_tests", output_dir="tools_test_out
     print(f"\n📁 Results saved to: {output_dir}/")
     
     return summary
-

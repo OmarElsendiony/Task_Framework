@@ -1,0 +1,54 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_permissions",
+        "arguments": {
+          "operation": "grant",
+          "permission_type": "user_device",
+          "subject_id": "4",
+          "target_ids": ["15"],
+          "user_id": "1",
+          "permission_data": { "permission_level": "full_control" }
+        },
+        "expected": {
+          "success": true,
+          "permission_type": "user_device",
+          "expected_contains": ["Granted", "successful_count", "device_id", "15"]
+        }
+      },
+      {
+        "name": "manage_permissions",
+        "arguments": {
+          "operation": "revoke",
+          "permission_type": "user_device",
+          "subject_id": "4",
+          "target_ids": ["15"],
+          "user_id": "1"
+        },
+        "expected": {
+          "success": true,
+          "permission_type": "user_device",
+          "expected_contains": ["Revoked", "successful_count", "device_id", "15"]
+        }
+      },
+      {
+        "name": "manage_permissions",
+        "arguments": {
+          "operation": "grant",
+          "permission_type": "skill_device",
+          "subject_id": "SK1",
+          "target_ids": ["15","16"],
+          "user_id": "1"
+        },
+        "expected": {
+          "success": true,
+          "permission_type": "skill_device",
+          "expected_contains": ["Granted", "skill_id", "SK1", "device_id"]
+        }
+      }
+    ]
+  }
+}

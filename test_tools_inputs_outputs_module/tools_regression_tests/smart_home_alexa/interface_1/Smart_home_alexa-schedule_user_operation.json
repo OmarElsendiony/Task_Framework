@@ -1,0 +1,52 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "schedule_user_operation",
+        "arguments": {
+          "operation_type": "user_deactivation",
+          "user_id": "11",
+          "schedule_data": { "deactivation_datetime": "2025-11-01T00:00:00" }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["deactivation_datetime", "scheduled_operation_id", "days_until_deactivation"]
+        }
+      },
+      {
+        "name": "schedule_user_operation",
+        "arguments": {
+          "operation_type": "reminder",
+          "schedule_data": {
+            "reminder_type": "privacy_review",
+            "reminder_days": 7,
+            "target_user_ids": ["1","2"]
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["reminder_id", "reminder_datetime", "target_user_ids"]
+        }
+      },
+      {
+        "name": "schedule_user_operation",
+        "arguments": {
+          "operation_type": "announcement",
+          "user_id": "1",
+          "schedule_data": {
+            "message": "Test announcement for office",
+            "target_devices": ["7","8"],
+            "delivery_datetime": "2025-10-22T19:00:00",
+            "volume": "medium"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["announcement_id", "delivery_datetime", "target_device_count"]
+        }
+      }
+    ]
+  }
+}

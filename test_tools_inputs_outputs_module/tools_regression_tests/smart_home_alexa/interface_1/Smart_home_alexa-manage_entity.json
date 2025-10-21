@@ -1,0 +1,57 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_entity",
+        "arguments": {
+          "operation": "create",
+          "entity_type": "group",
+          "user_id": "1",
+          "entity_data": {
+            "group_name": "Home Office",
+            "group_type": "location",
+            "description": "Devices for home office"
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "create",
+          "expected_contains": ["operation", "create", "entity_type", "group", "entity_id"]
+        }
+      },
+      {
+        "name": "manage_entity",
+        "arguments": {
+          "operation": "update",
+          "entity_type": "device",
+          "user_id": "1",
+          "entity_id": "3",
+          "entity_data": {
+            "status": "suspended"
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "update",
+          "expected_contains": ["operation", "update", "entity_id", "3", "status"]
+        }
+      },
+      {
+        "name": "manage_entity",
+        "arguments": {
+          "operation": "delete",
+          "entity_type": "group",
+          "user_id": "1",
+          "entity_id": "8"
+        },
+        "expected": {
+          "success": true,
+          "operation": "delete",
+          "expected_contains": ["operation", "delete", "entity_type", "group", "entity_id"]
+        }
+      }
+    ]
+  }
+}

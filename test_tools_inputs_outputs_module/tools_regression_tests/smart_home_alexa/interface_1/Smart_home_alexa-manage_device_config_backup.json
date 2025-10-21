@@ -1,0 +1,47 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_device_config_backup",
+        "arguments": {
+          "operation": "backup",
+          "backup_type": "device_config",
+          "device_id": "11"
+        },
+        "expected": {
+          "success": true,
+          "action": "backup",
+          "expected_contains": ["backup_id", "backup_record", "device_id"]
+        }
+      },
+      {
+        "name": "manage_device_config_backup",
+        "arguments": {
+          "operation": "backup",
+          "backup_type": "network_config",
+          "device_id": "11"
+        },
+        "expected": {
+          "success": true,
+          "action": "backup",
+          "expected_contains": ["backup_id", "backup_record", "network_config"]
+        }
+      },
+      {
+        "name": "manage_device_config_backup",
+        "arguments": {
+          "operation": "restore",
+          "backup_type": "device_config",
+          "device_id": "11"
+        },
+        "expected": {
+          "success": true,
+          "action": "restore",
+          "expected_contains": ["restored_data", "device_id", "backup_id"]
+        }
+      }
+    ]
+  }
+}

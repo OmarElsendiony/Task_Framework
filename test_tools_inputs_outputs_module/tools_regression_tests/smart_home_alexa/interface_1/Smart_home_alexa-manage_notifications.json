@@ -1,0 +1,57 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_notifications",
+        "arguments": {
+          "notification_type": "security_alert",
+          "notification_data": {
+            "priority": "critical",
+            "message": "Unauthorized access detected at front door",
+            "affected_device_id": "3",
+            "alert_type": "security_alert"
+          }
+        },
+        "expected": {
+          "success": true,
+          "notification_type": "security_alert",
+          "expected_contains": ["alert_id", "priority", "security", "Unauthorized access"]
+        }
+      },
+      {
+        "name": "manage_notifications",
+        "arguments": {
+          "notification_type": "announcement",
+          "notification_data": {
+            "message": "Dinner is ready",
+            "target_devices": ["7","8"],
+            "volume": "medium"
+          }
+        },
+        "expected": {
+          "success": true,
+          "notification_type": "announcement",
+          "expected_contains": ["announcement", "target_devices", "message_sent"]
+        }
+      },
+      {
+        "name": "manage_notifications",
+        "arguments": {
+          "notification_type": "email_notification",
+          "notification_data": {
+            "recipient_emails": ["admin@example.com"],
+            "subject": "System Maintenance",
+            "message": "Planned maintenance at 02:00 AM"
+          }
+        },
+        "expected": {
+          "success": true,
+          "notification_type": "email_notification",
+          "expected_contains": ["emails_sent", "recipients_count", "System Maintenance"]
+        }
+      }
+    ]
+  }
+}

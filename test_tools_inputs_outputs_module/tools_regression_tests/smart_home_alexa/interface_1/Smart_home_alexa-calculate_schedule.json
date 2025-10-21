@@ -1,0 +1,44 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "calculate_schedule",
+        "arguments": {
+          "calculation_type": "next_routine_execution",
+          "calculation_data": { "routine_id": "1" }
+        },
+        "expected": {
+          "success": true,
+          "calculation_type": "next_routine_execution",
+          "expected_contains": ["next_execution", "routine_id"]
+        }
+      },
+      {
+        "name": "calculate_schedule",
+        "arguments": {
+          "calculation_type": "next_routine_execution",
+          "calculation_data": { "routine_id": "4" }
+        },
+        "expected": {
+          "success": true,
+          "calculation_type": "next_routine_execution",
+          "expected_contains": ["next_execution", "routine_id"]
+        }
+      },
+      {
+        "name": "calculate_schedule",
+        "arguments": {
+          "calculation_type": "next_routine_execution",
+          "calculation_data": { "routine_id": "11" }
+        },
+        "expected": {
+          "success": true,
+          "calculation_type": "next_routine_execution",
+          "expected_contains": ["next_execution", "routine_id"]
+        }
+      }
+    ]
+  }
+}

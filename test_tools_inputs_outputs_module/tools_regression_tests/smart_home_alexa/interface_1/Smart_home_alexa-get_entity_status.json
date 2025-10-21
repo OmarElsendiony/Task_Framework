@@ -1,0 +1,52 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "get_entity_status",
+        "arguments": {
+          "entity_type": "device",
+          "entity_id": "1",
+          "user_id": "1",
+          "include_health_info": true
+        },
+        "expected": {
+          "entity_type": "device",
+          "entity_id": "1",
+          "success": true,
+          "expected_contains": ["health_history", "connection_status"]
+        }
+      },
+      {
+        "name": "get_entity_status",
+        "arguments": {
+          "entity_type": "routine",
+          "entity_id": "3",
+          "user_id": "1",
+          "include_health_info": false
+        },
+        "expected": {
+          "entity_type": "routine",
+          "entity_id": "3",
+          "success": true,
+          "expected_contains": ["routine_name", "routine_status"]
+        }
+      },
+      {
+        "name": "get_entity_status",
+        "arguments": {
+          "entity_type": "user",
+          "entity_id": "5",
+          "user_id": "1"
+        },
+        "expected": {
+          "entity_type": "user",
+          "entity_id": "5",
+          "success": true,
+          "expected_contains": ["account_status", "mfa_enabled"]
+        }
+      }
+    ]
+  }
+}

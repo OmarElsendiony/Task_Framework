@@ -4,6 +4,7 @@ import os
 import ast
 from typing import Dict, Any
 import re
+import sys
 
 
 session = dict()
@@ -184,6 +185,15 @@ def env_interface(environment: str, interface: str, envs_path="envs"):
             
             session["imports_set"] = importsSet
             session["invoke_methods"] = invoke_methods
+
+            # --- ADD: store package context + repo root so relative imports can be resolved later ---
+            repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            # Create a package-like name that corresponds to the envs layout (used as __package__)
+            tools_pkg = f"{envs_path.replace(os.sep, '.')}.{environment}.tools.interface_{interface}"
+            session["tools_package"] = tools_pkg
+            session["tools_package_root"] = repo_root
+            # --- END ADD ---
+
             return ({
                 'status': 'success',
                 'message': 'Environment and interface selected successfully',
@@ -215,12 +225,58 @@ class Tools:
 """
     for invoke_method in invoke_methods:
         class_code += ("    @staticmethod\n" + invoke_method + "\n\n")
-    # Execute the code and return the class
-    namespace = {}
-    exec(class_code, namespace)
-    # return namespace['Tools']
-    # session["tools_class_code"] = class_code 
-    return namespace['Tools']
+
+    # Prepare exec namespace with package context & builtins
+    package_name = session.get("tools_package", "__main__")
+    namespace = {
+        "__name__": "__main__",
+        "__file__": __file__,
+        "__builtins__": __builtins__,
+        "__package__": package_name
+    }
+
+    # Temporarily ensure the repo root is on sys.path so imports (including package-relative) resolve.
+    added_path = None
+    repo_root = session.get("tools_package_root")
+    try:
+        if repo_root and repo_root not in sys.path:
+            sys.path.insert(0, repo_root)
+            added_path = repo_root
+        try:
+            exec(class_code, namespace)
+        except ImportError as imp_err:
+            # Fallback: try removing relative "from .module import ..." lines and retry
+            filtered_lines = []
+            for ln in imports_code.splitlines():
+                stripped = ln.strip()
+                if stripped.startswith("from .") or stripped.startswith("from .."):
+                    # skip relative import in fallback attempt
+                    continue
+                filtered_lines.append(ln)
+            filtered_imports_code = "\n".join(filtered_lines)
+            filtered_class_code = f"""
+{filtered_imports_code}
+
+class Tools:
+"""
+            for invoke_method in invoke_methods:
+                filtered_class_code += ("    @staticmethod\n" + invoke_method + "\n\n")
+            try:
+                exec(filtered_class_code, namespace)
+            except Exception as second_err:
+                # If still failing, surface original import error for diagnostics
+                print(f"ImportError during dynamic exec (original): {imp_err}")
+                print(f"Retry exec failed with: {second_err}")
+                raise
+        # store generated code for debugging if needed
+        # session["tools_class_code"] = class_code
+        return namespace.get('Tools')
+    finally:
+        if added_path and added_path in sys.path:
+            try:
+                sys.path.remove(added_path)
+            except ValueError:
+                pass
 
 import typing
 

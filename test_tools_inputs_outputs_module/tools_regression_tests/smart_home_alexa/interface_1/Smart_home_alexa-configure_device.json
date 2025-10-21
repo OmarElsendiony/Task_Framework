@@ -1,0 +1,53 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "configure_device",
+        "arguments": {
+          "configuration_type": "status",
+          "device_id": "15",
+          "config_data": {
+            "power_state": "on",
+            "last_active": "2025-10-01T12:00:00"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["device_id", "15", "configuration_type", "status", "power_state"]
+        }
+      },
+      {
+        "name": "configure_device",
+        "arguments": {
+          "configuration_type": "privacy",
+          "device_id": "9",
+          "config_data": {
+            "microphone_enabled": false,
+            "camera_enabled": false
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["device_id", "9", "configuration_type", "privacy", "microphone_enabled"]
+        }
+      },
+      {
+        "name": "configure_device",
+        "arguments": {
+          "configuration_type": "network",
+          "device_id": "3",
+          "config_data": {
+            "mac_address": "AA:BB:CC:DD:EE:03",
+            "network_name": "HomeWiFi"
+          }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["device_id", "3", "configuration_type", "network", "network_name"]
+        }
+      }
+    ]
+  }
+}

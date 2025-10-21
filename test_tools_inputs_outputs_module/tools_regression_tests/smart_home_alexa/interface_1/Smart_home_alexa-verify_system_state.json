@@ -1,0 +1,42 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "verify_system_state",
+        "arguments": {
+          "verification_type": "device_network_compatibility",
+          "verification_data": { "device_id": "3", "network_frequency": "2.4GHz" }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["verified", "device_id", "network_frequency"]
+        }
+      },
+      {
+        "name": "verify_system_state",
+        "arguments": {
+          "verification_type": "backup_file_exists",
+          "verification_data": { "backup_id": "bkup-001" }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["backup_id", "exists"]
+        }
+      },
+      {
+        "name": "verify_system_state",
+        "arguments": {
+          "verification_type": "firmware_version",
+          "verification_data": { "expected_version": "1.2.3" },
+          "entity_id": "5"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["device_id", "current_version", "expected_version"]
+        }
+      }
+    ]
+  }
+}

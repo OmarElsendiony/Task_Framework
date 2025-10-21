@@ -1,0 +1,44 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "generate_report",
+        "arguments": {
+          "report_type": "health",
+          "report_data": { "device_list": ["1", "2", "3"] }
+        },
+        "expected": {
+          "success": true,
+          "report_type": "health",
+          "expected_contains": ["summary", "devices", "health_score"]
+        }
+      },
+      {
+        "name": "generate_report",
+        "arguments": {
+          "report_type": "update",
+          "report_data": {}
+        },
+        "expected": {
+          "success": true,
+          "report_type": "update",
+          "expected_contains": ["devices_needing_updates", "devices_up_to_date"]
+        }
+      },
+      {
+        "name": "generate_report",
+        "arguments": {
+          "report_type": "routine_diagnostics",
+          "report_data": { "routine_id": "1" }
+        },
+        "expected": {
+          "success": true,
+          "report_type": "routine_diagnostics",
+          "expected_contains": ["routine_id", "action_diagnostics", "issues_found"]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_skill_linking",
+        "arguments": {
+          "operation": "initiate_linking",
+          "skill_id": "3"
+        },
+        "expected": {
+          "success": true,
+          "operation": "initiate_linking",
+          "expected_contains": ["linking_url", "linking_code", "awaiting_user_authorization"]
+        }
+      },
+      {
+        "name": "manage_skill_linking",
+        "arguments": {
+          "operation": "wait_authorization",
+          "skill_id": "3",
+          "operation_parameters": {
+            "timeout_minutes": 5
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "wait_authorization",
+          "expected_contains": ["linked", "linked_account", "linked_at"]
+        }
+      },
+      {
+        "name": "manage_skill_linking",
+        "arguments": {
+          "operation": "unlink_account",
+          "skill_id": "3"
+        },
+        "expected": {
+          "success": true,
+          "operation": "unlink_account",
+          "expected_contains": ["not_linked", "unlinked_at"]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_user_sessions",
+        "arguments": {
+          "operation": "invalidate",
+          "user_id": "1",
+          "session_parameters": {
+            "exclude_current": true
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "invalidate",
+          "expected_contains": ["sessions_invalidated", "exclude_current"]
+        }
+      },
+      {
+        "name": "manage_user_sessions",
+        "arguments": {
+          "operation": "start_voice_training",
+          "user_id": "2",
+          "session_parameters": {
+            "profile_name": "Alice Voice",
+            "training_phrases_count": 10
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "start_voice_training",
+          "expected_contains": ["training_session_id", "profile_name", "training_phrases_required"]
+        }
+      },
+      {
+        "name": "manage_user_sessions",
+        "arguments": {
+          "operation": "wait_training_completion",
+          "user_id": "2",
+          "session_parameters": {
+            "session_id": "train_session_1",
+            "timeout_minutes": 5
+          }
+        },
+        "expected": {
+          "success": true,
+          "operation": "wait_training_completion",
+          "expected_contains": ["training_completed", "training_quality_score", "completion_timestamp"]
+        }
+      }
+    ]
+  }
+}

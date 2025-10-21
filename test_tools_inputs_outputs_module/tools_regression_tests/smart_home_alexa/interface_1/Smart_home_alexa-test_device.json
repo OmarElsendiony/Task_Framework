@@ -1,0 +1,42 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "test_device",
+        "arguments": {
+          "test_type": "responsiveness",
+          "device_id": "7",
+          "test_parameters": { "timeout_ms": 5000 }
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["device_id", "response_time_ms", "result"]
+        }
+      },
+      {
+        "name": "test_device",
+        "arguments": {
+          "test_type": "routine_execution",
+          "routine_id": "1"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["routine_id", "devices_tested", "result"]
+        }
+      },
+      {
+        "name": "test_device",
+        "arguments": {
+          "test_type": "response_time",
+          "device_id": "6"
+        },
+        "expected": {
+          "success": true,
+          "expected_contains": ["device_id", "response_time_ms", "performance_rating"]
+        }
+      }
+    ]
+  }
+}

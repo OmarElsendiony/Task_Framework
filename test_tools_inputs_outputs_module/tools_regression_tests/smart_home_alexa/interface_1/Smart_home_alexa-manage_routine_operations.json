@@ -1,0 +1,45 @@
+{
+  "env": "smart_home_alexa",
+  "interface_num": 1,
+  "task": {
+    "actions": [
+      {
+        "name": "manage_routine_operations",
+        "arguments": {
+          "operation": "test_execution",
+          "routine_id": "1"
+        },
+        "expected": {
+          "success": true,
+          "operation": "test_execution",
+          "expected_contains": ["test_results", "overall_success", "device_results"]
+        }
+      },
+      {
+        "name": "manage_routine_operations",
+        "arguments": {
+          "operation": "manual_trigger",
+          "routine_id": "1",
+          "operation_parameters": { "test_mode": true, "user_id": "1" }
+        },
+        "expected": {
+          "success": true,
+          "operation": "manual_trigger",
+          "expected_contains": ["execution_id", "execution_status", "devices_executed"]
+        }
+      },
+      {
+        "name": "manage_routine_operations",
+        "arguments": {
+          "operation": "get_test_results",
+          "routine_id": "1"
+        },
+        "expected": {
+          "success": true,
+          "operation": "get_test_results",
+          "expected_contains": ["execution_id", "test_results", "outcome"]
+        }
+      }
+    ]
+  }
+}
