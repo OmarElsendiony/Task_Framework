@@ -1,0 +1,88 @@
+{
+  "task_file": "tools_regression_tests/interface_3/attain_permission_test.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "filters": {
+          "permission_id": "1"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "results": [
+            {
+              "permission_id": "1",
+              "content_id": "1",
+              "content_type": "space",
+              "user_id": "26",
+              "operation": "admin",
+              "granted_by": null,
+              "granted_at": "2023-07-10T07:28:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "filters": {
+          "content_id": "1",
+          "content_type": "space",
+          "operation": "admin"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "results": [
+            {
+              "permission_id": "1",
+              "content_id": "1",
+              "content_type": "space",
+              "user_id": "26",
+              "operation": "admin",
+              "granted_by": null,
+              "granted_at": "2023-07-10T07:28:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "filters": {
+          "permission_id": "2",
+          "content_id": "1",
+          "content_type": "space",
+          "user_id": "5",
+          "operation": "delete",
+          "granted_by": "26"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "results": [
+            {
+              "permission_id": "2",
+              "content_id": "1",
+              "content_type": "space",
+              "user_id": "5",
+              "operation": "delete",
+              "granted_by": "26",
+              "granted_at": "2023-07-13T03:15:00"
+            }
+          ]
+        },
+        200
+      ]
+    }
+  ]
+}

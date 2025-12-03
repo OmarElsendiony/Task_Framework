@@ -1,0 +1,91 @@
+{
+  "task_file": "tools_regression_tests/interface_3/discover_whiteboard_view_test.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "whiteboard_view_id": "1"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "results": [
+            {
+              "whiteboard_view_id": "1",
+              "title": "Architecture Diagram",
+              "host_workspace_id": null,
+              "host_document_id": "66",
+              "content": "[{\"id\": \"1\", \"type\": \"oval\", \"text\": \"Persistent 4thgeneration colla\", \"x_position\": 100, \"y_position\": 143, \"width\": 100, \"height\": 100, \"color\": \"yellow\"}]",
+              "status": "current",
+              "created_by": "26",
+              "created_at": "2024-05-09T16:14:00",
+              "updated_by": "33",
+              "updated_at": "2024-05-16T05:17:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "title": "Brainstorming Session",
+        "host_document_id": "48",
+        "status": "current"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "results": [
+            {
+              "whiteboard_view_id": "2",
+              "title": "Brainstorming Session",
+              "host_workspace_id": null,
+              "host_document_id": "48",
+              "content": "[{\"id\": \"1\", \"type\": \"oval\", \"text\": \"Secured heuristic open system\", \"x_position\": 100, \"y_position\": 133, \"width\": 100, \"height\": 100, \"color\": \"purple\"}]",
+              "status": "current",
+              "created_by": "22",
+              "created_at": "2023-09-23T10:29:00",
+              "updated_by": "10",
+              "updated_at": "2023-10-19T09:10:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "whiteboard_view_id": "5",
+        "title": "Team Goals",
+        "host_document_id": "82",
+        "status": "current",
+        "created_by": "19",
+        "updated_by": "28"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "results": [
+            {
+              "whiteboard_view_id": "5",
+              "title": "Team Goals",
+              "host_workspace_id": null,
+              "host_document_id": "82",
+              "content": "[{\"id\": \"1\", \"type\": \"rectangle\", \"text\": \"Decentralized bandwidth-monito\", \"x_position\": 100, \"y_position\": 163, \"width\": 100, \"height\": 100, \"color\": \"gray\"}, {\"id\": \"2\", \"type\": \"sticky_note\", \"text\": \"Extended didactic budgetary ma\", \"x_position\": 200, \"y_position\": 598, \"width\": 100, \"height\": 100, \"color\": \"red\"}]",
+              "status": "current",
+              "created_by": "19",
+              "created_at": "2024-04-12T12:19:00",
+              "updated_by": "28",
+              "updated_at": "2024-06-13T10:28:00"
+            }
+          ]
+        },
+        200
+      ]
+    }
+  ]
+}

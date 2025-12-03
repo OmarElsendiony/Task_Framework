@@ -1,8 +1,8 @@
-Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide two tests for each function with the most number of parameters as possible (if applicable). However, you have to follow the format that I provide to you below.
+Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide three tests for each function within the same file with the most number of parameters as possible (if applicable). However, you have to follow the format that I provide to you below.
 
 # Format:
 {
-    "env": "incident_management_redos",
+    "env": "wiki_pages",
     "interface_num": 2,
     "task": {
         "actions": [
@@ -32,63 +32,56 @@ where the name of action is the function name and the arguments are the paramete
 
 # Functions:
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional
 from tau_bench.envs.tool import Tool
 
 
-class DiscoverAssets(Tool):
+
+class ObtainUser(Tool):
     @staticmethod
-    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+    def invoke(
+        data: Dict[str, Any],
+        user_id: Optional[str] = None,
+        email: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> str:
         """
-        Discover asset entities (configuration_items, ci_client_assignments). 
-        The entity to discover is decided by entity_type.
-        Optionally, filters can be applied to narrow down the search results.
-        
-        Supported entities:
-        - configuration_items: Configuration Item (CI) records
-        - ci_client_assignments: CI Client Assignment records
+        Obtain user details from the Confluence database (SharePoint 'obtain_user' logic).
+        Maps SharePoint user queries to Confluence users table.
         """
-        if entity_type not in ["configuration_items", "ci_client_assignments"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'configuration_items' or 'ci_client_assignments'"
-            })
-        
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": f"Invalid data format for {entity_type}"
+                "error": "Invalid data format"
             })
         
+        users = data.get("users", {})
         results = []
-        entities = data.get(entity_type, {})
         
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    if entity_type == "configuration_items":
-                        id_field = "ci_id"
-                    else:  # ci_client_assignments
-                        id_field = "assignment_id"
-                    results.append({**entity_data, id_field: entity_id})
-            else:
-                if entity_type == "configuration_items":
-                    id_field = "ci_id"
-                else:  # ci_client_assignments
-                    id_field = "assignment_id"
-                results.append({**entity_data, id_field: entity_id})
+        for uid, user_data in users.items():
+            match = True
+            
+            if user_id and uid != user_id:
+                match = False
+            if email and user_data.get("email") != email:
+                match = False
+            if status and user_data.get("status") != status:
+                match = False
+            
+            if match:
+                results.append({
+                    "user_id": uid,
+                    "email": user_data.get("email"),
+                    "display_name": user_data.get("display_name"),
+                    "status": user_data.get("status"),
+                    "created_at": user_data.get("created_at"),
+                    "updated_at": user_data.get("updated_at")
+                })
         
         return json.dumps({
             "success": True,
-            "entity_type": entity_type,
             "count": len(results),
-            "results": results
+            "users": results
         })
     
     @staticmethod
@@ -96,152 +89,140 @@ class DiscoverAssets(Tool):
         return {
             "type": "function",
             "function": {
-                "name": "discover_assets",
-                "description": "Discover asset entities (configuration items, CI client assignments). The entity to discover is decided by entity_type. Optional filters can be applied to narrow down the search results.",
+                "name": "obtain_user",
+                "description": "Obtain user details. Filters by user_id, email, or status ('active', 'inactive', 'deactivated'). Returns user information including user_id, email, display_name, status, created_at, and updated_at.",
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "entity_type": {
+                        "user_id": {
                             "type": "string",
-                            "description": "Type of entity to discover: 'configuration_items' or 'ci_client_assignments'"
+                            "description": "Unique user identifier"
                         },
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters to narrow down search results. Only exact matches are supported (AND logic for multiple filters).",
-                            "properties": {
-                                "ci_id": {
-                                    "type": "string",
-                                    "description": "Configuration Item ID"
-                                },
-                                "ci_name": {
-                                    "type": "string",
-                                    "description": "Configuration Item name (for configuration_items)"
-                                },
-                                "ci_type": {
-                                    "type": "string",
-                                    "description": "CI type: 'server', 'application', 'database', 'network', 'storage', 'service' (for configuration_items)"
-                                },
-                                "environment": {
-                                    "type": "string",
-                                    "description": "Environment: 'production', 'staging', 'development', 'testing' (for configuration_items)"
-                                },
-                                "operational_status": {
-                                    "type": "string",
-                                    "description": "Operational status: 'operational', 'degraded', 'down' (for configuration_items)"
-                                },
-                                "responsible_owner": {
-                                    "type": "string",
-                                    "description": "User ID responsible for the CI (for configuration_items)"
-                                },
-                                "assignment_id": {
-                                    "type": "string",
-                                    "description": "Assignment ID (for ci_client_assignments)"
-                                },
-                                "client_id": {
-                                    "type": "string",
-                                    "description": "Client ID (for ci_client_assignments)"
-                                },
-                                "created_at": {
-                                    "type": "string",
-                                    "description": "Creation timestamp in YYYY-MM-DD format"
-                                },
-                                "updated_at": {
-                                    "type": "string",
-                                    "description": "Update timestamp in YYYY-MM-DD format (for configuration_items)"
-                                }
-                            }
+                        "email": {
+                            "type": "string",
+                            "description": "User email address"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "User status: 'active', 'inactive', 'deactivated'",
+                            "enum": ["active", "inactive", "deactivated"]
                         }
                     },
-                    "required": ["entity_type"]
+                    "required": []
                 }
             }
         }
+
+# -----------------
+
+ALL_TOOLS_INTERFACE_2 = []
 
 
 # -----------------
 
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional
 from tau_bench.envs.tool import Tool
 
 
-class DiscoverIncidentTracking(Tool):
+class AddPage(Tool):
     @staticmethod
-    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+    def invoke(
+        data: Dict[str, Any],
+        title: str,
+        site_id: str,
+        created_by: str,
+        parent_page_id: Optional[str] = None,
+        body_storage: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> str:
         """
-        Discover incident tracking entities (incidents, problem_tickets, work_notes, attachments, 
-        incident_reports, work_orders, incident_configuration_items, problem_configuration_items). 
-        The entity to discover is decided by entity_type. Optionally, filters can be applied to narrow down the search results.
-        
-        Supported entities:
-        - incidents: Incident records
-        - problem_tickets: Problem Ticket records
-        - work_notes: Work Note records
-        - attachments: Attachment records
-        - incident_reports: Incident Report records
-        - work_orders: Work Order records
-        - incident_configuration_items: Incident CI links
-        - problem_configuration_items: Problem CI links
+        Add a new page in the Confluence database (SharePoint 'add_page' logic).
+        Maps SharePoint page creation to Confluence pages (site_id maps to space_id).
         """
-        valid_types = ["incidents", "problem_tickets", "work_notes", "attachments", 
-                      "incident_reports", "work_orders", "incident_configuration_items", 
-                      "problem_configuration_items"]
-        
-        if entity_type not in valid_types:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be one of: {', '.join(valid_types)}"
-            })
+        def generate_id(table: Dict[str, Any]) -> str:
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
         
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": f"Invalid data format for {entity_type}"
+                "error": "Invalid data format"
             })
         
-        results = []
-        entities = data.get(entity_type, {})
+        pages = data.get("pages", {})
+        spaces = data.get("spaces", {})
+        users = data.get("users", {})
         
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    id_mapping = {
-                        "incidents": "incident_id",
-                        "problem_tickets": "problem_id",
-                        "work_notes": "note_id",
-                        "attachments": "attachment_id",
-                        "incident_reports": "report_id",
-                        "work_orders": "work_order_id",
-                        "incident_configuration_items": "incident_ci_id",
-                        "problem_configuration_items": "problem_ci_id"
-                    }
-                    id_field = id_mapping[entity_type]
-                    results.append({**entity_data, id_field: entity_id})
-            else:
-                id_mapping = {
-                    "incidents": "incident_id",
-                    "problem_tickets": "problem_id",
-                    "work_notes": "note_id",
-                    "attachments": "attachment_id",
-                    "incident_reports": "report_id",
-                    "work_orders": "work_order_id",
-                    "incident_configuration_items": "incident_ci_id",
-                    "problem_configuration_items": "problem_ci_id"
-                }
-                id_field = id_mapping[entity_type]
-                results.append({**entity_data, id_field: entity_id})
+        # Validate required fields
+        if not all([title, site_id, created_by]):
+            return json.dumps({
+                "success": False,
+                "error": "Missing required parameters: title, site_id, created_by"
+            })
+        
+        # Validate site exists
+        if site_id not in spaces:
+            return json.dumps({
+                "success": False,
+                "error": f"Site with ID '{site_id}' not found"
+            })
+        
+        # Validate user exists
+        if created_by not in users:
+            return json.dumps({
+                "success": False,
+                "error": f"User with ID '{created_by}' not found"
+            })
+        
+        # Validate parent page if provided
+        if parent_page_id and parent_page_id not in pages:
+            return json.dumps({
+                "success": False,
+                "error": f"Parent page with ID '{parent_page_id}' not found"
+            })
+        
+        # Check for duplicate title in the same site
+        for page_data in pages.values():
+            if page_data.get("space_id") == site_id and page_data.get("title") == title:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Page with title '{title}' already exists in this site"
+                })
+        
+        # Generate new page ID
+        new_page_id = generate_id(pages)
+        timestamp = "2025-10-01T00:00:00"
+        
+        # Create new page record
+        new_page = {
+            "page_id": new_page_id,
+            "title": title,
+            "space_id": site_id,
+            "parent_page_id": parent_page_id,
+            "body_storage": body_storage,
+            "status": status if status else "current",
+            "created_by": created_by,
+            "created_at": timestamp,
+            "updated_by": created_by,
+            "updated_at": timestamp
+        }
+        
+        pages[new_page_id] = new_page
         
         return json.dumps({
             "success": True,
-            "entity_type": entity_type,
-            "count": len(results),
-            "results": results
+            "page_id": new_page_id,
+            "title": title,
+            "site_id": site_id,
+            "parent_page_id": parent_page_id,
+            "body_storage": body_storage,
+            "status": new_page["status"],
+            "created_by": created_by,
+            "created_at": timestamp,
+            "updated_by": created_by,
+            "updated_at": timestamp
         })
     
     @staticmethod
@@ -249,219 +230,38 @@ class DiscoverIncidentTracking(Tool):
         return {
             "type": "function",
             "function": {
-                "name": "discover_incident_tracking",
-                "description": "Discover incident tracking entities (incidents, problem tickets, work notes, attachments, incident reports, work orders, incident configuration items, problem configuration items). The entity to discover is decided by entity_type. Optional filters can be applied to narrow down the search results.",
+                "name": "add_page",
+                "description": "Add a new page. Requires title, site_id, and created_by. Optional: parent_page_id (for child pages), body_storage (page content), status ('current', 'draft', 'locked', 'archived', 'deleted', defaults to 'current'). Returns created page details including page_id, title, site_id, parent_page_id, body_storage, status, created_by, created_at, updated_by, and updated_at.",
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "entity_type": {
+                        "title": {
                             "type": "string",
-                            "description": "Type of entity to discover: 'incidents', 'problem_tickets', 'work_notes', 'attachments', 'incident_reports', 'work_orders', 'incident_configuration_items', or 'problem_configuration_items'"
+                            "description": "Page title (must be unique within the site)"
                         },
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters to narrow down search results. Only exact matches are supported (AND logic for multiple filters).",
-                            "properties": {
-                                "incident_id": {
-                                    "type": "string",
-                                    "description": "Incident ID"
-                                },
-                                "problem_id": {
-                                    "type": "string",
-                                    "description": "Problem ticket ID"
-                                },
-                                "incident_number": {
-                                    "type": "string",
-                                    "description": "Incident number, e.g., INC0012345 (for incidents)"
-                                },
-                                "problem_number": {
-                                    "type": "string",
-                                    "description": "Problem number, e.g., PRB0001234 (for problem_tickets)"
-                                },
-                                "title": {
-                                    "type": "string",
-                                    "description": "Title of the incident, problem, or work order"
-                                },
-                                "description": {
-                                    "type": "string",
-                                    "description": "Description text"
-                                },
-                                "category": {
-                                    "type": "string",
-                                    "description": "Category: 'inquiry/help', 'software', 'hardware', 'network', 'database' (for incidents and problem_tickets)"
-                                },
-                                "severity": {
-                                    "type": "string",
-                                    "description": "Severity level: 'P1', 'P2', 'P3', 'P4' (for incidents)"
-                                },
-                                "impact": {
-                                    "type": "string",
-                                    "description": "Impact level: 'critical', 'high', 'medium', 'low' (for incidents)"
-                                },
-                                "urgency": {
-                                    "type": "string",
-                                    "description": "Urgency level: 'critical', 'high', 'medium', 'low' (for incidents)"
-                                },
-                                "status": {
-                                    "type": "string",
-                                    "description": "Status of the entity"
-                                },
-                                "reported_by": {
-                                    "type": "string",
-                                    "description": "User ID who reported the incident or problem"
-                                },
-                                "assigned_to": {
-                                    "type": "string",
-                                    "description": "User ID assigned to the incident, problem, or work order"
-                                },
-                                "detection_time": {
-                                    "type": "string",
-                                    "description": "Detection timestamp in YYYY-MM-DD format (for incidents)"
-                                },
-                                "detected_at": {
-                                    "type": "string",
-                                    "description": "Detection timestamp in YYYY-MM-DD format (for problem_tickets)"
-                                },
-                                "acknowledged_at": {
-                                    "type": "string",
-                                    "description": "Acknowledgement timestamp in YYYY-MM-DD format (for incidents)"
-                                },
-                                "resolved_at": {
-                                    "type": "string",
-                                    "description": "Resolution timestamp in YYYY-MM-DD format (for incidents and problem_tickets)"
-                                },
-                                "closed_at": {
-                                    "type": "string",
-                                    "description": "Closure timestamp in YYYY-MM-DD format (for incidents and problem_tickets)"
-                                },
-                                "note_id": {
-                                    "type": "string",
-                                    "description": "Work note ID (for work_notes)"
-                                },
-                                "note_text": {
-                                    "type": "string",
-                                    "description": "Work note text content (for work_notes)"
-                                },
-                                "note_type": {
-                                    "type": "string",
-                                    "description": "Note type (for work_notes)"
-                                },
-                                "created_by": {
-                                    "type": "string",
-                                    "description": "User ID who created the note or entity"
-                                },
-                                "attachment_id": {
-                                    "type": "string",
-                                    "description": "Attachment ID (for attachments)"
-                                },
-                                "reference_id": {
-                                    "type": "string",
-                                    "description": "Reference ID of the parent record (for attachments)"
-                                },
-                                "reference_type": {
-                                    "type": "string",
-                                    "description": "Type of parent record: 'incident', 'change', 'rca', 'report', 'pir', 'communication', 'work_order', 'problem' (for attachments)"
-                                },
-                                "file_name": {
-                                    "type": "string",
-                                    "description": "File name (for attachments)"
-                                },
-                                "file_url": {
-                                    "type": "string",
-                                    "description": "File URL (for attachments)"
-                                },
-                                "file_type": {
-                                    "type": "string",
-                                    "description": "File type (for attachments)"
-                                },
-                                "file_size_bytes": {
-                                    "type": "integer",
-                                    "description": "File size in bytes (for attachments)"
-                                },
-                                "uploaded_by": {
-                                    "type": "string",
-                                    "description": "User ID who uploaded the file (for attachments)"
-                                },
-                                "uploaded_at": {
-                                    "type": "string",
-                                    "description": "Upload timestamp in YYYY-MM-DD format (for attachments)"
-                                },
-                                "report_id": {
-                                    "type": "string",
-                                    "description": "Report ID (for incident_reports)"
-                                },
-                                "report_number": {
-                                    "type": "string",
-                                    "description": "Report number, e.g., RPT0001234 (for incident_reports)"
-                                },
-                                "report_title": {
-                                    "type": "string",
-                                    "description": "Report title (for incident_reports)"
-                                },
-                                "report_type": {
-                                    "type": "string",
-                                    "description": "Report type: 'post_incident_review', 'client_impact', 'compliance' (for incident_reports)"
-                                },
-                                "report_content": {
-                                    "type": "string",
-                                    "description": "Report content (for incident_reports)"
-                                },
-                                "generated_by": {
-                                    "type": "string",
-                                    "description": "User ID who generated the report (for incident_reports)"
-                                },
-                                "generation_date": {
-                                    "type": "string",
-                                    "description": "Generation timestamp in YYYY-MM-DD format (for incident_reports)"
-                                },
-                                "report_status": {
-                                    "type": "string",
-                                    "description": "Report status: 'draft', 'completed', 'approved', 'archived' (for incident_reports)"
-                                },
-                                "work_order_id": {
-                                    "type": "string",
-                                    "description": "Work order ID (for work_orders)"
-                                },
-                                "work_order_number": {
-                                    "type": "string",
-                                    "description": "Work order number, e.g., WO0001234 (for work_orders)"
-                                },
-                                "change_id": {
-                                    "type": "string",
-                                    "description": "Associated change request ID (for work_orders)"
-                                },
-                                "scheduled_date": {
-                                    "type": "string",
-                                    "description": "Scheduled date in YYYY-MM-DD format (for work_orders)"
-                                },
-                                "completed_at": {
-                                    "type": "string",
-                                    "description": "Completion timestamp in YYYY-MM-DD format (for work_orders)"
-                                },
-                                "incident_ci_id": {
-                                    "type": "string",
-                                    "description": "Incident CI link ID (for incident_configuration_items)"
-                                },
-                                "problem_ci_id": {
-                                    "type": "string",
-                                    "description": "Problem CI link ID (for problem_configuration_items)"
-                                },
-                                "ci_id": {
-                                    "type": "string",
-                                    "description": "Configuration Item ID (for incident_configuration_items and problem_configuration_items)"
-                                },
-                                "created_at": {
-                                    "type": "string",
-                                    "description": "Creation timestamp in YYYY-MM-DD format"
-                                },
-                                "updated_at": {
-                                    "type": "string",
-                                    "description": "Update timestamp in YYYY-MM-DD format"
-                                }
-                            }
+                        "site_id": {
+                            "type": "string",
+                            "description": "Site (space) identifier where the page will be created"
+                        },
+                        "created_by": {
+                            "type": "string",
+                            "description": "User ID creating the page"
+                        },
+                        "parent_page_id": {
+                            "type": "string",
+                            "description": "Parent page identifier for creating a child page"
+                        },
+                        "body_storage": {
+                            "type": "string",
+                            "description": "Page content in storage format"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "Page status: 'current', 'draft', 'locked', 'archived', 'deleted' (defaults to 'current')",
+                            "enum": ["current", "draft", "locked", "archived", "deleted"]
                         }
                     },
-                    "required": ["entity_type"]
+                    "required": ["title", "site_id", "created_by"]
                 }
             }
         }
@@ -473,1087 +273,74 @@ import json
 from typing import Any, Dict, Optional
 from tau_bench.envs.tool import Tool
 
-class AssessIncidentSeverity(Tool):
-    """
-    Assesses incident severity based on impact, scope, and business criticality.
-    Determines severity level (P1-P4) through systematic evaluation criteria.
-    """
-    
+
+class DiscoverPage(Tool):
     @staticmethod
     def invoke(
         data: Dict[str, Any],
-        complete_outage: Optional[bool] = None,
-        no_workaround: Optional[bool] = None,
-        enterprise_impact: Optional[bool] = None,
-        affected_parties_count: Optional[int] = None,
-        regulatory_implications: Optional[bool] = None,
-        high_priority_customer: Optional[bool] = None,
-        recurrent_incident: Optional[bool] = None,
-        major_degradation: Optional[bool] = None,
-        workaround_available: Optional[bool] = None,
-        multiple_departments: Optional[bool] = None,
-        sla_breach_risk: Optional[bool] = None,
-        single_department: Optional[bool] = None,
-        moderate_degradation: Optional[bool] = None,
-        minimal_workaround: Optional[bool] = None
+        page_id: Optional[str] = None,
+        title: Optional[str] = None,
+        site_id: Optional[str] = None,
+        parent_page_id: Optional[str] = None,
+        status: Optional[str] = None,
+        created_by: Optional[str] = None,
+        created_at: Optional[str] = None,
+        updated_by: Optional[str] = None,
+        updated_at: Optional[str] = None,
     ) -> str:
         """
-        Evaluates incident severity based on structured criteria and returns P1-P4 classification.
-        
-        Severity Levels:
-        - P1: Critical - Complete outage, enterprise-wide impact, or regulatory implications
-        - P2: High - Major degradation, multi-department impact, or SLA breach risk
-        - P3: Medium - Single department impact or moderate degradation with workaround
-        - P4: Low - Minor impact, localized issue
+        Discover page details from the Confluence database (SharePoint 'discover_page' logic).
+        Maps SharePoint pages to Confluence pages (site_id maps to space_id).
         """
-        
-        severity = None
-        justification = []
-        evaluation_path = []
-        
-        # P1 Evaluation
-        evaluation_path.append("Starting P1 evaluation")
-        
-        # P1 Criterion 1: Complete outage of business-critical service
-        if complete_outage is True and no_workaround is True:
-            severity = "P1"
-            justification.append("Complete outage of business-critical service with no workaround available")
-            evaluation_path.append("P1 Criterion 1: Met - Complete outage without workaround")
-        elif complete_outage is not None or no_workaround is not None:
-            evaluation_path.append("P1 Criterion 1: Not met - Continuing evaluation")
-        
-        # P1 Criterion 2: Enterprise or multiple customer impact
-        if severity is None and (enterprise_impact is True or (affected_parties_count is not None and affected_parties_count >= 5)):
-            severity = "P1"
-            if enterprise_impact:
-                justification.append("Impacts entire enterprise or multiple customers")
-            if affected_parties_count and affected_parties_count >= 5:
-                justification.append(f"Affects {affected_parties_count} parties (threshold: 5+)")
-            evaluation_path.append("P1 Criterion 2: Met - Enterprise-wide or multi-customer impact")
-        elif enterprise_impact is not None or affected_parties_count is not None:
-            evaluation_path.append("P1 Criterion 2: Not met - Continuing evaluation")
-        
-        # P1 Criterion 3: Regulatory, safety, or financial implications
-        if severity is None and regulatory_implications is True:
-            severity = "P1"
-            justification.append("Significant regulatory, safety, or financial implications")
-            evaluation_path.append("P1 Criterion 3: Met - Regulatory/safety/financial implications")
-        elif regulatory_implications is not None:
-            evaluation_path.append("P1 Criterion 3: Not met - Continuing evaluation")
-        
-        # P1 Criterion 4: High-priority customer or recurrent incident
-        if severity is None and (high_priority_customer is True or recurrent_incident is True):
-            severity = "P1"
-            if high_priority_customer:
-                justification.append("Involves high-priority customer with contractual P1 requirements")
-            if recurrent_incident:
-                justification.append("Recurrent incident with escalated priority")
-            evaluation_path.append("P1 Criterion 4: Met - High-priority customer or recurrent incident")
-        elif high_priority_customer is not None or recurrent_incident is not None:
-            evaluation_path.append("P1 Criterion 4: Not met - Proceeding to P2 evaluation")
-        
-        # P2 Evaluation
-        if severity is None:
-            evaluation_path.append("Starting P2 evaluation")
-            
-            # P2 Criterion 1: Major degradation with workaround
-            if major_degradation is True and workaround_available is True:
-                severity = "P2"
-                justification.append("Major degradation of business-critical services with workaround available")
-                evaluation_path.append("P2 Criterion 1: Met - Major degradation with workaround")
-            elif major_degradation is not None or workaround_available is not None:
-                evaluation_path.append("P2 Criterion 1: Not met - Continuing evaluation")
-            
-            # P2 Criterion 2: Multiple departments or critical functions
-            if severity is None and multiple_departments is True:
-                severity = "P2"
-                justification.append("Impacts multiple departments, sites, or critical business functions")
-                evaluation_path.append("P2 Criterion 2: Met - Multi-department impact")
-            elif multiple_departments is not None:
-                evaluation_path.append("P2 Criterion 2: Not met - Continuing evaluation")
-            
-            # P2 Criterion 3: SLA breach risk
-            if severity is None and sla_breach_risk is True:
-                severity = "P2"
-                justification.append("Risks breaching high-priority SLA with significant impact")
-                evaluation_path.append("P2 Criterion 3: Met - SLA breach risk")
-            elif sla_breach_risk is not None:
-                evaluation_path.append("P2 Criterion 3: Not met - Proceeding to P3 evaluation")
-        
-        # P3 Evaluation
-        if severity is None:
-            evaluation_path.append("Starting P3 evaluation")
-            
-            # P3 Criterion 1: Single department or localized impact
-            if single_department is True:
-                severity = "P3"
-                justification.append("Impacts single department, localized users, or non-critical function")
-                evaluation_path.append("P3 Criterion 1: Met - Single department impact")
-            elif single_department is not None:
-                evaluation_path.append("P3 Criterion 1: Not met - Continuing evaluation")
-            
-            # P3 Criterion 2: Moderate degradation with minimal workaround
-            if severity is None and moderate_degradation is True and minimal_workaround is True:
-                severity = "P3"
-                justification.append("Moderate degradation with operations continuing using minimal workaround")
-                evaluation_path.append("P3 Criterion 2: Met - Moderate degradation with minimal workaround")
-            elif moderate_degradation is not None or minimal_workaround is not None:
-                evaluation_path.append("P3 Criterion 2: Not met - Defaulting to P4")
-        
-        # P4 Default
-        if severity is None:
-            severity = "P4"
-            justification.append("Low impact incident not meeting higher severity criteria")
-            evaluation_path.append("Defaulting to P4 - Minor/localized issue")
-        
-        result = {
-            "severity": severity,
-            # "justification": justification,
-            # "evaluation_path": evaluation_path,
-            # "timestamp": "2025-10-01T12:00:00"
-        }
-        
-        return json.dumps(result)
-    
-    @staticmethod
-    def get_info() -> Dict[str, Any]:
-        """
-        Returns the schema for the AssessIncidentSeverity tool.
-        """
-        return {
-            "type": "function",
-            "function": {
-                "name": "assess_incident_severity",
-                "description": "Assesses and determines incident severity level (P1-P4) through systematic evaluation of impact, scope, and business criticality. Evaluates incidents against structured criteria: P1 for critical outages, enterprise-wide impact, or regulatory implications; P2 for major degradation or multi-department impact; P3 for single department or moderate degradation; P4 for minor issues. Returns severity classification with justification and evaluation path.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "complete_outage": {
-                            "type": "boolean",
-                            "description": "Whether incident causes complete outage of business-critical service (P1 criterion)"
-                        },
-                        "no_workaround": {
-                            "type": "boolean",
-                            "description": "Whether no workaround is available for the outage (P1 criterion, evaluated with complete_outage)"
-                        },
-                        "enterprise_impact": {
-                            "type": "boolean",
-                            "description": "Whether incident impacts entire enterprise or multiple customers (P1 criterion)"
-                        },
-                        "affected_parties_count": {
-                            "type": "integer",
-                            "description": "Number of affected parties/customers (P1 if 5 or more)"
-                        },
-                        "regulatory_implications": {
-                            "type": "boolean",
-                            "description": "Whether incident has significant regulatory, safety, or financial implications (P1 criterion)"
-                        },
-                        "high_priority_customer": {
-                            "type": "boolean",
-                            "description": "Whether incident involves high-priority customer with contractual P1 requirements (P1 criterion)"
-                        },
-                        "recurrent_incident": {
-                            "type": "boolean",
-                            "description": "Whether this is a recurrent incident requiring escalated priority (P1 criterion)"
-                        },
-                        "major_degradation": {
-                            "type": "boolean",
-                            "description": "Whether incident causes major degradation of business-critical services (P2 criterion)"
-                        },
-                        "workaround_available": {
-                            "type": "boolean",
-                            "description": "Whether a workaround is available for major degradation (P2 criterion, evaluated with major_degradation)"
-                        },
-                        "multiple_departments": {
-                            "type": "boolean",
-                            "description": "Whether incident impacts multiple departments, sites, or critical business functions (P2 criterion)"
-                        },
-                        "sla_breach_risk": {
-                            "type": "boolean",
-                            "description": "Whether incident risks breaching high-priority SLA with significant impact (P2 criterion)"
-                        },
-                        "single_department": {
-                            "type": "boolean",
-                            "description": "Whether incident impacts single department, localized users, or non-critical function (P3 criterion)"
-                        },
-                        "moderate_degradation": {
-                            "type": "boolean",
-                            "description": "Whether incident causes moderate degradation (P3 criterion)"
-                        },
-                        "minimal_workaround": {
-                            "type": "boolean",
-                            "description": "Whether operations continue using minimal workaround (P3 criterion, evaluated with moderate_degradation)"
-                        }
-                    },
-                    "required": [
-                        "complete_outage",
-                        "no_workaround",
-                        "enterprise_impact",
-                        "affected_parties_count",
-                        "regulatory_implications",
-                        "high_priority_customer",
-                        "recurrent_incident",
-                        "major_degradation",
-                        "workaround_available",
-                        "multiple_departments",
-                        "sla_breach_risk",
-                        "single_department",
-                        "moderate_degradation",
-                        "minimal_workaround"
-                    ]
-                }
-            }
-        }
-
-# -----------------
-
-import json
-from typing import Any, Dict
-from tau_bench.envs.tool import Tool
-
-
-class CheckAuthorization(Tool):
-    @staticmethod
-    def invoke(data: Dict[str, Any], action: str, requester_email: str) -> str:
-        """
-        Check authorization for Incident Management actions.
-        Uses two-tier logic with fallback:
-        1. If requester has an authorized role → authorized
-        2. If requester lacks an authorized role but has an 'approved' approval record from someone with an authorized role → authorized
-        3. Otherwise → not authorized
-        
-        Args:
-            data: Environment data containing users and approvals
-            action: The incident management action being performed
-            requester_email: Email of the user requesting the action
-            
-        Returns:
-            JSON string with authorization result
-        """
-        # Single source of truth for all actions and their authorized roles
-        ACTIONS = {
-            "create_client": ["system_administrator", "incident_manager", "account_manager"],
-            "update_client": ["system_administrator", "incident_manager", "account_manager"],
-            "create_user": ["system_administrator", "incident_manager"],
-            "update_user": ["system_administrator", "incident_manager"],
-            "deactivate_user": ["system_administrator", "incident_manager"],
-            "create_vendor": ["system_administrator", "incident_manager", "executive"],
-            "update_vendor": ["system_administrator", "incident_manager", "executive"],
-            "create_product": ["system_administrator", "incident_manager", "executive"],
-            "update_product": ["system_administrator", "incident_manager", "executive"],
-            "create_component": ["system_administrator", "technical_support", "incident_manager"],
-            "update_component": ["system_administrator", "technical_support", "incident_manager"],
-            "create_subscription": ["account_manager", "incident_manager", "executive"],
-            "update_subscription": ["account_manager", "incident_manager", "executive"],
-            "create_sla": ["account_manager", "system_administrator", "executive"],
-            "update_sla": ["account_manager", "system_administrator", "executive"],
-            "create_incident": ["incident_manager", "technical_support", "system_administrator", "executive"],
-            "update_incident": ["incident_manager", "technical_support", "system_administrator", "executive"],
-            "resolve_incident": ["incident_manager", "technical_support", "executive"],
-            "close_incident": ["incident_manager", "technical_support"],
-            "create_communication": ["incident_manager", "technical_support", "system_administrator", "account_manager"],
-            "update_communication": ["incident_manager", "technical_support", "system_administrator", "account_manager"],
-            "create_workaround": ["technical_support", "incident_manager", "system_administrator", "executive"],
-            "update_workaround": ["technical_support", "incident_manager", "system_administrator", "executive"],
-            "conduct_rca": ["technical_support", "incident_manager"],
-            "update_rca": ["technical_support", "incident_manager", "system_administrator", "executive"],
-            "create_escalation": ["incident_manager", "technical_support", "system_administrator", "executive", "account_manager"],
-            "update_escalation": ["incident_manager", "technical_support", "system_administrator", "executive"],
-            "create_change_request": ["technical_support", "incident_manager", "system_administrator", "executive"],
-            "update_change_request": ["technical_support", "incident_manager", "system_administrator", "executive"],
-            "create_rollback_request": ["technical_support", "system_administrator", "incident_manager"],
-            "update_rollback_request": ["incident_manager", "system_administrator", "executive"],
-            "record_metrics": ["incident_manager", "system_administrator"],
-            "update_metrics": ["incident_manager", "system_administrator"],
-            "generate_report": ["incident_manager", "executive"],
-            "update_report": ["incident_manager", "executive"],
-            "create_kb_article": ["technical_support", "incident_manager"],
-            "update_kb_article": ["technical_support", "incident_manager"],
-            "create_pir": ["incident_manager", "executive"],
-            "update_pir": ["incident_manager", "executive"],
-            "initiate_bridge": ["incident_manager", "technical_support", "executive"],
-            "close_bridge": ["incident_manager", "technical_support"],
-            "request_approval": ["technical_support", "system_administrator", "incident_manager"],
-            "approve_request": ["incident_manager", "executive"],
-            "update_communication_status": ["incident_manager", "technical_support", "system_administrator"],
-            "create_work_note": ["incident_manager", "technical_support", "system_administrator"],
-            "update_work_note": ["incident_manager", "technical_support", "system_administrator"],
-            "create_attachment": ["incident_manager", "technical_support", "system_administrator", "client_contact"],
-            "update_escalation_status": ["incident_manager", "executive", "technical_support"],
-            "update_approval_request": ["incident_manager", "system_administrator"]
-        }
-        
-        # Actions that may require approval under certain conditions
-        APPROVAL_REQUIRED_ACTIONS = [
-            "create_escalation",
-            "initiate_bridge",
-            "create_rollback_request",
-            "create_change_request",
-            "close_incident",
-            "conduct_rca"
-        ]
-        
-        # Find the requester's role and user_id
-        users = data.get("users", {})
-        requester_role = None
-        requester_user_id = None
-        for user_id, user in users.items():
-            if user.get("email") == requester_email:
-                requester_role = user.get("role")
-                requester_user_id = user_id
-                break
-        
-        if not requester_role:
-            return json.dumps({
-                "authorized": False,
-                "error": f"No user found with email: {requester_email}"
-            })
-        
-        # Check if the action is defined
-        if action not in ACTIONS:
-            return json.dumps({
-                "authorized": False,
-                "error": f"Unknown action: {action}"
-            })
-        
-        authorized_roles = ACTIONS[action]
-        
-        # TIER 1: Check if requester has direct authorization
-        if requester_role in authorized_roles:
-            return json.dumps({
-                "authorized": True,
-                "message": f"User with role '{requester_role}' is directly authorized to perform action '{action}'"
-            })
-        
-        # TIER 2: Requester not directly authorized, check for an explicit approval
-        # This only applies to actions that support the approval workflow
-        if action in APPROVAL_REQUIRED_ACTIONS:
-            approvals = data.get("approvals", {})
-            
-            for approval in approvals.values():
-                # Check for a matching, approved record for the specific requester and action
-                approval_requested_by = approval.get("requested_by")
-                
-                # Match by user_id
-                if str(approval_requested_by) != str(requester_user_id):
-                    continue
-                    
-                # Check if this approval is for the action being requested
-                # Map action names to approval request patterns
-                approval_action_match = False
-                requested_action = approval.get("requested_action", "")
-                
-                if action == "create_escalation" and "Escalation approval" in requested_action:
-                    approval_action_match = True
-                elif action == "initiate_bridge" and "Bridge initiation approval" in requested_action:
-                    approval_action_match = True
-                elif action == "create_rollback_request" and "Rollback approval" in requested_action:
-                    approval_action_match = True
-                elif action == "create_change_request" and "change approval" in requested_action.lower():
-                    approval_action_match = True
-                elif action == "close_incident" and "Incident Closure approval" in requested_action:
-                    approval_action_match = True
-                elif action == "conduct_rca" and "Rca approval" in requested_action:
-                    approval_action_match = True
-                
-                if approval_action_match and approval.get("status") == "approved":
-                    # Get the approver's role
-                    approver_user_id = approval.get("approver")
-                    approver_role = None
-                    
-                    for user_id, user in users.items():
-                        if str(user_id) == str(approver_user_id):
-                            approver_role = user.get("role")
-                            break
-                    
-                    # Check if the approver has an authorized role
-                    if approver_role and approver_role in authorized_roles:
-                        return json.dumps({
-                            "authorized": True,
-                            "message": f"User '{requester_email}' has a valid approval from user with role '{approver_role}' for action '{action}'"
-                        })
-        
-        # No direct authorization or valid approval found
-        return json.dumps({
-            "authorized": False,
-            "error": f"Role '{requester_role}' is not authorized for action '{action}', and no valid approval was found. Authorized roles: {', '.join(authorized_roles)}."
-        })
-
-    @staticmethod
-    def get_info() -> Dict[str, Any]:
-        """Return the function schema for tool registration."""
-        return {
-            "type": "function",
-            "function": {
-                "name": "check_authorization",
-                "description": "Validates authorization for Incident Management actions. First checks if the requester's role is directly authorized. If not, checks for an approved approval record from a user who has an authorized role.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "action": {
-                            "type": "string",
-                            "description": "The incident management action being performed. Valid actions: create_client, update_client, create_user, update_user, deactivate_user, create_vendor, update_vendor, create_product, update_product, create_component, update_component, create_subscription, update_subscription, create_sla, update_sla, create_incident, update_incident, resolve_incident, close_incident, create_communication, update_communication, create_workaround, update_workaround, conduct_rca, update_rca, create_escalation, update_escalation, create_change_request, update_change_request, create_rollback_request, update_rollback_request, record_metrics, update_metrics, generate_report, update_report, create_kb_article, update_kb_article, create_pir, update_pir, initiate_bridge, close_bridge, request_approval, approve_request, update_communication_status, create_work_note, update_work_note, create_attachment, update_escalation_status, update_approval_request"
-                        },
-                        "requester_email": {
-                            "type": "string",
-                            "description": "Email of the user requesting the action"
-                        }
-                    },
-                    "required": ["action", "requester_email"]
-                }
-            }
-        }
-
-# -----------------
-
-import json
-from typing import Any, Dict, List
-from tau_bench.envs.tool import Tool
-
-
-class DiscoverCoordination(Tool):
-    @staticmethod
-    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover coordination entities (escalations, bridges, bridge_participants). The entity to discover is decided by entity_type.
-        Optionally, filters can be applied to narrow down the search results.
-        
-        Supported entities:
-        - escalations: Escalation records
-        - bridges: Bridge records
-        - bridge_participants: Bridge Participant records
-        """
-        if entity_type not in ["escalations", "bridges", "bridge_participants"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'escalations', 'bridges', or 'bridge_participants'"
-            })
-        
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": f"Invalid data format for {entity_type}"
+                "error": "Invalid data format"
             })
         
+        pages = data.get("pages", {})
         results = []
-        entities = data.get(entity_type, {})
         
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    if entity_type == "escalations":
-                        id_field = "escalation_id"
-                    elif entity_type == "bridges":
-                        id_field = "bridge_id"
-                    else:  # bridge_participants
-                        id_field = "participant_id"
-                    results.append({**entity_data, id_field: entity_id})
-            else:
-                if entity_type == "escalations":
-                    id_field = "escalation_id"
-                elif entity_type == "bridges":
-                    id_field = "bridge_id"
-                else:  # bridge_participants
-                    id_field = "participant_id"
-                results.append({**entity_data, id_field: entity_id})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": entity_type,
-            "count": len(results),
-            "results": results
-        })
-    
-    @staticmethod
-    def get_info() -> Dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": "discover_coordination",
-                "description": "Discover coordination entities (escalations, bridges, bridge participants). The entity to discover is decided by entity_type. Optional filters can be applied to narrow down the search results.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "entity_type": {
-                            "type": "string",
-                            "description": "Type of entity to discover: 'escalations', 'bridges', or 'bridge_participants'"
-                        },
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters to narrow down search results. Only exact matches are supported (AND logic for multiple filters).",
-                            "properties": {
-                                "escalation_id": {
-                                    "type": "string",
-                                    "description": "Escalation ID (for escalations)"
-                                },
-                                "incident_id": {
-                                    "type": "string",
-                                    "description": "Associated incident ID"
-                                },
-                                "escalated_from": {
-                                    "type": "string",
-                                    "description": "User ID who requested escalation (for escalations)"
-                                },
-                                "escalated_to": {
-                                    "type": "string",
-                                    "description": "User ID receiving escalation (for escalations)"
-                                },
-                                "escalation_reason": {
-                                    "type": "string",
-                                    "description": "Reason for escalation (for escalations)"
-                                },
-                                "approver": {
-                                    "type": "string",
-                                    "description": "User ID who approved/denied the escalation (for escalations)"
-                                },
-                                "status": {
-                                    "type": "string",
-                                    "description": "Status: 'pending', 'approved', 'denied', 'cancelled'"
-                                },
-                                "requested_at": {
-                                    "type": "string",
-                                    "description": "Request timestamp in YYYY-MM-DD format (for escalations)"
-                                },
-                                "responded_at": {
-                                    "type": "string",
-                                    "description": "Response timestamp in YYYY-MM-DD format (for escalations)"
-                                },
-                                "bridge_id": {
-                                    "type": "string",
-                                    "description": "Bridge ID"
-                                },
-                                "bridge_number": {
-                                    "type": "string",
-                                    "description": "Bridge number, e.g., BRG0001234 (for bridges)"
-                                },
-                                "bridge_type": {
-                                    "type": "string",
-                                    "description": "Bridge type: 'major_incident', 'coordination', 'technical' (for bridges)"
-                                },
-                                "bridge_host": {
-                                    "type": "string",
-                                    "description": "User ID hosting the bridge (for bridges)"
-                                },
-                                "start_time": {
-                                    "type": "string",
-                                    "description": "Start timestamp in YYYY-MM-DD format (for bridges)"
-                                },
-                                "end_time": {
-                                    "type": "string",
-                                    "description": "End timestamp in YYYY-MM-DD format (for bridges)"
-                                },
-                                "participant_id": {
-                                    "type": "string",
-                                    "description": "Participant ID (for bridge_participants)"
-                                },
-                                "user_id": {
-                                    "type": "string",
-                                    "description": "User ID of the participant (for bridge_participants)"
-                                },
-                                "role_in_bridge": {
-                                    "type": "string",
-                                    "description": "Role in bridge: 'host', 'technical_support', 'account_manager', 'executive' (for bridge_participants)"
-                                },
-                                "joined_at": {
-                                    "type": "string",
-                                    "description": "Join timestamp in YYYY-MM-DD format (for bridge_participants)"
-                                },
-                                "created_at": {
-                                    "type": "string",
-                                    "description": "Creation timestamp in YYYY-MM-DD format"
-                                }
-                            }
-                        }
-                    },
-                    "required": ["entity_type"]
-                }
-            }
-        }
-
-
-# -----------------
-
-import json
-from typing import Any, Dict, List
-from tau_bench.envs.tool import Tool
-
-
-class DiscoverImprovement(Tool):
-    @staticmethod
-    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover improvement entities (root_cause_analyses, post_incident_reviews). The entity to discover is decided by entity_type.
-        Optionally, filters can be applied to narrow down the search results.
-        
-        Supported entities:
-        - root_cause_analyses: Root Cause Analysis records
-        - post_incident_reviews: Post Incident Review records
-        """
-        if entity_type not in ["root_cause_analyses", "post_incident_reviews"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'root_cause_analyses' or 'post_incident_reviews'"
-            })
-        
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid data format for {entity_type}"
-            })
-        
-        results = []
-        entities = data.get(entity_type, {})
-        
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    if entity_type == "root_cause_analyses":
-                        id_field = "rca_id"
-                    else:  # post_incident_reviews
-                        id_field = "review_id"
-                    results.append({**entity_data, id_field: entity_id})
-            else:
-                if entity_type == "root_cause_analyses":
-                    id_field = "rca_id"
-                else:  # post_incident_reviews
-                    id_field = "review_id"
-                results.append({**entity_data, id_field: entity_id})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": entity_type,
-            "count": len(results),
-            "results": results
-        })
-    
-    @staticmethod
-    def get_info() -> Dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": "discover_improvement",
-                "description": "Discover improvement entities (root cause analyses, post incident reviews). The entity to discover is decided by entity_type. Optional filters can be applied to narrow down the search results.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "entity_type": {
-                            "type": "string",
-                            "description": "Type of entity to discover: 'root_cause_analyses' or 'post_incident_reviews'"
-                        },
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters to narrow down search results. Only exact matches are supported (AND logic for multiple filters).",
-                            "properties": {
-                                "rca_id": {
-                                    "type": "string",
-                                    "description": "Root cause analysis ID (for root_cause_analyses)"
-                                },
-                                "rca_number": {
-                                    "type": "string",
-                                    "description": "RCA number, e.g., RCA0001234 (for root_cause_analyses)"
-                                },
-                                "rca_title": {
-                                    "type": "string",
-                                    "description": "RCA title (for root_cause_analyses)"
-                                },
-                                "associated_incident_id": {
-                                    "type": "string",
-                                    "description": "Associated incident ID (for root_cause_analyses)"
-                                },
-                                "incident_id": {
-                                    "type": "string",
-                                    "description": "Associated incident ID (for post_incident_reviews)"
-                                },
-                                "assigned_to": {
-                                    "type": "string",
-                                    "description": "User ID assigned to the RCA (for root_cause_analyses)"
-                                },
-                                "analysis_method": {
-                                    "type": "string",
-                                    "description": "Analysis method: '5_whys', 'fishbone', 'timeline', 'fault_tree', 'kepner_tregoe' (for root_cause_analyses)"
-                                },
-                                "root_cause_summary": {
-                                    "type": "string",
-                                    "description": "Summary of root cause findings (for root_cause_analyses)"
-                                },
-                                "status": {
-                                    "type": "string",
-                                    "description": "Status: 'assigned', 'in_progress', 'completed', 'approved', 'scheduled', 'cancelled'"
-                                },
-                                "due_date": {
-                                    "type": "string",
-                                    "description": "Due date in YYYY-MM-DD format (for root_cause_analyses)"
-                                },
-                                "completed_at": {
-                                    "type": "string",
-                                    "description": "Completion timestamp in YYYY-MM-DD format (for root_cause_analyses)"
-                                },
-                                "approved_by": {
-                                    "type": "string",
-                                    "description": "User ID who approved the RCA (for root_cause_analyses)"
-                                },
-                                "reported_by": {
-                                    "type": "string",
-                                    "description": "User ID who reported (for root_cause_analyses)"
-                                },
-                                "review_id": {
-                                    "type": "string",
-                                    "description": "Post incident review ID (for post_incident_reviews)"
-                                },
-                                "scheduled_date": {
-                                    "type": "string",
-                                    "description": "Scheduled date in YYYY-MM-DD format (for post_incident_reviews)"
-                                },
-                                "facilitator": {
-                                    "type": "string",
-                                    "description": "User ID of facilitator (for post_incident_reviews)"
-                                },
-                                "review_notes": {
-                                    "type": "string",
-                                    "description": "Notes from the review (for post_incident_reviews)"
-                                },
-                                "lessons_learned": {
-                                    "type": "string",
-                                    "description": "Lessons learned (for post_incident_reviews)"
-                                },
-                                "action_items": {
-                                    "type": "string",
-                                    "description": "Action items from the review (for post_incident_reviews)"
-                                },
-                                "created_by": {
-                                    "type": "string",
-                                    "description": "User ID who created (for post_incident_reviews)"
-                                },
-                                "created_at": {
-                                    "type": "string",
-                                    "description": "Creation timestamp in YYYY-MM-DD format"
-                                },
-                                "updated_at": {
-                                    "type": "string",
-                                    "description": "Update timestamp in YYYY-MM-DD format (for root_cause_analyses)"
-                                }
-                            }
-                        }
-                    },
-                    "required": ["entity_type"]
-                }
-            }
-        }
-
-
-# -----------------
-
-import json
-from typing import Any, Dict, List
-from tau_bench.envs.tool import Tool
-
-
-class DiscoverAudit(Tool):
-    @staticmethod
-    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover audit entities (audit_trails). The entity to discover is decided by entity_type.
-        Optionally, filters can be applied to narrow down the search results.
-        
-        Supported entities:
-        - audit_trails: Audit Trail records
-        """
-        if entity_type not in ["audit_trails"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'audit_trails'"
-            })
-        
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid data format for {entity_type}"
-            })
-        
-        results = []
-        entities = data.get(entity_type, {})
-        
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**entity_data, "audit_id": entity_id})
-            else:
-                results.append({**entity_data, "audit_id": entity_id})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": entity_type,
-            "count": len(results),
-            "results": results
-        })
-    
-    @staticmethod
-    def get_info() -> Dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": "discover_audit",
-                "description": "Discover audit entities (audit trails). The entity to discover is decided by entity_type. Optional filters can be applied to narrow down the search results.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "entity_type": {
-                            "type": "string",
-                            "description": "Type of entity to discover: 'audit_trails'"
-                        },
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters to narrow down search results. Only exact matches are supported (AND logic for multiple filters).",
-                            "properties": {
-                                "audit_id": {
-                                    "type": "string",
-                                    "description": "Audit trail ID"
-                                },
-                                "reference_id": {
-                                    "type": "string",
-                                    "description": "ID of the record that was changed"
-                                },
-                                "reference_type": {
-                                    "type": "string",
-                                    "description": "Type of record: 'user', 'client', 'sla', 'ci', 'incident', 'escalation', 'bridge', 'change', 'rollback', 'work_order', 'problem', 'incident_ci', 'problem_ci', 'client_ci'"
-                                },
-                                "action": {
-                                    "type": "string",
-                                    "description": "Action performed: 'create', 'update'"
-                                },
-                                "user_id": {
-                                    "type": "string",
-                                    "description": "User ID who performed the action"
-                                },
-                                "field_name": {
-                                    "type": "string",
-                                    "description": "Name of the field that was changed"
-                                },
-                                "old_value": {
-                                    "type": "string",
-                                    "description": "Previous value before change"
-                                },
-                                "new_value": {
-                                    "type": "string",
-                                    "description": "New value after change"
-                                },
-                                "created_at": {
-                                    "type": "string",
-                                    "description": "Creation timestamp in YYYY-MM-DD format"
-                                }
-                            }
-                        }
-                    },
-                    "required": ["entity_type"]
-                }
-            }
-        }
-
-
-# -----------------
-
-import json
-from typing import Any, Dict, List
-from tau_bench.envs.tool import Tool
-
-
-class DiscoverContracts(Tool):
-    @staticmethod
-    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover contract entities (sla_agreements). The entity to discover is decided by entity_type.
-        Optionally, filters can be applied to narrow down the search results.
-        
-        Supported entities:
-        - sla_agreements: SLA Agreement records
-        """
-        if entity_type not in ["sla_agreements"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'sla_agreements'"
-            })
-        
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid data format for {entity_type}"
-            })
-        
-        results = []
-        entities = data.get(entity_type, {})
-        
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    results.append({**entity_data, "sla_id": entity_id})
-            else:
-                results.append({**entity_data, "sla_id": entity_id})
-        
-        return json.dumps({
-            "success": True,
-            "entity_type": entity_type,
-            "count": len(results),
-            "results": results
-        })
-    
-    @staticmethod
-    def get_info() -> Dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": "discover_contracts",
-                "description": "Discover contract entities (SLA agreements). The entity to discover is decided by entity_type. Optional filters can be applied to narrow down the search results.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "entity_type": {
-                            "type": "string",
-                            "description": "Type of entity to discover: 'sla_agreements'"
-                        },
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters to narrow down search results. Only exact matches are supported (AND logic for multiple filters).",
-                            "properties": {
-                                "sla_id": {
-                                    "type": "string",
-                                    "description": "SLA agreement ID"
-                                },
-                                "client_id": {
-                                    "type": "string",
-                                    "description": "Client ID"
-                                },
-                                "tier": {
-                                    "type": "string",
-                                    "description": "SLA tier: 'premium', 'standard', 'basic'"
-                                },
-                                "support_coverage": {
-                                    "type": "string",
-                                    "description": "Support coverage: '24x7', 'business_hours', 'on_call'"
-                                },
-                                "effective_date": {
-                                    "type": "string",
-                                    "description": "Effective date in YYYY-MM-DD format"
-                                },
-                                "expiration_date": {
-                                    "type": "string",
-                                    "description": "Expiration date in YYYY-MM-DD format"
-                                },
-                                "created_by": {
-                                    "type": "string",
-                                    "description": "User ID who created the SLA"
-                                },
-                                "status": {
-                                    "type": "string",
-                                    "description": "Status: 'active', 'inactive', 'expired'"
-                                },
-                                "created_at": {
-                                    "type": "string",
-                                    "description": "Creation timestamp in YYYY-MM-DD format"
-                                },
-                                "updated_at": {
-                                    "type": "string",
-                                    "description": "Update timestamp in YYYY-MM-DD format"
-                                }
-                            }
-                        }
-                    },
-                    "required": ["entity_type"]
-                }
-            }
-        }
-
-
-# -----------------
-
-import json
-from typing import Any, Dict, List
-from tau_bench.envs.tool import Tool
-
-
-class DiscoverParties(Tool):
-    @staticmethod
-    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
-        """
-        Discover party entities (clients, users). The entity to discover is decided by entity_type.
-        Optionally, filters can be applied to narrow down the search results.
-        
-        Supported entities:
-        - clients: Client records
-        - users: User records
-        """
-        if entity_type not in ["clients", "users"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'clients' or 'users'"
-            })
-        
-        if not isinstance(data, dict):
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid data format for {entity_type}"
-            })
-        
-        results = []
-        entities = data.get(entity_type, {})
-        
-        for entity_id, entity_data in entities.items():
-            # Create a copy of the entity data to avoid modifying the original
-            result_data = entity_data.copy()
+        for pid, page_data in pages.items():
+            match = True
             
-            # Remove the 'role' field from users if it exists
-            if entity_type == "users" and "role" in result_data:
-                del result_data["role"]
+            if page_id and pid != page_id:
+                match = False
+            if title and page_data.get("title") != title:
+                match = False
+            if site_id and page_data.get("space_id") != site_id:
+                match = False
+            if parent_page_id and page_data.get("parent_page_id") != parent_page_id:
+                match = False
+            if status and page_data.get("status") != status:
+                match = False
+            if created_by and page_data.get("created_by") != created_by:
+                match = False
+            if created_at and page_data.get("created_at") != created_at:
+                match = False
+            if updated_by and page_data.get("updated_by") != updated_by:
+                match = False
+            if updated_at and page_data.get("updated_at") != updated_at:
+                match = False
             
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    # Check against original entity_data for filtering (including role)
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    if entity_type == "clients":
-                        id_field = "client_id"
-                    else:  # users
-                        id_field = "user_id"
-                    results.append({**result_data, id_field: entity_id})
-            else:
-                if entity_type == "clients":
-                    id_field = "client_id"
-                else:  # users
-                    id_field = "user_id"
-                results.append({**result_data, id_field: entity_id})
+            if match:
+                results.append({
+                    "page_id": pid,
+                    "title": page_data.get("title"),
+                    "site_id": page_data.get("space_id"),
+                    "parent_page_id": page_data.get("parent_page_id"),
+                    "body_storage": page_data.get("body_storage"),
+                    "status": page_data.get("status"),
+                    "created_by": page_data.get("created_by"),
+                    "created_at": page_data.get("created_at"),
+                    "updated_by": page_data.get("updated_by"),
+                    "updated_at": page_data.get("updated_at")
+                })
         
         return json.dumps({
             "success": True,
-            "entity_type": entity_type,
             "count": len(results),
-            "results": results
+            "pages": results
         })
     
     @staticmethod
@@ -1561,87 +348,50 @@ class DiscoverParties(Tool):
         return {
             "type": "function",
             "function": {
-                "name": "discover_parties",
-                "description": "Discover party entities (clients, users). The entity to discover is decided by entity_type. Optional filters can be applied to narrow down the search results. Note: The 'role' field is excluded from user results but can still be used for filtering.",
+                "name": "discover_page", # RENAMED from get_page
+                "description": "Discover page details. Filters by page_id, title, site_id, parent_page_id, status ('current', 'draft', 'locked', 'archived', 'deleted'), created_by, created_at, updated_by, or updated_at. Date format: YYYY-MM-DDTHH:MM:SS. Returns page information including page_id, title, site_id, parent_page_id, body_storage, status, created_by, created_at, updated_by, and updated_at.",
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "entity_type": {
+                        "page_id": {
                             "type": "string",
-                            "description": "Type of entity to discover: 'clients' or 'users'"
+                            "description": "Unique page identifier"
                         },
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters to narrow down search results. Only exact matches are supported (AND logic for multiple filters).",
-                            "properties": {
-                                "client_id": {
-                                    "type": "string",
-                                    "description": "Client ID (for clients)"
-                                },
-                                "client_name": {
-                                    "type": "string",
-                                    "description": "Client name (for clients)"
-                                },
-                                "registration_number": {
-                                    "type": "string",
-                                    "description": "Registration number (for clients)"
-                                },
-                                "company_type": {
-                                    "type": "string",
-                                    "description": "Company type: 'enterprise', 'mid_market', 'smb', 'startup' (for clients)"
-                                },
-                                "primary_address": {
-                                    "type": "string",
-                                    "description": "Primary address (for clients)"
-                                },
-                                "support_coverage": {
-                                    "type": "string",
-                                    "description": "Support coverage: '24x7', 'business_hours', 'on_call' (for clients)"
-                                },
-                                "preferred_communication": {
-                                    "type": "string",
-                                    "description": "Preferred communication: 'email', 'portal', 'phone', 'slack' (for clients)"
-                                },
-                                "status": {
-                                    "type": "string",
-                                    "description": "Status: 'active', 'inactive'"
-                                },
-                                "user_id": {
-                                    "type": "string",
-                                    "description": "User ID (for users)"
-                                },
-                                "first_name": {
-                                    "type": "string",
-                                    "description": "First name (for users)"
-                                },
-                                "last_name": {
-                                    "type": "string",
-                                    "description": "Last name (for users)"
-                                },
-                                "email": {
-                                    "type": "string",
-                                    "description": "Email address (for users)"
-                                },
-                                "role": {
-                                    "type": "string",
-                                    "description": "User role: 'incident_manager', 'technical_support', 'account_manager', 'executive', 'system_administrator', 'client_contact' (for users - can be used for filtering but won't appear in results)"
-                                },
-                                "timezone": {
-                                    "type": "string",
-                                    "description": "Timezone (for users)"
-                                },
-                                "created_at": {
-                                    "type": "string",
-                                    "description": "Creation timestamp in YYYY-MM-DD format"
-                                },
-                                "updated_at": {
-                                    "type": "string",
-                                    "description": "Update timestamp in YYYY-MM-DD format"
-                                }
-                            }
+                        "title": {
+                            "type": "string",
+                            "description": "Page title"
+                        },
+                        "site_id": {
+                            "type": "string",
+                            "description": "Site (space) identifier where the page resides"
+                        },
+                        "parent_page_id": {
+                            "type": "string",
+                            "description": "Parent page identifier for child pages"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "Page status: 'current', 'draft', 'locked', 'archived', 'deleted'",
+                            "enum": ["current", "draft", "locked", "archived", "deleted"]
+                        },
+                        "created_by": {
+                            "type": "string",
+                            "description": "User ID who created the page"
+                        },
+                        "created_at": {
+                            "type": "string",
+                            "description": "Page creation timestamp (YYYY-MM-DDTHH:MM:SS)"
+                        },
+                        "updated_by": {
+                            "type": "string",
+                            "description": "User ID who last updated the page"
+                        },
+                        "updated_at": {
+                            "type": "string",
+                            "description": "Page last update timestamp (YYYY-MM-DDTHH:MM:SS)"
                         }
                     },
-                    "required": ["entity_type"]
+                    "required": []
                 }
             }
         }
@@ -1650,62 +400,74 @@ class DiscoverParties(Tool):
 # -----------------
 
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional
 from tau_bench.envs.tool import Tool
 
 
-class DiscoverChangeControl(Tool):
+
+class SearchSite(Tool):
     @staticmethod
-    def invoke(data: Dict[str, Any], entity_type: str, filters: Dict[str, Any] = None) -> str:
+    def invoke(
+        data: Dict[str, Any],
+        site_id: Optional[str] = None,
+        site_url: Optional[str] = None,
+        site_name: Optional[str] = None,
+        description: Optional[str] = None,
+        status: Optional[str] = None,
+        created_by: Optional[str] = None,
+        created_at: Optional[str] = None,
+        updated_at: Optional[str] = None,
+    ) -> str:
         """
-        Discover change control entities (change_requests, rollback_requests). The entity to discover is decided by entity_type.
-        Optionally, filters can be applied to narrow down the search results.
-        
-        Supported entities:
-        - change_requests: Change Request records
-        - rollback_requests: Rollback Request records
+        Search for site details from the Confluence database (SharePoint 'search_site' logic).
+        Maps SharePoint sites to Confluence spaces (site_url maps to space_key, site_name to name).
         """
-        if entity_type not in ["change_requests", "rollback_requests"]:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid entity_type '{entity_type}'. Must be 'change_requests' or 'rollback_requests'"
-            })
-        
         if not isinstance(data, dict):
             return json.dumps({
                 "success": False,
-                "error": f"Invalid data format for {entity_type}"
+                "error": "Invalid data format"
             })
         
+        spaces = data.get("spaces", {})
         results = []
-        entities = data.get(entity_type, {})
         
-        for entity_id, entity_data in entities.items():
-            if filters:
-                match = True
-                for filter_key, filter_value in filters.items():
-                    entity_value = entity_data.get(filter_key)
-                    if entity_value != filter_value:
-                        match = False
-                        break
-                if match:
-                    if entity_type == "change_requests":
-                        id_field = "change_id"
-                    else:  # rollback_requests
-                        id_field = "rollback_id"
-                    results.append({**entity_data, id_field: entity_id})
-            else:
-                if entity_type == "change_requests":
-                    id_field = "change_id"
-                else:  # rollback_requests
-                    id_field = "rollback_id"
-                results.append({**entity_data, id_field: entity_id})
+        for sid, space_data in spaces.items():
+            match = True
+            
+            if site_id and sid != site_id:
+                match = False
+            if site_url and space_data.get("space_key") != site_url:
+                match = False
+            if site_name and space_data.get("name") != site_name:
+                match = False
+            if description and space_data.get("description") != description:
+                match = False
+            if status and space_data.get("status") != status:
+                match = False
+            if created_by and space_data.get("created_by") != created_by:
+                match = False
+            if created_at and space_data.get("created_at") != created_at:
+                match = False
+            if updated_at and space_data.get("updated_at") != updated_at:
+                match = False
+            
+            if match:
+                results.append({
+                    "site_id": sid,
+                    "site_url": space_data.get("space_key"),
+                    "site_name": space_data.get("name"),
+                    "description": space_data.get("description"),
+                    "type": space_data.get("type"),
+                    "status": space_data.get("status"),
+                    "created_by": space_data.get("created_by"),
+                    "created_at": space_data.get("created_at"),
+                    "updated_at": space_data.get("updated_at")
+                })
         
         return json.dumps({
             "success": True,
-            "entity_type": entity_type,
             "count": len(results),
-            "results": results
+            "sites": results
         })
     
     @staticmethod
@@ -1713,1376 +475,582 @@ class DiscoverChangeControl(Tool):
         return {
             "type": "function",
             "function": {
-                "name": "discover_change_control",
-                "description": "Discover change control entities (change requests, rollback requests). The entity to discover is decided by entity_type. Optional filters can be applied to narrow down the search results.",
+                "name": "search_site", # RENAMED from get_site
+                "description": "Search for site details. Filters by site_id, site_url, site_name, description, status ('current', 'archived'), created_by, created_at, or updated_at. Date format: YYYY-MM-DDTHH:MM:SS. Returns site information including site_id, site_url, site_name, description, type, status, created_by, created_at, and updated_at.",
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "entity_type": {
+                        "site_id": {
                             "type": "string",
-                            "description": "Type of entity to discover: 'change_requests' or 'rollback_requests'"
+                            "description": "Unique site identifier"
                         },
-                        "filters": {
-                            "type": "object",
-                            "description": "Optional filters to narrow down search results. Only exact matches are supported (AND logic for multiple filters).",
-                            "properties": {
-                                "change_id": {
-                                    "type": "string",
-                                    "description": "Change request ID (for change_requests)"
-                                },
-                                "change_number": {
-                                    "type": "string",
-                                    "description": "Change request number, e.g., CHG0001234 (for change_requests)"
-                                },
-                                "incident_id": {
-                                    "type": "string",
-                                    "description": "Associated incident ID"
-                                },
-                                "problem_ticket_id": {
-                                    "type": "string",
-                                    "description": "Associated problem ticket ID (for change_requests)"
-                                },
-                                "title": {
-                                    "type": "string",
-                                    "description": "Change/rollback title"
-                                },
-                                "description": {
-                                    "type": "string",
-                                    "description": "Change description (for change_requests)"
-                                },
-                                "change_type": {
-                                    "type": "string",
-                                    "description": "Type of change: 'standard', 'normal', 'emergency' (for change_requests)"
-                                },
-                                "risk_level": {
-                                    "type": "string",
-                                    "description": "Risk level of change: 'low', 'medium', 'high', 'critical' (for change_requests)"
-                                },
-                                "requested_by": {
-                                    "type": "string",
-                                    "description": "User ID who requested the change/rollback"
-                                },
-                                "approved_by": {
-                                    "type": "string",
-                                    "description": "User ID who approved the change (for change_requests)"
-                                },
-                                "status": {
-                                    "type": "string",
-                                    "description": "Status of the change/rollback"
-                                },
-                                "implementation_date": {
-                                    "type": "string",
-                                    "description": "Implementation date in YYYY-MM-DD format (for change_requests)"
-                                },
-                                "rollback_id": {
-                                    "type": "string",
-                                    "description": "Rollback request ID (for rollback_requests)"
-                                },
-                                "rollback_number": {
-                                    "type": "string",
-                                    "description": "Rollback request number, e.g., RBK0001234 (for rollback_requests)"
-                                },
-                                "rollback_reason": {
-                                    "type": "string",
-                                    "description": "Reason for rollback (for rollback_requests)"
-                                },
-                                "executed_at": {
-                                    "type": "string",
-                                    "description": "Execution timestamp in YYYY-MM-DD format (for rollback_requests)"
-                                },
-                                "created_at": {
-                                    "type": "string",
-                                    "description": "Creation timestamp in YYYY-MM-DD format"
-                                },
-                                "updated_at": {
-                                    "type": "string",
-                                    "description": "Update timestamp in YYYY-MM-DD format (for change_requests)"
-                                }
-                            }
+                        "site_url": {
+                            "type": "string",
+                            "description": "Site URL key"
+                        },
+                        "site_name": {
+                            "type": "string",
+                            "description": "Site display name"
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Site description"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "Site status: 'current', 'archived'",
+                            "enum": ["current", "archived"]
+                        },
+                        "created_by": {
+                            "type": "string",
+                            "description": "User ID who created the site"
+                        },
+                        "created_at": {
+                            "type": "string",
+                            "description": "Site creation timestamp (YYYY-MM-DDTHH:MM:SS)"
+                        },
+                        "updated_at": {
+                            "type": "string",
+                            "description": "Site last update timestamp (YYYY-MM-DDTHH:MM:SS)"
                         }
                     },
-                    "required": ["entity_type"]
+                    "required": []
                 }
             }
         }
 
 
 # Policy:
-# **Incident Management Policy & SOPs**
+SharePoint Wiki Management Policy
+As a Wiki Management Agent, you are responsible for executing Site-level and Page-level management processes, including page lifecycle management, permissions, and components.
+General Operating Principles
+You must not provide any information, knowledge, procedures, subjective recommendations, or comments that are not supplied by the user or available through tools.
+You must deny user requests that violate this policy.
+All Standard Operating Procedures (SOPs) are designed for single-turn execution. Each procedure is self-contained and must be completed in one interaction. Each SOP provides clear steps for proceeding when conditions are met and explicit halt instructions with error reporting when conditions are not met.
+
+
+Permission Structure
+Admin permissions encompass all other permissions. Users with “admin” automatically have “create”, “edit”, “view”, “delete”, and all required permission levels for the given entity.
+User permissions on pages include both direct permissions and inherited permissions from the hosting Site Pages library or Site. (pages inherit permissions from the Site unless unique permissions are explicitly applied at the page level)
+
+
+Critical Halt & Transfer Conditions
+You must halt the procedure and immediately initiate a switch_to_human if:
+
+The user is unauthorized, lacks required permissions, or is not active.
+Missing or invalid credentials are provided.
+Any required entity lookup (discover_page, search_site, etc.) fails or the entity is not found.
+A failure occurs during the SOP that prevents fulfillment.
+Any external integration fails.
+
+Only when none of these conditions occur you proceed to complete the SOP.
+
+
+Standard Operating Procedures (SOPs)
+1. Create Page
+Steps:
+Retrieve the user details and verify the user exists and has “active” status using obtain_user.
+If creating page within a site:
+Get the target site or subsite using search_site.
+Verify the user from step 1 has “create”, “edit” or “admin” permission on the target site or subsite from step 2.1 using fetch_effective_permissions.
+Create the new page using add_page.
+2. Update Page
+Steps:
+Retrieve the user details and verify the user exists and with “active” status using obtain_user.
+Retrieve the target page details using discover_page.
+Verify that the user from step 1 has “edit” or “admin” permission on the target page from step 2 using fetch_effective_permissions.
+If moving the page to a different site or subsite:
+Retrieve the target site using search_site.
+Verify that the user from step 1 has “view” or “admin” permission on the target site from step 4.1 using fetch_effective_permissions.
+Verify the target page from step 2 remains unique within the target site from step 4.1 using get_pages.
+Update the target page from step 2 using amend_page.
+If updating the page title:
+Verify the title remains unique within the site using discover_page.
+Apply the update to the page from step 2 using amend_page.
+3. Remove Page
+Steps:
+Retrieve the user details and verify the user exists and with “active” status using obtain_user.
+Retrieve the target page using discover_page.
+Verify the user from step 2 has “delete” or “admin” permission on the target page from step 1 using fetch_effective_permissions.
+Delete the target page from step 1 using remove_page.
+4. Modify Page Permissions
+Steps:
+Retrieve both the acting user and the target user and confirm they have “active” status using obtain_user.
+Retrieve the target page and confirm it exists using discover_page.
+Retrieve the host site for the target page in step 1 using search_site.
+Verify that the acting user from step 1 has “admin” permission on the target page from step 2 or host site from step 3 using fetch_effective_permissions.
+Modify the page permissions of the target page from step 1 using set_permission.
+5. Create Whiteboard
+Steps:
+Retrieve the hosting Site or page using search_site or discover_page.
+Retrieve the user details and verify the user exists and is “active” using obtain_user.
+Verify the user from step 2 has permission to create Whiteboards using fetch_effective_permissions.
+Create the whiteboard using new_whiteboard.
+6. Update Whiteboard
+Steps:
+Retrieve the Whiteboard and confirm it exists using get_whiteboard.
+Retrieve the hosting Site or Page where the Whiteboard from step 1 is located using search_site or discover_page.
+Retrieve the user details and verify the user exists with “active” status using obtain_user.
+Verify the user from step 3 has permission to edit the Whiteboard using fetch_effective_permissions.
+Update the Whiteboard from step 1 using edit_whiteboard.
+7. Remove Whiteboard
+Steps:
+Retrieve the Whiteboard and confirm it exists using get_whiteboard.
+Retrieve the hosting Site or Page where the Whiteboard from step 1 exists using search_site or discover_page.
+Retrieve the user details and verify the user exists with “active” status using obtain_user.
+Verify the user from step 2 has permission to delete the Whiteboard using fetch_effective_permissions.
+Delete the Whiteboard from step 1 using remove_whiteboard.
+8. Create Quick Link
+Steps:
+Retrieve the hosting page where the Quick Link will be created using discover_page.
+Identify the type of link being added, such as url, page, document, or list item.
+Retrieve the user details and verify the user exists with “active” status using obtain_user.
+Verify the user from step 3 has permission to edit the page using fetch_effective_permissions.
+Create the new Quick Links Webpart using create_quick_links.
+9. Remove Quick Link
+Steps:
+Retrieve the hosting page that contains the Smart Link using discover_page.
+Retrieve the user details and verify the user exists with “active” status using obtain_user.
+Verify the user from step 2 has permission to edit the hosting page using fetch_effective_permissions.
+Retrieve the Quick Links Webpart configuration on the hosting page from step 1 using discover_page (page JSON).
+Remove the Smart Link by deleting or updating the associated Quick Links Webpart from step 4 using delete_quick_links.
+Apply the update to the hosting page from step 1 using amend_page.
+10. Update Quick Link
+Steps:
+Retrieve the hosting page that contains the Smart Link using discover_page.
+Retrieve the user details and verify the user exists with “active” status using obtain_user.
+Verify the user from step 2 has permission to edit the hosting page using fetch_effective_permissions.
+Retrieve the Quick Links Webpart configuration that includes the Smart Link on the hosting page from step 1 using discover_page.
+Update the Smart Link by modifying the corresponding Quick Links Webpart using update_quick_links.
+Apply the update to the hosting page from step 1 using amend_page.
+11. Create Database
+Steps:
+Retrieve the target Site where the database will be created using search_site.
+Retrieve the user details and verify the user exists with “active” status using obtain_user.
+Verify the user from step 3 has permission to create databases on the target Site using fetch_effective_permissions.
+Create the new List using produce_list.
+If unique permissions are required for the new List, grant permissions using set_permission.
+12. Remove Database
+Steps:
+Retrieve the hosting Site and confirm it exists using search_site.
+Retrieve the user details and verify the user exists with “active” status using obtain_user.
+Verify the user from step 2 has permission to delete the list using fetch_effective_permissions.
+Retrieve the list that must be removed using get_list.
+Identify all pages that reference the list from step 4 by scanning page webparts using get_pages and inspecting each page’s webpart configuration via discover_page.
+For each page containing a List Webpart that references the list from step 4, remove or update the Webpart using delete_list_webpart or adjust_list_webpart.
+Delete the list using delete_list.
+13. Update Database
+Steps:
+Retrieve the hosting Site using search_site.
+Retrieve the user details and verify the user exists with “active” status using obtain_user.
+Verify the user from step 2 has permission to edit the database list using fetch_effective_permissions.
+Retrieve the target list to be updated using get_list.
+Update the list settings from step 4 using adjust_list.
+14. Add Attachment/Label
+Steps:
+Retrieve the hosting page and confirm that the page exists using discover_page.
+Retrieve the user details and verify the user exists with “active” status using obtain_user.
+Verify the user from step 2 has “edit” permission on the page using fetch_effective_permissions.
+To add:
+an attachment, attach the file using establish_attachment.
+a label, update the page’s metadata field from step 1 using create_metadata_field_value.
+15. Remove Attachment/Label
+Steps:
+Retrieve the hosting page and confirm that the page exists using discover_page.
+Retrieve the user details and verify the user exists and is active using obtain_user.
+Verify the user from step 2 has “edit” permission on the page using fetch_effective_permissions.
+To remove:
+an attachment, delete it using delete_attachment.
+a label, clear or update the page metadata field from step 1 containing the label using create_metadata_field_value or delete_metadata_field_value.
+16. Update Attachment/Label
+Steps:
+Retrieve the hosting page and confirm that the page exists using discover_page.
+Retrieve the user details and verify the user exists and is active using obtain_user.
+Verify the user from step 2 has “edit” permission on the page using fetch_effective_permissions.
+ To update:
+an attachment, replace it by deleting the existing attachment using delete_attachment and re-attach with establish_attachment.
+a label, modify the associated page metadata field from step 1 using create_metadata_field_value.
 
-The current time is 2025-10-04 12:00:00 UTC
-
-## **Introduction**
-
-This document defines the operational guide for an Incident Management automation agent. It is designed for single-turn execution: each procedure must be self-contained and completed in one interaction.
-
-**Validation first**: All inputs must be validated. If any required element is missing or invalid, the process halts with a clear error message.
-
-**Logging**: Every INSERT, UPDATE, or DELETE operation must generate an audit_log entry with entity_type, entity_id, operation_type, changed_by_id, field_name, old_value, and new_value. .
-
-**Role-based permissions**: Only designated roles may perform an action; other roles may do so only with explicit approval from a role authorized to perform it.
-
-### **What is "Halt"?**
-
-When a process halts, the agent immediately stops execution of the current SOP and returns a message to the user that says "cannot continue the process" \- therefore no further steps within that SOP are performed. The agent will use the **transfer_to_human** tool to transfer the request to a human agent.
-
-## **Standard Operating Procedures**
-
-### **Entities Lookup / Discovery**
-
-Use this whenever you need to find, search, or verify entities; fetch details for validation or reporting; or when another SOP needs entity information first.
-
-1. **Obtain:**  
-* **Required**: entity_type  
-* **Optional**: Include any filters for that entity (e.g., ID, status, dates) used to narrow the search.  
-2. **Pick one discovery tool that matches the entity type:**  
-* For clients, call **discover_clients** (filter by client_id, client_name, client_type, industry, country, status)  
-* For **vendors**, call **discover_vendors** (filter by vendor_id, vendor_name, vendor_type, status)  
-* For **users**, call **discover_users**  (filter by user_id, email, role, client_id, vendor_id, status)  
-* For **products**, call **discover_products**  (filter by product_id, product_name, product_type, version, vendor_support_id, status)  
-* For **infrastructure components**, call **discover_components** (filter by component_id, product_id, component_name, component_type, environment, location, port_number, status)  
-* For **client subscriptions,** **sla agreements** call **discover_subscription_agreements** (filter by subscription_id, client_id, product_id, subscription_type, start_date, end_date, sla_tier, rto_hours, status, sla_id, subscription_id, severity_level, response_time_minutes, resolution_time_hours, availability_percentage).  
-* For **incidents, post incident reviews** call **discover_incident_entities** (filter by incident_id, incident_code, client_id, component_id, reporter_id, assigned_manager_id, severity, status, category, detection_source, detected_at, impact, urgency).  
-* For **workarounds**, call **discover_workaround_entities** (filter by workaround_id, incident_id, implemented_by_id, effectiveness, status, implemented_at)  
-* For **root cause analysis**, call **discover_rca_entities** (filter by rca_id, incident_id, analysis_method, conducted_by_id, completed_at, status)  
-* For **escalations**, call **discover_escalation_entities** (filter by escalation_id, escalation_code, incident_id, escalated_by_id, escalated_to_id, escalation_reason, escalation_level, escalated_at, acknowledged_at, resolved_at, status)  
-* For **change requests, rollback requests**, call **discover_change_entities** (filter by change_id, change_code, rollback_id, incident_id, requested_by_id, approved_by_id, change_type, status)  
-* For **metrics**, call **discover_metrics_entities** (filter by metric_id, incident_id, metric_type, value_minutes, target_minutes, recorded_at)  
-* For **incident reports**, call **discover_incident_entities** (filter by report_id, incident_id, report_type, generated_by_id, generated_at, status)  
-* For communications, call **discover_communication_entities** (filter by communication_id, incident_id, sender_id, recipient_id, recipient_type, communication_type, sent_at, delivery_status, pir_id, incident_id, facilitator_id, scheduled_date, timeline_accuracy_rating, communication_effectiveness_rating, technical_response_rating)  
-* For **knowledge base articles**, call **discover_kb_article_entities** (filter by article_id, incident_id, created_by_id, reviewed_by_id, article_type, category, view_count, status)  
-3. **Run the selected discovery tool and wait for the results.**  
-4. **Acquire the result** \- whether it is a single match, multiple matches, or none.
-
-**Halt, and use transfer_to_human if any of these occur:**
-
-* The entity_type is missing or invalid  
-* The requester is not authorized  
-* The discovery tool fails to execute
-
----
-
-## **Client Management Operations**
-
-### **Create Client Record**
-
-1. **Obtain:**  
-* **Required**: client_name, client_type (enterprise, mid_market, small_business, startup), country  
-* **Optional**: registration_number, contact_email, industry, status (active, inactive, suspended)  
-* **Validate** that client_name and registration_number (if provided) are unique using **discover_clients**.  
-2. **Create** the client record using **manage_clients**.  
-3. **Create** an audit entry for client creation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing or invalid inputs  
-* Client name or registration number already exists  
-* Invalid client_type or country  
-* Client creation failed  
-* Audit trail logging failure
-
----
-
-### **Update Client Information**
-
-**1.   Obtain:**
-
-* **Required**: client_id  
-* **Optional**: client_name, registration_number, contact_email, client_type (enterprise, mid_market, small_business, startup), industry, country, status (active, inactive, suspended) (at least one must be provided)  
-* **Validate** that client exists and is accessible to the user using **discover_clients**.
-
-2**. Verify** that the approval to conduct the action is present using **check_approval**    (system_administrator or incident_manager or account_manager approval required). 
-
-**3. If updating** client_name or registration_number, validate uniqueness using **discover_clients**.
-
-**4. Update** the client record using **manage_clients**.
-
-**5. Create** an audit entry for client update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Client not found  
-* User not authorized for client updates  
-* New client_name or registration_number already exists  
-* Invalid client_type or status  
-* Client update failed  
-* Audit trail logging failure
-
----
-
-**User Management Operations**
-
-### **Create User Account**
-
-1. **Obtain:**  
-* **Required**: first_name, last_name, email, role (incident_manager, technical_support, account_manager, executive, vendor_contact, system_administrator, client_contact), timezone  
-* **Optional**: phone, department, client_id, vendor_id, status (active, inactive, on_leave)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (system_administrator or incident_manager approval required).  
-3. **Validate** that email is unique using **discover_users**.  
-4. **If client_id provided**, validate that client exists and has active status using **discover_clients**.  
-5. **If vendor_id provided**, validate that vendor exists and has active status using **discover_vendors**.  
-6. **Create** the user account using **manage_users**.  
-7. **Create** an audit entry for user creation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing or invalid inputs  
-* Email already exists  
-* Client or vendor not found or inactive  
-* Invalid role or timezone  
-* Approval missing for elevated role creation  
-* User creation failed  
-* Audit trail logging failure
-
----
-
-### **Update User Information**
-
-1. **Obtain:**  
-* **Required**: user_id  
-* **Optional**: first_name, last_name, email, phone, role (incident_manager, technical_support, account_manager, executive, vendor_contact, system_administrator, client_contact), department, client_id, vendor_id, timezone, status (active, inactive, on_leave) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (system_administrator or incident_manager approval required).  
-3. **Validate** that user exists using **discover_users**.  
-4. **If updating email**, validate uniqueness using **discover_users**.  
-5. **Update** the user record using **manage_users**.  
-6. **Create** an audit entry for user update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing approval for updating user information  
-* User not found  
-* New email already exists  
-* Invalid role or status  
-* Approval missing for role elevation  
-* User update failed  
-* Audit trail logging failure
-
----
-
-## **Vendor Management Operations**
-
-### **Create Vendor Record**
-
-1. **Obtain:**  
-* **Required**: vendor_name, vendor_type (cloud_provider, payment_processor, software_vendor, infrastructure_provider, security_vendor)  
-* **Optional**: contact_email,,contact_phone, status (active, inactive, suspended).  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (system_administrator or incident_manager or executive approval required)  
-3. **Validate** that vendor_name is unique using **discover_vendors**.  
-4. **Create** the vendor record using **manage_vendors**.  
-5. **Create** an audit entry for vendor creation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for vendor creation  
-* Missing or invalid inputs  
-* Vendor name already exists  
-* Invalid vendor_type  
-* Vendor creation failed  
-* Audit trail logging failure
-
----
-
-### **Update Vendor Information**
-
-1. **Obtain:**  
-* **Required**: vendor_id  
-* **Optional**: vendor_name, vendor_type (cloud_provider, payment_processor, software_vendor, infrastructure_provider, security_vendor), contact_email, contact_phone, status (active, inactive, suspended) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (system_administrator or incident_manager or executive approval required).  
-3. **Validate** that vendor exists using **discover_vendors**.  
-4. **If updating vendor_name**, validate uniqueness using **discover_vendors**.  
-5. **Update** the vendor record using **manage_vendors**.  
-6. **Create** an audit entry for vendor update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for vendor update  
-* Vendor not found  
-* New vendor_name already exists  
-* Invalid vendor_type or status  
-* Vendor update failed  
-* Audit trail logging failure
-
----
-
-## **Product and Infrastructure Operations**
-
-### **Create Product Record**
-
-1. **Obtain:**  
-* **Required**: product_name, product_type (payment_processing, banking_system, api_gateway, data_integration, reporting_platform, security_service, backup_service, monitoring_tool)  
-* **Optional**: version, vendor_support_id, status (active, deprecated, maintenance)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (system_administrator or incident_manager or executive approval required)  
-3. **Validate** that product_name is unique using **discover_products**.  
-4. **If vendor_support_id provided**, validate that vendor exists and has active status using **discover_vendors**.  
-5. **Create** the product record using **manage_products**.  
-6. **Create** an audit entry for product creation using **log_audit_records**
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing or invalid inputs  
-* Product name already exists  
-* Vendor not found or inactive  
-* Invalid product_type  
-* Product creation failed  
-* Audit trail logging failure
-
-## **Update Product Record**
-
-1. **Obtain:**  
-* **Required**: product_id  
-* **Optional**: product_name, product_type (payment_processing, banking_system, api_gateway, data_integration, reporting_platform, security_service, backup_service, monitoring_tool), version, vendor_support_id, status (active, deprecated, maintenance) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (system_administrator or incident_manager or executive approval required).  
-3. **Validate** that product exists using **discover_products**.  
-4. **If updating product_name**, validate uniqueness using **discover_products**.  
-5. **If updating vendor_support_id**, validate that vendor exists and has active status using **discover_vendors**.  
-6. **Update** the product record using **manage_products**.  
-7. **Create** an audit entry for product update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for product update  
-* Product not found  
-* New product_name already exists  
-* Vendor not found or inactive (if updating vendor_support_id)  
-* Invalid product_type or status  
-* Product update failed  
-* Audit trail logging failure
-
----
-
-## **Create Infrastructure Component**
-
-1. **Obtain:**  
-* **Required**: component_name, component_type (sftp_server, api_endpoint, database, load_balancer, firewall, authentication_service, payment_gateway, file_storage, monitoring_system), environment (production, staging, development, test)  
-* **Optional**: product_id, location, port_number, status (online, offline, maintenance, degraded)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (system_administrator or technical_support or incident_manager approval required).  
-3. **Validate** that component_name is unique within the specified product using **discover_components**.  
-4. **If product_id provided**, validate that product exists and has active status using **discover_products**.  
-5. **Create** the infrastructure component using **manage_components**.  
-6. **Create** an audit entry for component creation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for component creation  
-* Missing or invalid inputs  
-* Product not found or inactive (if product_id specified)  
-* Component name already exists within product  
-* Invalid component_type, environment, or status  
-* Component creation failed  
-* Audit trail logging failure
-
-## **Update Infrastructure Component**
-
-1. **Obtain:**  
-* **Required**: component_id  
-* **Optional**: component_name, component_type (sftp_server, api_endpoint, database, load_balancer, firewall, authentication_service, payment_gateway, file_storage, monitoring_system), product_id, environment (production, staging, development, test), location, port_number, status (online, offline, maintenance, degraded) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (system_administrator or technical_support or incident_manager approval required).  
-3. **Validate** that component exists using **discover_components**.  
-4. **If updating component_name**, validate uniqueness within the specified product using **discover_components**.  
-5. **If updating product_id**, validate that product exists and has active status using **discover_products**.  
-6. **Update** the infrastructure component using **manage_components**.  
-7. **Create** an audit entry for component update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for component update  
-* Component not found  
-* Product not found or inactive (if updating product_id)  
-* New component_name already exists within product  
-* Invalid component_type, environment, or status  
-* Component update failed  
-* Audit trail logging failure
-
----
-
-## **Subscription and Service Level Management**
-
-### **Create Client Subscription**
-
-1. **Obtain:**  
-* **Required**: client_id, product_id, subscription_type (full_service, limited_service, trial, custom), start_date, sla_tier (premium, standard, basic), rto_hours  
-* **Optional**: end_date, status (active, expired, cancelled, suspended)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (account_manager or incident_manager or executive approval required).  
-3. **Validate** that client exists and has active status using **discover_clients**.  
-4. **Validate** that product exists and has active status using **discover_products**.  
-5. **Create** the subscription record using **manage_client_subscriptions**.  
-6. **Create** an audit entry for subscription creation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for subscription creation  
-* Missing or invalid inputs  
-* Client not found or inactive  
-* Product not found or inactive  
-* Invalid subscription_type, sla_tier, or rto_hours  
-* Subscription creation failed  
-* Audit trail logging failure
-
----
-
-### **Update Client Subscription**
-
-1. **Obtain:**  
-* **Required**: subscription_id  
-* **Optional**: subscription_type (full_service, limited_service, trial, custom), start_date, end_date, sla_tier (premium, standard, basic), rto_hours, status (active, expired, cancelled, suspended) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (account_manager or incident_manager or executive approval required).  
-3. **Validate** that subscription exists using **discover_subscription_agreements**.  
-4. **Update** the subscription record using **manage_client_subscriptions**.  
-5. **Create** an audit entry for subscription update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for subscription update  
-* Subscription not found  
-* Invalid subscription_type, sla_tier, status, or dates  
-* Subscription update failed  
-* Audit trail logging failure
-
----
-
-### **Create SLA Agreement**
-
-1. **Obtain:**  
-* **Required**: subscription_id, severity_level (P1, P2, P3, P4), response_time_minutes, resolution_time_hours  
-* **Optional**: availability_percentage  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (account_manager or system_administrator or executive approval required).  
-3. **Validate** that subscription exists and has active status using **discover_subscription_agreements**.  
-4. **Validate** that response and resolution times align with subscription tier using the following guidelines:  
-* **Premium tier**: P1: 15-30 min response, 2-4 hrs resolution; P2: 1-2 hrs response, 8-24 hrs resolution; P3: 4-8 hrs response, 48-72 hrs resolution; P4: 24-48 hrs response, 128 hrs resolution  
-* **Standard tier**: P1: 1-2 hrs response, 8-24 hrs resolution; P2: 4-8 hrs response, 24-48 hrs resolution; P3: 24 hrs response, 72-120 hrs resolution; P4: 48-72 hrs response, 168 hrs resolution  
-* **Basic tier**: P1: 4-8 hrs response, 24-48 hrs resolution; P2: 24 hrs response, 72-120 hrs resolution; P3: 48-72 hrs response, 5-10 days resolution; P4: 5-7 days response, 2 weeks resolution  
-5. **Create** the SLA agreement using **manage_sla_agreements**.  
-6. **Create** an audit entry for SLA creation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for SLA creation  
-* Missing or invalid inputs  
-* Subscription not found or inactive  
-* Response/resolution times don't align with subscription tier  
-* Invalid severity_level or availability_percentage  
-* SLA creation failed  
-* Audit trail logging failure
-
-### **Update SLA Agreement**
-
-1. **Obtain:**  
-* **Required**: sla_id  
-* **Optional**: severity_level (P1, P2, P3, P4), response_time_minutes, resolution_time_hours, availability_percentage (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (account_manager or system_administrator or executive approval required).  
-3. **Validate** that SLA agreement exists using **discover_subscription_agreements**.  
-4. **Retrieve** the associated subscription to determine subscription tier.  
-5. **If updating response_time_minutes or resolution_time_hours**, validate that new times align with subscription tier using the following guidelines:  
-* **Premium tier**: P1: 15-30 min response, 2-4 hrs resolution; P2: 1-2 hrs response, 8-24 hrs resolution; P3: 4-8 hrs response, 48-72 hrs resolution; P4: 24-48 hrs response, 128 hrs resolution  
-* **Standard tier**: P1: 1-2 hrs response, 8-24 hrs resolution; P2: 4-8 hrs response, 24-48 hrs resolution; P3: 24 hrs response, 72-120 hrs resolution; P4: 48-72 hrs response, 168 hrs resolution  
-* **Basic tier**: P1: 4-8 hrs response, 24-48 hrs resolution; P2: 24 hrs response, 72-120 hrs resolution; P3: 48-72 hrs response, 5-10 days resolution; P4: 5-7 days response, 2 weeks resolution  
-6. **Update** the SLA agreement using **manage_sla_agreements**.  
-7. **Create** an audit entry for SLA update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for SLA update  
-* SLA agreement not found  
-* Response/resolution times don't align with subscription tier  
-* Invalid severity_level or availability_percentage  
-* SLA update failed  
-* Audit trail logging failure
-
----
-
-## **Incident Operations**
-
-### **Create Incident**
-
-1. **Obtain:**  
-* **Required**: title, reporter_id, client_id, category (system_outage, performance_degradation, security_incident, data_corruption, integration_failure, network_issue, hardware_failure, software_bug, configuration_error, capacity_issue, backup_failure, authentication_failure, api_error, database_issue, service_unavailable) , impact (critical, high, medium, low), detection_source(client_reported,internally_detected, monitoring_alert,vendor_reported,scheduled_maintenance,emergency_maintanence), urgency (critical, high, medium, low), detected_at  
-* Optional: assigned_manager_id, component_id, severity(P1,P2,P3,P4), status(open,in_progress,resolved,closed) , is_recurring,downtime_minutes,sla_breach,rto_breach,closed_at,resolved_at  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (incident_manager or technical_support or system_administrator or executive approval required).  
-3. **Validate** that reporter exists and has active status using **discover_users**.  
-4. **Validate** that client exists and has active status using **discover_clients**.  
-5. **If component_id provided**, validate that component exists using **discover_products**.  
-6. **If assigned_manager_id provided**, validate that user exists using **discover_users**.  
-7. **Create** the incident record using **manage_incidents.**  
-8. **Create** an audit entry for incident creation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for creating an incident  
-* Missing or invalid inputs  
-* Reporter not found or inactive  
-* Client not found or inactive  
-* Component not found  
-* Assigned manager not found  
-* Invalid category, impact, urgency, or severity  
-* Incident creation failed  
-* Audit trail logging failure
-
----
-
-### **Update Incident**
-
-1. **Obtain:**  
-* **Required**: incident_id  
-2. **Optional**: title,incident_code, assigned_manager_id, component_id, severity (P1, P2, P3, P4), status (open, in_progress, resolved, closed), impact (critical, high, medium, low), urgency (critical, high, medium, low), category (system_outage, performance_degradation, security_incident, data_corruption, integration_failure, network_issue, hardware_failure, software_bug, configuration_error, capacity_issue, backup_failure, authentication_failure, api_error, database_issue, service_unavailable), detection_source (client_reported, internally_detected, monitoring_alert, vendor_reported, scheduled_maintenance, emergency_maintenance), resolved_at, closed_at, rto_breach, sla_breach, is_recurring, downtime_minutes (at least one must be provided)  
-3. **Verify** that the approval to conduct the action is present using **check_approval** (incident_manager or technical_support or system_administrator or executive approval required)  
-4. **Validate** that incident exists using **discover_incident_entities**.  
-5. **If updating assigned_manager_id**, validate that user exists using **discover_users**.  
-6. **Update** the incident record using **manage_incidents**.  
-7. **Create** an audit entry for incident update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing to update incident  
-* Incident not found  
-* Assigned manager not found or has invalid role  
-* Invalid severity, impact, urgency, category, or timestamps  
-* Incident update failed  
-* Audit trail logging failure
-
----
-
-### **Resolve Incident**
-
-1. **Obtain:**  
-* **Required**: incident_id  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (incident_manager or technical_support or executive approval required)  
-3. **Validate** that incident exists and has status of in_progress or open using **discover_incident_entities**.  
-4. **Update** incident status to resolved and set resolved_at timestamp using **manage_incidents**.  
-5. **Create** an audit entry for incident resolution using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing approval to resolve incident  
-* Incident not found or invalid status  
-* Report generation failed  
-* Incident resolution update failed  
-* Audit trail logging failure
-
----
-
-### **Close Incident**
-
-1. **Obtain:**  
-* **Required**: incident_id  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (incident_manager or executive approval required).  
-3. **Validate** that incident exists and has status of resolved using **discover_incident_entities**.  
-4. **Update** incident status to closed and set closed_at timestamp using **manage_incidents**.  
-5. **Create** an audit entry for incident closure using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing to close incident  
-* Incident not found or status not resolved  
-* Incident closure failed  
-* Audit trail logging failure
-
----
-
-## **Communication Management**
-
-### **Create Communication**
-
-1. **Obtain:**  
-* **Required**: incident_id, sender_id, recipient_id, recipient_type (client, internal_team, executive, vendor, regulatory), communication_type (email, sms, phone_call, status_page, portal_update)  
-* **Optional**: delivery_status (sent, delivered, failed, pending), sent_at  
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( incident_manager or technical_support or system_administrator or account_manager approval required).  
-3. **Validate** that incident exists using **discover_incident_entities**.  
-4. **Validate** that sender and recipient exists and has active status using **discover_users**.  
-5. **Create** the communication record using **manage_communications**.  
-6. **Create** an audit entry for communication using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing approval  for creating communication record  
-* Missing or invalid inputs  
-* Incident not found  
-* Sender not found or inactive  
-* Recipient not found (if specified)  
-* Invalid recipient_type or communication_type  
-* Communication recording failed  
-* Audit trail logging failure
-
-## **Update Communication**
-
-1. **Obtain:**  
-* **Required**: communication_id  
-* **Optional**: incident_id, sender_id, recipient_id, recipient_type (client, internal_team, executive, vendor, regulatory), communication_type (email, sms, phone_call, status_page, portal_update), delivery_status (sent, delivered, failed, pending), sent_at (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( incident_manager or technical_support or system_administrator or account_manager approval required).  
-3. **Validate** that communication record exists using **discover_communication_entities**.  
-4. If updating incident_id, sender_id, or recipient_id, validate that the communication record has delivery_status of "pending" using **discover_communication_entities**. These fields can only be updated when delivery_status is "pending".  
-5. **If updating incident_id**, validate that incident exists using **discover_incident_entities**.  
-6. **If updating sender_id**, validate that sender exists and has active status using **discover_users**.  
-7. **If updating recipient_id**, validate that recipient exists using **discover_users**.  
-8. **Update** the communication record using **manage_communications**.  
-9. **Create** an audit entry for communication update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing to update communication record  
-* Communication record not found  
-* Incident not found (if updating incident_id)  
-* Sender not found or inactive (if updating sender_id)  
-* Recipient not found (if updating recipient_id)  
-* Invalid recipient_type, communication_type, or delivery_status  
-* Communication update failed  
-* Audit trail logging failure
-
----
-
-## **Workaround and Resolution Management**
-
-### **Create Workaround**
-
-1. **Obtain:**  
-* **Required**: incident_id, implemented_by_id, effectiveness (complete, partial, minimal),implemented_at  
-* **Optional**: status (active, inactive, replaced)   
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( technical_support or incident_manager or system_administrator or executive approval required).  
-3. **Validate** that incident exists and has status of open or in_progress using **discover_incident_entities**.  
-4. **Create** the workaround record using **manage_work_arounds**.  
-5. **Create** an audit entry for workaround implementation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing or invalid inputs  
-* Incident not found or invalid status  
-* Implementing user not found or has invalid role  
-* Invalid effectiveness level  
-* Workaround creation failed  
-* Audit trail logging failure
-
----
-
-## **Update Workaround**
-
-1. **Obtain:**  
-* **Required**: workaround_id  
-* **Optional**: effectiveness (complete, partial, minimal), status (active, inactive, replaced) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (technical_support or incident_manager or system_administrator or executive approval required).  
-3. **Validate** that workaround record exists using **discover_workaround_entities**.  
-4. **Update** the workaround record using **manage_work_arounds**.  
-5. **Create** an audit entry for workaround update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for workaround update  
-* Workaround not found  
-* Invalid effectiveness level or status  
-* Workaround update failed  
-* Audit trail logging failure
-
----
-
-### **Conduct Root Cause Analysis**
-
-1. **Obtain:**  
-* **Required**: incident_id, conducted_by_id, analysis_method (five_whys, fishbone, timeline_analysis, fault_tree)  
-* **Optional**: completed_at, status (in_progress, completed, approved)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( technical_support or incident_manager or system_administrator or executive approval required).  
-3. **Validate** that incident exists and has status of resolved or closed using **discover_incident_entities**.  
-4. **Create** the root cause analysis record using **manage_root_cause_analysis**.  
-5. **Create** an audit entry for RCA initiation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for conduct root cause analysis  
-* Missing or invalid inputs  
-* Incident not found or invalid status  
-* Invalid analysis_method  
-* RCA creation failed  
-* Audit trail logging failure
-
----
-
-### **Update Root Cause Analysis**
-
-1. **Obtain:**  
-* **Required**: rca_id  
-* **Optional**: analysis_method (five_whys, fishbone, timeline_analysis, fault_tree), completed_at, status (in_progress, completed, approved) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( technical_support or incident_manager or system_administrator or executive approval required).  
-3. **Validate** that RCA record exists using **discover_rca_entities**.  
-4. **Update** the RCA record using **manage_root_cause_analysis**.  
-5. **Create** an audit entry for RCA update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for updating rca  
-* RCA not found  
-* Invalid analysis_method or status  
-* RCA update failed  
-* Audit trail logging failure
-
----
-
-## **Escalation Management**
-
-### **Create Escalation**
-
-1. **Obtain:**  
-* **Required**: incident_id, escalated_by_id, escalated_to_id, escalation_reason (sla_breach, severity_increase, resource_unavailable, executive_request, client_demand), escalated_at ,escalation_level (technical, management, executive, vendor)  
-* **Optional**: acknowledged_at, resolved_at, status (open, acknowledged, resolved)  
-2. **Validate** that incident exists and has status of open or in_progress using **discover_incident_entities**.  
-3. **Validate** that escalated_by and escalated_to  user exists and has active status using **discover_users**.  
-4. **Create** the escalation record using **manage_escalations**.  
-5. **Create** an audit entry for escalation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing or invalid inputs  
-* Incident not found or invalid status  
-* Escalating user not found or inactive  
-* Escalation target user not found or has invalid role for level  
-* Invalid escalation_reason or escalation_level  
-* Escalation creation failed  
-* Audit trail logging failure
-
----
-
-### **Update Escalation Status**
-
-1. **Obtain:**  
-* **Required**: escalation_id  
-* **Optional**: escalation_code, acknowledged_at, resolved_at, status (open, acknowledged, resolved) (at least one must be provided)  
-2. **Validate** that escalation exists using **discover_escalation_entities**.  
-3. **Update** the escalation record using **manage_escalations**.  
-4. **Create** an audit entry for escalation update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Escalation not found  
-* User not authorized to update escalation  
-* Invalid status or timestamps  
-* Escalation update failed  
-* Audit trail logging failure
-
----
-
-## **Change Management Operations**
-
-### **Create Change Request**
-
-1. **Obtain:**  
-* **Required**: title, change_type (emergency, standard, normal), requested_by_id, risk_level (high, medium, low)  
-* **Optional**: incident_id, approved_by_id, scheduled_start, scheduled_end, actual_start, actual_end, status (requested, approved, scheduled, in_progress, completed, failed, rolled_back)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( technical_support or incident_manager or system_administrator or executive approval required)..  
-3. **If incident_id provided**, validate that incident exists using **discover_incident_entities**  
-4. **Create** the change request record using **manage_change_requests**.  
-5. **Create** an audit entry for change request using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing Approval for creating a change request  
-* Missing or invalid inputs  
-* Incident not found (if specified)  
-* Invalid change_type, risk_level, or status  
-* Change request creation failed  
-* Audit trail logging failure
-
----
-
-### **Update Change Request**
-
-1. **Obtain:**  
-* **Required**: change_id  
-* **Optional**: title,change_code, change_type (emergency, standard, normal), approved_by_id, risk_level (high, medium, low), scheduled_start, scheduled_end, actual_start, actual_end, status (requested, approved, scheduled, in_progress, completed, failed, rolled_back) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( technical_support or incident_manager or system_administrator or executive approval required).  
-3. **Validate** that change request exists using **discover_change_entities**.  
-4. **Update** the change request using **manage_change_requests**.  
-5. **Create** an audit entry for change update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for update change request  
-* Change request not found  
-* User not authorized  
-* Invalid change_type, risk_level, status, or timestamps  
-* Change request update failed  
-* Audit trail logging failure
-
----
-
-### **Create Rollback Request**
-
-1. **Obtain:**  
-* **Required**: change_id, requested_by_id  
-* **Optional**: incident_id, approved_by_id, executed_at, validation_completed, status (requested, approved, in_progress, completed, failed).  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (system_administrator or executive approval required)  
-3. **Validate** that change request exists using **discover_change_entities**.  
-4. **If incident_id provided**, validate that incident exists using **discover_incident_entities**.  
-5. **Create** the rollback request using **manage_rollback_requests**.  
-6. **Create** an audit entry for rollback request using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for rollback request  
-* Missing or invalid inputs  
-* Change request not found  
-* Requesting user not found or has invalid role  
-* Incident not found (if specified)  
-* Rollback request creation failed  
-* Audit trail logging failure
-
----
-
-### **Update Rollback Request**
-
-1. **Obtain:**  
-* **Required**: rollback_id  
-* **Optional**: rollback_code , approved_by_id, executed_at, validation_completed, status (requested, approved, in_progress, completed, failed) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** (  incident_manager or system_administrator or executive approval required).  
-3. **Validate** that rollback request exists using **discover_change_entities**.  
-4. **Update** the rollback request using **manage_rollback_requests**.  
-5. **Create** an audit entry for rollback update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing Approval for rollback request  
-* Rollback request not found  
-* User not authorized  
-* Invalid status or timestamps  
-* Rollback update failed  
-* Audit trail logging failure
-
----
-
-## **Metrics and Reporting Operations**
-
-### **Record Performance Metrics**
-
-1. **Obtain:**  
-* **Required**: incident_id, metric_type (MTTA, MTTD, MTTR, MTTM, FTR), value_minutes  
-* **Optional**: target_minutes, recorded_at  
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( incident_manager or system_administrator approval required).  
-3. **Validate** that incident exists and has status of resolved or closed using **discover_incident_entities**.  
-4. **Create** the metrics record using **manage_metrics**.  
-5. **Create** an audit entry for metrics recording using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing or invalid inputs  
-* Incident not found or invalid status  
-* User not authorized  
-* Invalid metric_type or value_minutes  
-* Metrics recording failed  
-* Audit trail logging failure
-
----
-
-### **Generate Incident Report**
-
-1. **Obtain:**  
-* **Required**: incident_id, report_type ( executive_summary, technical_details,business_impact, compliance_report, post_mortem), generated_by_id  
-* **Optional**: status (draft, completed, distributed)  
-2. **Validate** that generating user exists and has appropriate role (incident_manager, executive) using **discover_users**..  
-3. **Generate** the report using **manage_incident_reports**.  
-4. **Create** an audit entry for report generation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing approval for generating report  
-* Missing or invalid inputs  
-* Invalid report_type or status  
-* Incident not resolved/closed for post_mortem  
-* Report generation failed  
-* Audit trail logging failure
-
----
-
-## **Knowledge Management Operations**
-
-### **Create Knowledge Base Article**
-
-1. **Obtain:**  
-* **Required**: title, article_type (troubleshooting, resolution_steps, prevention_guide, faq), created_by_id, category(authentication_issues, payment_processing, api_integration, data_synchronization, system_outages, performance_degradation, security_incidents, backup_recovery, user_management, billing_issues, compliance_procedures, vendor_escalations, configuration_changes, monitoring_alerts, network_connectivity, database_issues, file_transfer_problems, reporting_errors, mobile_app_issues, browser_compatibility, third_party_integrations, scheduled_maintenance, emergency_procedures, client_onboarding, account_provisioning, sla_management, incident_response, change_management, capacity_planning, disaster_recovery)  
-* **Optional**: incident_id, reviewed_by_id, view_count, status (draft, published, archived)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( technical_support or incident_manager approval required).  
-3. **If incident_id provided**, validate that incident exists and is resolved or closed using **discover_incident_entities**.  
-4. **If reviewed_by_id provided**, validate that reviewer exists and has appropriate role using **discover_users**.  
-5. **Create** the knowledge base article using **manage_kb_articles**.  
-6. **Create** an audit entry for article creation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Missing or invalid inputs  
-* Creating user not found or has invalid role  
-* Incident not found or invalid status (if specified)  
-* Reviewer not found (if specified)  
-* Invalid article_type, category, or status  
-* Knowledge article creation failed  
-* Audit trail logging failure
-
----
-
-### **Update Knowledge Base Article**
-
-1. **Obtain:**  
-* **Required**: article_id  
-* **Optional**: title, article_type (troubleshooting, resolution_steps, prevention_guide, faq), incident_id, reviewed_by_id, category, view_count, status (draft, published, archived) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( technical_support or incident_manager approval required).  
-3. **Validate** that article exists using **discover_kb_article_entities**.  
-4. **If updating reviewed_by_id**, validate that reviewer exists using **discover_users**.  
-5. **Update** the knowledge article using **manage_kb_articles**.  
-6. **Create** an audit entry for article update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Article not found  
-* User not authorized  
-* Reviewer not found (if specified)  
-* Invalid article_type, category, or status  
-* Article update failed  
-* Audit trail logging failure
-
----
-
-### **Create Post-Incident Review**
-
-1. **Obtain:**  
-* **Required**: incident_id, scheduled_date, facilitator_id  
-* **Optional**: timeline_accuracy_rating, communication_effectiveness_rating, technical_response_rating, status (scheduled, completed, cancelled)   
-2. **Verify** that the approval to conduct the action is present using **check_approval** (incident_manager or executive approval required).  
-3. **Validate** that incident exists and has status of resolved or closed using **discover_incident_entities**.  
-4. **Validate** that facilitator exists and has an appropriate role (incident_manager, executive) using **discover_users**.  
-5. **Create** the post-incident review record using **manage_post_incident_reviews**.  
-6. **Create** an audit entry for PIR creation using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing for PIR creation  
-* Missing or invalid inputs  
-* Incident not found or invalid status  
-* Facilitator not found or has invalid role  
-* Invalid scheduled_date or ratings  
-* PIR creation failed  
-* Audit trail logging failure
-
----
-
-### **Update Post-Incident Review**
-
-1. **Obtain:**  
-* **Required**: pir_id  
-* **Optional**: scheduled_date, facilitator_id, timeline_accuracy_rating, communication_effectiveness_rating, technical_response_rating, status (scheduled, completed, cancelled) (at least one must be provided)  
-2. **Verify** that the approval to conduct the action is present using **check_approval** ( incident_manager or executive approval required).  
-3. **Validate** that PIR exists using **discover_incident_entities**..  
-4. **Update** the post-incident review using **manage_post_incident_review**.  
-5. **Create** an audit entry for PIR update using **log_audit_records**.
-
-**Halt, and use transfer_to_human if you receive the following errors; otherwise complete the SOP:**
-
-* Approval missing  
-* PIR not found  
-* User not authorized  
-* Invalid scheduled_date, ratings, or status  
-* PIR update failed  
-* Audit trail logging failure
-
----
-
-## **Authority and Access Controls**
-
-**Permission Validation**
-
-All operations verify user authority based on:
-
-* **role** field (incident_manager, technical_support, account_manager, executive, vendor_contact, system_administrator, client_contact)  
-* **client_id** association through client_id field in users table  
-* **vendor_id** association through vendor_id field in users table  
-* **status** field must be active in users table
-
-Operations requiring elevated permissions use a check_approval tool to verify proper authorization before proceeding.
 
 # Database Schema:
-// Use DBML to define your database structure
-// Docs: https://dbml.dbdiagram.io/docs
+// DBML Schema for Confluence Content Management System
+// Based on actual Confluence database table structure
 
-// B2B Incident Management Database Schema
-// This schema represents a comprehensive database for managing incidents,
-// clients, products, infrastructure, and operational processes
+// ============================================================================
+// CORE CONTENT TYPES
+// ============================================================================
 
-Table clients {
-  client_id string [primary key]
-  client_name varchar(100) [not null]
-  registration_number varchar(100)
-  contact_email string
-  client_type enum('enterprise','mid_market','small_business','startup') [not null]
-  industry varchar(100)
-  country varchar(100)
-  status enum('active','inactive','suspended') [not null]
+Table pages {
+  page_id varchar(50) [primary key]
+  // page_number varchar(50) [not null, unique] // e.g., PAGE0000001
+  title varchar(500) [not null]
+  space_id varchar(50) [not null]
+  parent_page_id varchar(50) // nullable for root pages
+  body_storage text // 
+  // body_view text // rendered HTML
+  status enum('current','draft','locked', 'archived','deleted') [not null, default: 'current']
+  // version_number int [not null, default: 1]
+  created_by varchar(50) [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_by varchar(50) [not null]
+  updated_at timestamp [not null, default: `NOW()`]
+
+  indexes {
+    parent_page_id
+    space_id
+    // folder_id
+    (space_id, status)
+    // page_number [unique]
+  }
+}
+
+Table databases {
+  database_id varchar(50) [primary key]
+  title varchar(500) [not null]
+  host_space_id varchar(50)      // For space-level databases
+  host_page_id varchar(50)       // For page-level databases
+  // Either host_space_id OR host_page_id must be set (mutually exclusive)
+  description text
+  status enum('current','archived','deleted') [not null, default: 'current']
+  created_by varchar(50) [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_by varchar(50) [not null]
+  updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    host_space_id
+    host_page_id
+  }
+}
+
+Table whiteboards {
+  whiteboard_id varchar(50) [primary key]
+  title varchar(500) [not null]
+  host_space_id varchar(50)      // For space-level whiteboards
+  host_page_id varchar(50)       // For page-level whiteboards  
+  content text
+  status enum('current','archived','deleted', 'locked') [not null, default: 'current']
+  created_by varchar(50) [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_by varchar(50) [not null]
+  updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    host_space_id
+    host_page_id
+  }
+}
+
+Table smart_links {
+  smart_link_id varchar(50) [primary key]
+  title varchar(500) [not null]
+  url varchar(2000) [not null]
+  
+  // What this smart link POINTS TO (the reference/target)
+  target_id varchar(50)           // The entity this link references
+  target_type enum('page','database','whiteboard','external', 'attachment')
+  
+  // Where this smart link is DISPLAYED (the container)
+  host_page_id varchar(50) [not null]
+  // host_id varchar(50) [not null]
+  // host_type enum('page','database','whiteboard') [not null]
+  
+  // link_type varchar(100) // e.g., 'jira_issue', 'external_url', etc.
+  // link_type enum(
+  //   'internal_link',
+  //   'document_link',
+  //   'repository_link',
+  //   'communication_link',
+  //   'media_link',
+  //   'external_url'
+  // ) [not null, default: 'external_url']
+  // status enum('current','archived','deleted') [not null, default: 'current']
+  created_by varchar(50) [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_by varchar(50) [not null]
+  updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    // parent_id
+    // space_id
+    url
+  }
+}
+
+
+// ============================================================================
+// SPACES
+// ============================================================================
+
+Table spaces {
+  space_id varchar(50) [primary key]
+  space_key varchar(50) [not null, unique]
+  name varchar(255) [not null]
+  description text
+  type enum('global','personal') [not null]
+  status enum('current','archived') [not null, default: 'current']
+  // homepage_id varchar(50) // FK to pages
+  created_by varchar(50) [not null]
   created_at timestamp [not null, default: `NOW()`]
   updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    space_key [unique]
+  }
 }
 
-Table vendors {
-  vendor_id string [primary key]
-  vendor_name varchar(100) [not null]
-  vendor_type enum('cloud_provider','payment_processor','software_vendor','infrastructure_provider','security_vendor') [not null]
-  contact_email varchar(100)
-  contact_phone varchar(20)
-  // escalation_contact varchar(100)
-  status enum('active','inactive','suspended') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-}
+// ============================================================================
+// USERS AND AUTHENTICATION
+// ============================================================================
 
 Table users {
-  user_id string [primary key]
-  client_id string
-  vendor_id string
-  first_name varchar(100) [not null]
-  last_name varchar(100) [not null]
+  user_id varchar(50) [primary key]
+  // account_id varchar(100) [not null, unique] // Atlassian account ID
   email varchar(320) [not null, unique]
-  phone varchar(20)
-  role enum('incident_manager','technical_support', 'account_manager','executive','vendor_contact','system_administrator', 'client_contact') [not null]
-  department varchar(100)
-  timezone varchar(50) [not null]
-  status enum('active','inactive','on_leave') [not null, default: 'active']
+  display_name varchar(255) [not null]
+  // account_type enum('atlassian','app','anonymous') [not null]
+  status enum('active','inactive','deactivated') [not null, default: 'active']
   created_at timestamp [not null, default: `NOW()`]
   updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table products {
-  product_id string [primary key]
-  product_name varchar(100) [not null]
-  product_type enum('payment_processing','banking_system','api_gateway','data_integration','reporting_platform','security_service','backup_service','monitoring_tool') [not null]
-  version varchar(50)
-  vendor_support_id string // references vendors.vendor_id
-  // internal_team_lead_id string // references users.user_id
-  status enum('active','deprecated','maintenance') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table infrastructure_components {
-  component_id string [primary key]
-  product_id string
-  component_name varchar(100) [not null]
-  component_type enum('sftp_server','api_endpoint','database','load_balancer','firewall','authentication_service','payment_gateway','file_storage','monitoring_system') [not null]
-  environment enum('production','staging','development','test') [not null]
-  location varchar(100)
-  port_number int
-  status enum('online','offline','maintenance','degraded') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table client_subscriptions {
-  subscription_id string [primary key]
-  client_id string [not null]
-  product_id string [not null]
-  subscription_type enum('full_service','limited_service','trial','custom') [not null]
-  start_date date [not null]
-  end_date date
-  sla_tier enum('premium','standard','basic') [not null]
-  rto_hours int [not null] // Recovery Time Objective
-  status enum('active','expired','cancelled','suspended') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
-
-Table sla_agreements {
-  sla_id string [primary key]
-  subscription_id string [not null]
-  severity_level enum('P1','P2','P3','P4') [not null]
-  response_time_minutes int [not null]
-  resolution_time_hours int [not null]
-  availability_percentage decimal(5,2)
-  created_at timestamp [not null, default: `NOW()`]
-}
-
-Table incidents {
-  incident_id string [primary key]
-  incident_code varchar(50) [unique, not null] // e.g., 'INC-2024-00123', 'INCIDENT-001234'
-  title varchar(100) [not null]
-  reporter_id string [not null]
-  assigned_manager_id string
-  client_id string [not null]
-  component_id string
-  // vendor_id string // For vendor-related incidents
-  // vendor_ticket_id varchar(100) // Vendor's ticket reference
-  // vendor_status varchar(100) // Status from vendor side
-  // vendor_estimated_resolution timestamp // Vendor's ETA
-  severity enum('P1','P2','P3','P4') [not null]
-  status enum('open','in_progress','resolved','closed') [not null]
-  impact enum('critical','high','medium','low') [not null]
-  urgency enum('critical','high','medium','low') [not null]
-  // category enum('client_onboarding','client_support','client_escalation','data_update','system_outage','security_breach','performance_issue','integration_failure','vendor_issue') [not null]
   
-  // Technical categories - WHAT went wrong
-  category enum(
-    'system_outage',
-    'performance_degradation',
-    'security_incident',
-    'data_corruption',
-    'integration_failure',
-    'network_issue',
-    'hardware_failure',
-    'software_bug',
-    'configuration_error',
-    'capacity_issue',
-    'backup_failure',
-    'authentication_failure',
-    'api_error',
-    'database_issue',
-    'service_unavailable'
-  ) [not null]
-  
-  // Business/operational context - WHO is affected and WHY it matters
-  detection_source enum(
-    'client_reported',
-    'internally_detected',
-    'monitoring_alert',
-    'vendor_reported',
-    'scheduled_maintenance',
-    'emergency_maintenance'
-  ) [not null]
-  
-  detected_at timestamp [not null]
-  resolved_at timestamp
-  closed_at timestamp
-  rto_breach boolean [default: false]
-  sla_breach boolean [default: false]
-  is_recurring boolean [default: false]
-  downtime_minutes int
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
+  indexes {
+    // account_id [unique]
+    email [unique]
+  }
 }
 
-// Table incident_updates {
-//   update_id string [primary key]
-//   incident_id string [not null]
-//   updated_by_id string [not null]
-//   update_type enum('status_change','severity_change','assignment','workaround','resolution','communication') [not null]
-//   field_name varchar(50) [not null]
-//   old_value varchar(100)
-//   new_value varchar(100)
+
+// ============================================================================
+// ATTACHMENTS
+// ============================================================================
+
+Table attachments {
+  attachment_id varchar(50) [primary key]
+  content_id varchar(50) [not null]
+  content_type enum('page','database','whiteboard','smart_link') [not null]
+  host_page_id varchar(50) 
+  file_name varchar(500) [not null]
+  file_url varchar(2000) [not null]
+  // file_size_bytes bigint [not null]
+  // media_type varchar(100) [not null] // MIME type
+  // download_url varchar(2000) [not null]
+  // comment text
+  // version_number int [not null, default: 1]
+  status enum('current','archived','deleted') [not null, default: 'current']
+  uploaded_by varchar(50) [not null]
+  uploaded_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    content_id
+    (content_id, content_type)
+    uploaded_by
+  }
+}
+
+
+// ============================================================================
+// VERSIONS
+// ============================================================================
+
+
+Table page_versions {
+  page_version_id varchar(50) [primary key]
+  page_id varchar(50) [not null]
+  version_number int [not null]
+  title varchar(500) [not null]
+  body_storage text
+  // is_minor_edit boolean [not null, default: false]
+  // created_by varchar(50)  
+  created_at timestamp [not null, default: `NOW()`]
+}
+
+Table page_version_components {
+  component_id varchar(50) [primary key]
+  page_version_id varchar(50) [not null]
+  component_type enum('whiteboard','smart_link') [not null]
+  component_data text [not null] // Complete snapshot of the component
+  
+  indexes {
+    page_version_id
+  }
+}
+
+Ref: page_version_components.page_version_id > page_versions.page_version_id
+
+
+// Table whiteboard_versions {
+//   whiteboard_version_id varchar(50) [primary key]
+//   whiteboard_id varchar(50) [not null]
+//   version_number int [not null]
+//   title varchar(500) [not null]
+//   content text
+//   version_message text
+//   created_by varchar(50) [not null]
 //   created_at timestamp [not null, default: `NOW()`]
+  
+//   indexes {
+//     whiteboard_id
+//     (whiteboard_id, version_number) [unique]
+//   }
 // }
 
-Table audit_log {
-  audit_id string [primary key]
-  entity_type varchar(100) [not null] // Which table was modified (e.g., 'incidents', 'clients', 'users')
-  entity_id string [not null] // ID of the record that changed
-  operation_type enum('INSERT','UPDATE','DELETE') [not null]
-  changed_by_id string [not null] // User who made the change
-  field_name varchar(100) // Specific field that changed (can be null for multi-field updates)
-  old_value text // Previous value
-  new_value text // New value
-  created_at timestamp [not null, default: `NOW()`]
+
+
+// ============================================================================
+// LABELS
+// ============================================================================
+
+Table page_labels {
+  page_label_id varchar(50) [primary key]
+  page_id varchar(50) [not null]
+  label_name varchar(255) [not null]  // stored directly
+  added_by varchar(50) [not null]
+  added_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    page_id
+    (page_id, label_name) [unique]
+  }
 }
 
-Table workarounds {
-  workaround_id string [primary key]
-  incident_id string [not null]
-  implemented_by_id string [not null]
-  effectiveness enum('complete','partial','minimal') [not null]
-  status enum('active','inactive','replaced') [not null]
-  implemented_at timestamp [not null]
-  created_at timestamp [not null, default: `NOW()`]
-}
-
-Table root_cause_analysis {
-  rca_id string [primary key]
-  incident_id string [not null]
-  analysis_method enum('five_whys','fishbone','timeline_analysis','fault_tree') [not null]
-  conducted_by_id string [not null]
-  completed_at timestamp
-  status enum('in_progress','completed','approved') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-}
-
-Table communications {
-  communication_id string [primary key]
-  incident_id string [not null]
-  sender_id string [not null]
-  recipient_id string
-  recipient_type enum('client','internal_team','executive','vendor','regulatory') [not null]
-  communication_type enum('email','sms','phone_call','status_page','portal_update') [not null]
-  sent_at timestamp [not null]
-  delivery_status enum('sent','delivered','failed','pending') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-}
-
-Table escalations {
-  escalation_id string [primary key]
-  escalation_code varchar(50) [unique, not null] // e.g., 'ESC-2024-00789', 'ESCALATION-001234'
-  incident_id string [not null]
-  escalated_by_id string [not null]
-  escalated_to_id string [not null]
-  escalation_reason enum('sla_breach','severity_increase','resource_unavailable','executive_request','client_demand') [not null]
-  escalation_level enum('technical','management','executive','vendor') [not null]
-  escalated_at timestamp [not null]
-  acknowledged_at timestamp
-  resolved_at timestamp
-  status enum('open','acknowledged','resolved') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-}
-
-Table change_requests {
-  change_id string [primary key]
-  change_code varchar(50) [unique, not null] // e.g., 'CHG-2024-00456', 'CR-001234'
-  incident_id string
-  title varchar(100) [not null]
-  change_type enum('emergency','standard','normal') [not null]
-  requested_by_id string [not null]
-  approved_by_id string
-  risk_level enum('high','medium','low') [not null]
-  scheduled_start timestamp
-  scheduled_end timestamp
-  actual_start timestamp
-  actual_end timestamp
-  status enum('requested','approved','scheduled','in_progress','completed','failed','rolled_back') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-}
-
-Table rollback_requests {
-  rollback_id string [primary key]
-  rollback_code varchar(50) [unique, not null] // e.g., 'RBK-2024-00321', 'ROLLBACK-001234'
-  change_id string [not null]
-  incident_id string
-  requested_by_id string [not null]
-  approved_by_id string
-  executed_at timestamp
-  validation_completed boolean [default: false]
-  status enum('requested','approved','in_progress','completed','failed') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-}
-
-
-
-// Vendor incidents are now handled directly in the incidents table
-// with vendor_id and vendor_ticket_id fields
-
-Table metrics {
-  metric_id string [primary key]
-  incident_id string [not null]
-  metric_type enum('MTTA','MTTD','MTTR','MTTM','FTR') [not null]
-  value_minutes int [not null]
-  target_minutes int
-  recorded_at timestamp [not null]
-  created_at timestamp [not null, default: `NOW()`]
-}
-
-// Table compliance_events {
-//   compliance_id string [primary key]
-//   incident_id string [not null]
-//   regulation_type enum('GDPR','HIPAA','SOX','PCI_DSS','FFIEC','CCPA','FCC','NERC') [not null]
-//   event_type enum('breach_assessment','notification_required','reporting_deadline','audit_trigger') [not null]
-//   deadline timestamp
-//   completed_at timestamp
-//   responsible_party_id string [not null]
-//   status enum('pending','in_progress','completed','overdue') [not null]
+// Table labels {
+//   label_id varchar(50) [primary key]
+//   label_name varchar(255) [not null, unique]
+//   // prefix varchar(50) // e.g., 'global', 'my', 'team'
 //   created_at timestamp [not null, default: `NOW()`]
+  
+//   indexes {
+//     label_name
+//   }
 // }
 
-Table incident_reports {
-  report_id string [primary key]
-  incident_id string [not null]
-  report_type enum('executive_summary','technical_details','business_impact','compliance_report','post_mortem') [not null]
-  generated_by_id string [not null]
-  generated_at timestamp [not null]
-  status enum('draft','completed','distributed') [not null]
-  created_at timestamp [not null, default: `NOW()`]
+// Table page_labels {
+//   page_label_id varchar(50) [primary key]
+//   page_id varchar(50) [not null]
+//   label_id varchar(50) [not null]
+//   added_by varchar(50) [not null]
+//   added_at timestamp [not null, default: `NOW()`]
+  
+//   indexes {
+//     (page_id, label_id) [unique]
+//     label_id
+//   }
+// }
+
+// Table attachment_labels {
+//   attachment_label_id varchar(50) [primary key]
+//   attachment_id varchar(50) [not null]
+//   label_id varchar(50) [not null]
+//   added_by varchar(50) [not null]
+//   added_at timestamp [not null, default: `NOW()`]
+  
+//   indexes {
+//     (attachment_id, label_id) [unique]
+//     label_id
+//   }
+// }
+
+// ============================================================================
+// LIKES
+// ============================================================================
+
+// Table likes {
+//   like_id varchar(50) [primary key]
+//   page_id varchar(50) [not null]
+//   // content_id varchar(50) [not null]
+//   // content_type enum('page','database','whiteboard','smart_link') [not null]
+//   user_id varchar(50) [not null]
+//   // account_id varchar(100) [not null] // Atlassian account ID
+//   liked_at timestamp [not null, default: `NOW()`]
+  
+//   indexes {
+//     // (content_id, content_type, user_id) [unique]
+//     // content_id
+//     user_id
+//   }
+// }
+
+// ============================================================================
+// PERMISSIONS
+// ============================================================================
+
+Table permissions {
+  permission_id varchar(50) [primary key]
+  content_id varchar(50) [not null]
+  content_type enum('space','page') [not null]
+  user_id varchar(50)
+  operation enum('view','edit','delete','create','admin', 'restrict_other_users') [not null]
+  granted_by varchar(50)
+  granted_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    (content_id, content_type)
+    user_id
+    operation
+  }
 }
 
-Table knowledge_base_articles {
-  article_id string [primary key]
-  // article_code varchar(50) [unique, not null] // e.g., 'KB-00741'
-  incident_id string
-  title varchar(100) [not null]
-  article_type enum('troubleshooting','resolution_steps','prevention_guide','faq') [not null]
-  created_by_id string [not null]
-  reviewed_by_id string
-  category enum(
-    'authentication_issues',
-    'payment_processing', 
-    'api_integration',
-    'data_synchronization',
-    'system_outages',
-    'performance_degradation',
-    'security_incidents',
-    'backup_recovery',
-    'user_management',
-    'billing_issues',
-    'compliance_procedures',
-    'vendor_escalations',
-    'configuration_changes',
-    'monitoring_alerts',
-    'network_connectivity',
-    'database_issues',
-    'file_transfer_problems',
-    'reporting_errors',
-    'mobile_app_issues',
-    'browser_compatibility',
-    'third_party_integrations',
-    'scheduled_maintenance',
-    'emergency_procedures',
-    'client_onboarding',
-    'account_provisioning',
-    'sla_management',
-    'incident_response',
-    'change_management',
-    'capacity_planning',
-    'disaster_recovery'
-  )
-  view_count int [default: 0]
-  status enum('draft','published','archived') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-  updated_at timestamp [not null, default: `NOW()`]
-}
 
-Table post_incident_reviews {
-  pir_id string [primary key]
-  incident_id string [not null]
-  scheduled_date timestamp [not null]
-  facilitator_id string [not null]
-  timeline_accuracy_rating int
-  communication_effectiveness_rating int
-  technical_response_rating int
-  status enum('scheduled','completed','cancelled') [not null]
-  created_at timestamp [not null, default: `NOW()`]
-}
+// ============================================================================
+// RELATIONSHIPS
+// ============================================================================
 
-// Relationships
-Ref: users.client_id > clients.client_id
-Ref: users.vendor_id > vendors.vendor_id
-// Ref: products.internal_team_lead_id > users.user_id
-Ref: products.vendor_support_id > vendors.vendor_id
-Ref: client_subscriptions.client_id > clients.client_id
-Ref: client_subscriptions.product_id > products.product_id
-Ref: sla_agreements.subscription_id > client_subscriptions.subscription_id
-Ref: incidents.reporter_id > users.user_id
-Ref: incidents.assigned_manager_id > users.user_id
-Ref: incidents.client_id > clients.client_id
-Ref: incidents.component_id > infrastructure_components.component_id
-// Ref: incidents.vendor_id > vendors.vendor_id
-// Ref: incident_updates.incident_id > incidents.incident_id
-// Ref: incident_updates.updated_by_id > users.user_id
-Ref: workarounds.incident_id > incidents.incident_id
-Ref: workarounds.implemented_by_id > users.user_id
-Ref: root_cause_analysis.incident_id > incidents.incident_id
-Ref: root_cause_analysis.conducted_by_id > users.user_id
-Ref: communications.incident_id > incidents.incident_id
-Ref: communications.sender_id > users.user_id
-Ref: escalations.incident_id > incidents.incident_id
-Ref: escalations.escalated_by_id > users.user_id
-Ref: escalations.escalated_to_id > users.user_id
-Ref: change_requests.incident_id > incidents.incident_id
-Ref: change_requests.requested_by_id > users.user_id
-Ref: change_requests.approved_by_id > users.user_id
-Ref: rollback_requests.change_id > change_requests.change_id
-Ref: rollback_requests.incident_id > incidents.incident_id
-Ref: rollback_requests.requested_by_id > users.user_id
-Ref: rollback_requests.approved_by_id > users.user_id
-Ref: metrics.incident_id > incidents.incident_id
-// Ref: compliance_events.incident_id > incidents.incident_id
-// Ref: compliance_events.responsible_party_id > users.user_id
-Ref: incident_reports.incident_id > incidents.incident_id
-Ref: incident_reports.generated_by_id > users.user_id
-Ref: knowledge_base_articles.incident_id > incidents.incident_id
-Ref: knowledge_base_articles.created_by_id > users.user_id
-Ref: knowledge_base_articles.reviewed_by_id > users.user_id
-Ref: post_incident_reviews.incident_id > incidents.incident_id
-Ref: post_incident_reviews.facilitator_id > users.user_id
-Ref: infrastructure_components.product_id > products.product_id
+// Content Pages
+Ref: pages.parent_page_id > pages.page_id
+Ref: pages.space_id > spaces.space_id
+Ref: pages.created_by > users.user_id
+Ref: pages.updated_by > users.user_id
+
+// Databases
+Ref: databases.host_space_id > spaces.space_id
+Ref: databases.host_page_id > pages.page_id
+Ref: databases.created_by > users.user_id
+Ref: databases.updated_by > users.user_id
+
+// Whiteboards
+Ref: whiteboards.host_space_id > spaces.space_id
+Ref: whiteboards.host_page_id > pages.page_id
+Ref: whiteboards.created_by > users.user_id
+Ref: whiteboards.updated_by > users.user_id
+
+// Smart Links
+// Ref: smart_links.space_id > spaces.space_id
+Ref: smart_links.created_by > users.user_id
+Ref: smart_links.updated_by > users.user_id
+
+// Spaces
+// Ref: spaces.homepage_id > pages.page_id
+Ref: spaces.created_by > users.user_id
+
+// Attachments
+Ref: attachments.uploaded_by > users.user_id
+// Ref: attachment_bodies.attachment_version_id > attachment_versions.attachment_version_id
+
+// Versions
+Ref: page_versions.page_id > pages.page_id
+// Ref: page_versions.created_by > users.user_id
+
+// Labels
+Ref: page_labels.page_id > pages.page_id
+// Ref: page_labels.label_id > labels.label_id
+Ref: page_labels.added_by > users.user_id
+
+// Ref: attachment_labels.attachment_id > attachments.attachment_id
+// Ref: attachment_labels.label_id > labels.label_id
+// Ref: attachment_labels.added_by > users.user_id
+
+
+// Likes
+// Ref: likes.user_id > users.user_id
+
+// Permissions
+Ref: permissions.user_id > users.user_id
+// Ref: permissions.group_id > groups.group_id
+Ref: permissions.granted_by > users.user_id
+
+Ref: smart_links.host_page_id > pages.page_id
+
 
 You have to provide the json file for each function separately including all the tests for that function in the actions part. You are going to provide the bash script that will create and populate those json files in a folder named tools_regression_tests/interface_2/.
 

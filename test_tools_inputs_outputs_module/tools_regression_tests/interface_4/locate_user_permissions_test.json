@@ -1,0 +1,35 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 4,
+  "task": {
+    "actions": [
+      {
+        "name": "locate_user_permissions",
+        "arguments": {
+          "filter": {
+            "email": "williamdavis@example.org",
+            "doc_id": "47"
+          }
+        }
+      },
+      {
+        "name": "locate_user_permissions",
+        "arguments": {
+          "filter": {
+            "email": "hoffmanjennifer@example.net",
+            "doc_id": "4"
+          }
+        }
+      },
+      {
+        "name": "locate_user_permissions",
+        "arguments": {
+          "filter": {
+            "email": "smithchristine@example.net",
+            "doc_id": "9"
+          }
+        }
+      }
+    ]
+  }
+}

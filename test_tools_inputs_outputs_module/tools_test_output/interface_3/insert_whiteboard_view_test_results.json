@@ -1,0 +1,74 @@
+{
+  "task_file": "tools_regression_tests/interface_3/insert_whiteboard_view_test.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "title": "New Architecture Review",
+        "created_by": "1",
+        "host_document_id": "1"
+      },
+      "output": [
+        {
+          "success": true,
+          "whiteboard_view_id": "26",
+          "whiteboard_data": {
+            "whiteboard_id": "26",
+            "title": "New Architecture Review",
+            "host_space_id": null,
+            "host_page_id": "1",
+            "content": null,
+            "status": "current",
+            "created_by": "1",
+            "created_at": "2025-10-01T00:00:00",
+            "updated_by": "1",
+            "updated_at": "2025-10-01T00:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "title": "Planning Session 2024",
+        "created_by": "5",
+        "host_document_id": "4"
+      },
+      "output": [
+        {
+          "success": true,
+          "whiteboard_view_id": "27",
+          "whiteboard_data": {
+            "whiteboard_id": "27",
+            "title": "Planning Session 2024",
+            "host_space_id": null,
+            "host_page_id": "4",
+            "content": null,
+            "status": "current",
+            "created_by": "5",
+            "created_at": "2025-10-01T00:00:00",
+            "updated_by": "5",
+            "updated_at": "2025-10-01T00:00:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "title": "Q2 Strategy Workshop",
+        "created_by": "7",
+        "host_document_id": "2",
+        "content": "[{\"id\": \"1\", \"type\": \"circle\", \"text\": \"Strategic Goals\", \"x_position\": 100, \"y_position\": 200, \"width\": 120, \"height\": 120, \"color\": \"blue\"}, {\"id\": \"2\", \"type\": \"rectangle\", \"text\": \"Implementation Plan\", \"x_position\": 300, \"y_position\": 200, \"width\": 150, \"height\": 100, \"color\": \"green\"}]",
+        "status": "draft"
+      },
+      "output": [
+        {
+          "success": false,
+          "error": "Invalid status. Must be one of: current, archived, deleted, locked"
+        },
+        200
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 4,
+  "task": {
+    "actions": [
+      {
+        "name": "construct_doc",
+        "arguments": {
+          "fields": {
+            "space_id": "1",
+            "title": "New Technical Specification",
+            "created_by": "1"
+          }
+        }
+      },
+      {
+        "name": "construct_doc",
+        "arguments": {
+          "fields": {
+            "space_id": "2",
+            "title": "Updated Process Documentation",
+            "created_by": "5",
+            "body_storage": "<h2>Process Overview</h2>\n<p>Follow these documented processes:</p>\n<ol><li>Review all requirements</li><li>Execute test cases</li><li>Document findings</li><li>Generate reports</li></ol>"
+          }
+        }
+      },
+      {
+        "name": "construct_doc",
+        "arguments": {
+          "fields": {
+            "space_id": "4",
+            "title": "Complete Project Plan",
+            "created_by": "7",
+            "body_storage": "<h1>Project Plan 2024</h1>\n<h2>Phase 1: Planning</h2>\n<p>Define scope and requirements in detail.</p>\n<h2>Phase 2: Development</h2>\n<p>Implement features according to specifications.</p>\n<h2>Phase 3: Testing</h2>\n<p>Execute comprehensive test suite and validation.</p>\n<h2>Phase 4: Deployment</h2>\n<p>Release to production with monitoring.</p>",
+            "status": "draft"
+          }
+        }
+      }
+    ]
+  }
+}

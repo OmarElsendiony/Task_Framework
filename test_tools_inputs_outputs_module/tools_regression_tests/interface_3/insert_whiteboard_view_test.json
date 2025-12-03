@@ -1,0 +1,34 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 3,
+  "task": {
+    "actions": [
+      {
+        "name": "insert_whiteboard_view",
+        "arguments": {
+          "title": "New Architecture Review",
+          "created_by": "1",
+          "host_document_id": "1"
+        }
+      },
+      {
+        "name": "insert_whiteboard_view",
+        "arguments": {
+          "title": "Planning Session 2024",
+          "created_by": "5",
+          "host_document_id": "4"
+        }
+      },
+      {
+        "name": "insert_whiteboard_view",
+        "arguments": {
+          "title": "Q2 Strategy Workshop",
+          "created_by": "7",
+          "host_document_id": "2",
+          "content": "[{\"id\": \"1\", \"type\": \"circle\", \"text\": \"Strategic Goals\", \"x_position\": 100, \"y_position\": 200, \"width\": 120, \"height\": 120, \"color\": \"blue\"}, {\"id\": \"2\", \"type\": \"rectangle\", \"text\": \"Implementation Plan\", \"x_position\": 300, \"y_position\": 200, \"width\": 150, \"height\": 100, \"color\": \"green\"}]",
+          "status": "draft"
+        }
+      }
+    ]
+  }
+}

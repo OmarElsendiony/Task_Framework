@@ -3,52 +3,18 @@
 # Create the directory structure
 mkdir -p tools_regression_tests/interface_1
 
-# Create test file for ManagePerformanceReview
-cat > tools_regression_tests/interface_1/manage_performance_review_tests.json << 'EOF'
+# Test 1: get_assets - Filter by employee_id and status
+cat > tools_regression_tests/interface_1/test_get_assets_1.json << 'EOF'
 {
-    "env": "hr_experts",
+    "env": "hr_admin_management",
     "interface_num": 1,
     "task": {
         "actions": [
             {
-                "name": "manage_performance_review",
+                "name": "get_assets",
                 "arguments": {
-                    "action": "create",
-                    "review_data": {
-                        "employee_id": "1",
-                        "reviewer_id": "1",
-                        "review_period_start": "2025-01-01",
-                        "review_period_end": "2025-12-31",
-                        "review_type": "annual",
-                        "overall_rating": "exceeds_expectations",
-                        "goals_achievement_score": 9.5,
-                        "communication_score": 8.7,
-                        "teamwork_score": 9.2,
-                        "leadership_score": 8.9,
-                        "technical_skills_score": 9.1,
-                        "status": "draft"
-                    }
-                }
-            },
-            {
-                "name": "manage_performance_review",
-                "arguments": {
-                    "action": "update",
-                    "review_id": "1",
-                    "review_data": {
-                        "employee_id": "2",
-                        "reviewer_id": "2",
-                        "review_period_start": "2025-04-01",
-                        "review_period_end": "2025-06-30",
-                        "review_type": "quarterly",
-                        "overall_rating": "meets_expectations",
-                        "goals_achievement_score": 7.8,
-                        "communication_score": 8.2,
-                        "teamwork_score": 7.5,
-                        "leadership_score": 6.9,
-                        "technical_skills_score": 8.4,
-                        "status": "submitted"
-                    }
+                    "employee_id": "1",
+                    "status": "assigned"
                 }
             }
         ]
@@ -56,40 +22,17 @@ cat > tools_regression_tests/interface_1/manage_performance_review_tests.json <<
 }
 EOF
 
-# Create test file for ManageInterview
-cat > tools_regression_tests/interface_1/manage_interview_tests.json << 'EOF'
+# Test 2: get_assets - Filter by status only
+cat > tools_regression_tests/interface_1/test_get_assets_2.json << 'EOF'
 {
-    "env": "hr_experts",
+    "env": "hr_admin_management",
     "interface_num": 1,
     "task": {
         "actions": [
             {
-                "name": "manage_interview",
+                "name": "get_assets",
                 "arguments": {
-                    "action": "create",
-                    "interview_data": {
-                        "application_id": "1",
-                        "interviewer_id": "1",
-                        "interview_type": "technical",
-                        "scheduled_date": "2025-11-15T14:30:00",
-                        "duration_minutes": 90,
-                        "status": "scheduled"
-                    }
-                }
-            },
-            {
-                "name": "manage_interview",
-                "arguments": {
-                    "action": "update",
-                    "interview_id": "1",
-                    "interview_data": {
-                        "overall_rating": "excellent",
-                        "technical_score": 9.2,
-                        "communication_score": 8.7,
-                        "cultural_fit_score": 9.0,
-                        "recommendation": "strong_hire",
-                        "status": "completed"
-                    }
+                    "status": "returned"
                 }
             }
         ]
@@ -97,44 +40,60 @@ cat > tools_regression_tests/interface_1/manage_interview_tests.json << 'EOF'
 }
 EOF
 
-# Create test file for ManageBenefitsPlan
-cat > tools_regression_tests/interface_1/manage_benefits_plan_tests.json << 'EOF'
+# Test 3: create_payslip - Valid employee and cycle
+cat > tools_regression_tests/interface_1/test_create_payslip_1.json << 'EOF'
 {
-    "env": "hr_experts",
+    "env": "hr_admin_management",
     "interface_num": 1,
     "task": {
         "actions": [
             {
-                "name": "manage_benefits_plan",
+                "name": "create_payslip",
                 "arguments": {
-                    "action": "create",
-                    "plan_data": {
-                        "plan_name": "Premium Health Insurance Plan",
-                        "plan_type": "health_insurance",
-                        "provider": "BlueCross BlueShield",
-                        "employee_cost": 250.00,
-                        "employer_cost": 750.00,
-                        "status": "active",
-                        "effective_date": "2025-01-01",
-                        "expiration_date": "2025-12-31"
-                    }
+                    "employee_id": "1",
+                    "cycle_id": "1"
                 }
-            },
+            }
+        ]
+    }
+}
+EOF
+
+# Test 4: create_payslip - Another valid employee and cycle
+cat > tools_regression_tests/interface_1/test_create_payslip_2.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 1,
+    "task": {
+        "actions": [
             {
-                "name": "manage_benefits_plan",
+                "name": "create_payslip",
                 "arguments": {
-                    "action": "update",
+                    "employee_id": "4",
+                    "cycle_id": "1"
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 5: update_benefit_plan - Update all optional parameters
+cat > tools_regression_tests/interface_1/test_update_benefit_plan_1.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "update_benefit_plan",
+                "arguments": {
                     "plan_id": "1",
-                    "plan_data": {
-                        "plan_name": "Updated Dental Coverage Plan",
-                        "plan_type": "dental",
-                        "provider": "Delta Dental",
-                        "employee_cost": 45.00,
-                        "employer_cost": 85.00,
-                        "status": "inactive",
-                        "effective_date": "2025-03-01",
-                        "expiration_date": "2026-02-28"
-                    }
+                    "name": "Premium Health PPO Plus",
+                    "status": "active",
+                    "current_cost": 18500.0,
+                    "previous_year_cost": 16000.0,
+                    "enrollment_window": "open"
                 }
             }
         ]
@@ -142,43 +101,19 @@ cat > tools_regression_tests/interface_1/manage_benefits_plan_tests.json << 'EOF
 }
 EOF
 
-# Create test file for ManagePayrollRecord
-cat > tools_regression_tests/interface_1/manage_payroll_record_tests.json << 'EOF'
+# Test 6: update_benefit_plan - Update status and enrollment window only
+cat > tools_regression_tests/interface_1/test_update_benefit_plan_2.json << 'EOF'
 {
-    "env": "hr_experts",
+    "env": "hr_admin_management",
     "interface_num": 1,
     "task": {
         "actions": [
             {
-                "name": "manage_payroll_record",
+                "name": "update_benefit_plan",
                 "arguments": {
-                    "action": "create",
-                    "payroll_data": {
-                        "employee_id": "1",
-                        "pay_period_start": "2025-10-01",
-                        "pay_period_end": "2025-10-15",
-                        "hourly_rate": 25.50,
-                        "hours_worked": 80.0,
-                        "payment_date": "2025-10-20",
-                        "status": "approved",
-                        "approved_by": "payroll_admin_001"
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_record",
-                "arguments": {
-                    "action": "update",
-                    "payroll_id": "1",
-                    "payroll_data": {
-                        "pay_period_start": "2025-10-16",
-                        "pay_period_end": "2025-10-31",
-                        "hours_worked": 85.5,
-                        "hourly_rate": 26.00,
-                        "payment_date": "2025-11-05",
-                        "status": "paid",
-                        "approved_by": "finance_officer_001"
-                    }
+                    "plan_id": "1",
+                    "status": "inactive",
+                    "enrollment_window": "closed"
                 }
             }
         ]
@@ -186,35 +121,21 @@ cat > tools_regression_tests/interface_1/manage_payroll_record_tests.json << 'EO
 }
 EOF
 
-# Create test file for ManagePayrollDeduction
-cat > tools_regression_tests/interface_1/manage_payroll_deduction_tests.json << 'EOF'
+# Test 7: create_payment - With all optional parameters
+cat > tools_regression_tests/interface_1/test_create_payment_1.json << 'EOF'
 {
-    "env": "hr_experts",
+    "env": "hr_admin_management",
     "interface_num": 1,
     "task": {
         "actions": [
             {
-                "name": "manage_payroll_deduction",
+                "name": "create_payment",
                 "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "1",
-                        "deduction_type": "tax",
-                        "amount": 125.75,
-                        "created_by": "payroll_admin_001"
-                    }
-                }
-            },
-            {
-                "name": "manage_payroll_deduction",
-                "arguments": {
-                    "action": "create",
-                    "deduction_data": {
-                        "payroll_id": "2",
-                        "deduction_type": "insurance",
-                        "amount": 89.50,
-                        "created_by": "hr_manager_002"
-                    }
+                    "employee_id": "1",
+                    "payment_method": "bank_transfer",
+                    "amount": 4143.13,
+                    "cycle_id": "20",
+                    "source_payslip_id": "1"
                 }
             }
         ]
@@ -222,42 +143,19 @@ cat > tools_regression_tests/interface_1/manage_payroll_deduction_tests.json << 
 }
 EOF
 
-# Create test file for ManageEmployeeBenefits
-cat > tools_regression_tests/interface_1/manage_employee_benefits_tests.json << 'EOF'
+# Test 8: create_payment - Only required parameters
+cat > tools_regression_tests/interface_1/test_create_payment_2.json << 'EOF'
 {
-    "env": "hr_experts",
+    "env": "hr_admin_management",
     "interface_num": 1,
     "task": {
         "actions": [
             {
-                "name": "manage_employee_benefits",
+                "name": "create_payment",
                 "arguments": {
-                    "action": "create",
-                    "benefits_data": {
-                        "employee_id": "1",
-                        "plan_id": "1",
-                        "enrollment_date": "2025-01-15",
-                        "coverage_level": "family",
-                        "status": "active",
-                        "beneficiary_name": "Jane Smith",
-                        "beneficiary_relationship": "spouse"
-                    }
-                }
-            },
-            {
-                "name": "manage_employee_benefits",
-                "arguments": {
-                    "action": "update",
-                    "enrollment_id": "1",
-                    "benefits_data": {
-                        "employee_id": "2",
-                        "plan_id": "2",
-                        "enrollment_date": "2025-02-01",
-                        "status": "terminated",
-                        "coverage_level": "employee_spouse",
-                        "beneficiary_name": "John Doe",
-                        "beneficiary_relationship": "domestic_partner"
-                    }
+                    "employee_id": "4",
+                    "payment_method": "check",
+                    "amount": 5000.0
                 }
             }
         ]
@@ -265,42 +163,18 @@ cat > tools_regression_tests/interface_1/manage_employee_benefits_tests.json << 
 }
 EOF
 
-# Create test file for ManageJobApplication
-cat > tools_regression_tests/interface_1/manage_job_application_tests.json << 'EOF'
+# Test 9: calculate_settlement - Using employee_id and email
+cat > tools_regression_tests/interface_1/test_calculate_settlement_1.json << 'EOF'
 {
-    "env": "hr_experts",
+    "env": "hr_admin_management",
     "interface_num": 1,
     "task": {
         "actions": [
             {
-                "name": "manage_job_application",
+                "name": "calculate_settlement",
                 "arguments": {
-                    "action": "create",
-                    "application_data": {
-                        "candidate_id": "1",
-                        "position_id": "1",
-                        "application_date": "2025-09-15",
-                        "recruiter_id": "1",
-                        "ai_screening_score": 87.5,
-                        "final_decision": "hire",
-                        "status": "submitted"
-                    }
-                }
-            },
-            {
-                "name": "manage_job_application",
-                "arguments": {
-                    "action": "update",
-                    "application_id": "1",
-                    "application_data": {
-                        "candidate_id": "2",
-                        "position_id": "2",
-                        "application_date": "2025-09-20",
-                        "recruiter_id": "2",
-                        "status": "interviewing",
-                        "ai_screening_score": 92.3,
-                        "final_decision": "hold"
-                    }
+                    "employee_id": "8",
+                    "email": "employee8@example.com"
                 }
             }
         ]
@@ -308,12 +182,103 @@ cat > tools_regression_tests/interface_1/manage_job_application_tests.json << 'E
 }
 EOF
 
-echo "All test files have been created successfully in tools_regression_tests/interface_1/"
-echo "Files created:"
-echo "- manage_performance_review_tests.json"
-echo "- manage_interview_tests.json"
-echo "- manage_benefits_plan_tests.json"
-echo "- manage_payroll_record_tests.json"
-echo "- manage_payroll_deduction_tests.json"
-echo "- manage_employee_benefits_tests.json"
-echo "- manage_job_application_tests.json"
+# Test 10: calculate_settlement - Using email only
+cat > tools_regression_tests/interface_1/test_calculate_settlement_2.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "calculate_settlement",
+                "arguments": {
+                    "email": "patrick.sanchez@example.com"
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 11: update_payslip - Update both status and net_pay_value
+cat > tools_regression_tests/interface_1/test_update_payslip_1.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "update_payslip",
+                "arguments": {
+                    "payslip_id": "1",
+                    "status": "updated",
+                    "net_pay_value": 4500.0
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 12: update_payslip - Update status only
+cat > tools_regression_tests/interface_1/test_update_payslip_2.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "update_payslip",
+                "arguments": {
+                    "payslip_id": "1",
+                    "status": "released"
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 13: update_payment - Update all optional parameters
+cat > tools_regression_tests/interface_1/test_update_payment_1.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "update_payment",
+                "arguments": {
+                    "payment_id": "1",
+                    "status": "completed",
+                    "payment_date": "2025-11-22",
+                    "amount": 4200.0
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 14: update_payment - Update status and payment_date only
+cat > tools_regression_tests/interface_1/test_update_payment_2.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 1,
+    "task": {
+        "actions": [
+            {
+                "name": "update_payment",
+                "arguments": {
+                    "payment_id": "1",
+                    "status": "failed",
+                    "payment_date": "2025-11-23"
+                }
+            }
+        ]
+    }
+}
+EOF
+
+echo "Test files created successfully in tools_regression_tests/interface_1/"
+echo "Total test files created: 14 (2 tests per function)"

@@ -1,0 +1,30 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 4,
+  "task": {
+    "actions": [
+      {
+        "name": "attain_user",
+        "arguments": {
+          "user_id": "1"
+        }
+      },
+      {
+        "name": "attain_user",
+        "arguments": {
+          "email": "susanrogers@example.org",
+          "status": "active"
+        }
+      },
+      {
+        "name": "attain_user",
+        "arguments": {
+          "user_id": "7",
+          "email": "arnoldmaria@example.net",
+          "display_name": "Nicole Ward",
+          "status": "active"
+        }
+      }
+    ]
+  }
+}

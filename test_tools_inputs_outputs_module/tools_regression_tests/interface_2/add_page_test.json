@@ -1,0 +1,36 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 2,
+  "task": {
+    "actions": [
+      {
+        "name": "add_page",
+        "arguments": {
+          "title": "Database Migration Guide",
+          "site_id": "1",
+          "created_by": "1"
+        }
+      },
+      {
+        "name": "add_page",
+        "arguments": {
+          "title": "Performance Optimization",
+          "site_id": "4",
+          "created_by": "5",
+          "parent_page_id": "1"
+        }
+      },
+      {
+        "name": "add_page",
+        "arguments": {
+          "title": "Security Best Practices",
+          "site_id": "2",
+          "created_by": "10",
+          "parent_page_id": "2",
+          "body_storage": "<h2>Security Guidelines</h2>\n<p>Follow these security best practices:</p>\n<ul><li>Always use HTTPS for data transmission</li><li>Implement OAuth 2.0 for authentication</li><li>Regularly update dependencies and patches</li><li>Conduct security audits quarterly</li><li>Use environment variables for sensitive data</li></ul>\n<p>For more details, consult the security team.</p>",
+          "status": "draft"
+        }
+      }
+    ]
+  }
+}

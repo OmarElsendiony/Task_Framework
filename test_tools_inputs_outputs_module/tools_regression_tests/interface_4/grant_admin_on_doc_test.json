@@ -1,0 +1,29 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 4,
+  "task": {
+    "actions": [
+      {
+        "name": "grant_admin_on_doc",
+        "arguments": {
+          "user_id": "1",
+          "doc_id": "1"
+        }
+      },
+      {
+        "name": "grant_admin_on_doc",
+        "arguments": {
+          "user_id": "5",
+          "doc_id": "2"
+        }
+      },
+      {
+        "name": "grant_admin_on_doc",
+        "arguments": {
+          "user_id": "7",
+          "doc_id": "5"
+        }
+      }
+    ]
+  }
+}

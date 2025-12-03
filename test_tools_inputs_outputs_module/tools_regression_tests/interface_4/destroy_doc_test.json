@@ -1,0 +1,26 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 4,
+  "task": {
+    "actions": [
+      {
+        "name": "destroy_doc",
+        "arguments": {
+          "doc_id": "6"
+        }
+      },
+      {
+        "name": "destroy_doc",
+        "arguments": {
+          "doc_id": "7"
+        }
+      },
+      {
+        "name": "destroy_doc",
+        "arguments": {
+          "doc_id": "8"
+        }
+      }
+    ]
+  }
+}

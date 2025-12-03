@@ -1,0 +1,76 @@
+{
+  "task_file": "tools_regression_tests/interface_4/attain_user_test.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "user_id": "1"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "users": [
+            {
+              "user_id": "1",
+              "email": "johnsonjoshua@example.org",
+              "display_name": "Donald Garcia",
+              "status": "active",
+              "created_at": "2023-06-13T03:01:00",
+              "updated_at": "2023-08-22T10:15:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "email": "susanrogers@example.org",
+        "status": "active"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "users": [
+            {
+              "user_id": "5",
+              "email": "susanrogers@example.org",
+              "display_name": "Noah Howard",
+              "status": "active",
+              "created_at": "2023-06-16T22:34:00",
+              "updated_at": "2023-10-02T06:02:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "user_id": "7",
+        "email": "arnoldmaria@example.net",
+        "display_name": "Nicole Ward",
+        "status": "active"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "users": [
+            {
+              "user_id": "7",
+              "email": "arnoldmaria@example.net",
+              "display_name": "Nicole Ward",
+              "status": "active",
+              "created_at": "2023-04-19T10:17:00",
+              "updated_at": "2023-05-28T17:05:00"
+            }
+          ]
+        },
+        200
+      ]
+    }
+  ]
+}

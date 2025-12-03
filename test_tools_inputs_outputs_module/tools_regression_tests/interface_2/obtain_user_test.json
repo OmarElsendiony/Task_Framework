@@ -1,0 +1,28 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 2,
+  "task": {
+    "actions": [
+      {
+        "name": "obtain_user",
+        "arguments": {
+          "user_id": "1"
+        }
+      },
+      {
+        "name": "obtain_user",
+        "arguments": {
+          "email": "susanrogers@example.org"
+        }
+      },
+      {
+        "name": "obtain_user",
+        "arguments": {
+          "user_id": "7",
+          "email": "arnoldmaria@example.net",
+          "status": "active"
+        }
+      }
+    ]
+  }
+}

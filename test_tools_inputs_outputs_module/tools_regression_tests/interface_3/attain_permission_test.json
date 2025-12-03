@@ -1,0 +1,39 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 3,
+  "task": {
+    "actions": [
+      {
+        "name": "attain_permission",
+        "arguments": {
+          "filters": {
+            "permission_id": "1"
+          }
+        }
+      },
+      {
+        "name": "attain_permission",
+        "arguments": {
+          "filters": {
+            "content_id": "1",
+            "content_type": "space",
+            "operation": "admin"
+          }
+        }
+      },
+      {
+        "name": "attain_permission",
+        "arguments": {
+          "filters": {
+            "permission_id": "2",
+            "content_id": "1",
+            "content_type": "space",
+            "user_id": "5",
+            "operation": "delete",
+            "granted_by": "26"
+          }
+        }
+      }
+    ]
+  }
+}

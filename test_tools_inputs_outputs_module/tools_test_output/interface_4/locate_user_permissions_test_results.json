@@ -1,0 +1,84 @@
+{
+  "task_file": "tools_regression_tests/interface_4/locate_user_permissions_test.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "filter": {
+          "email": "williamdavis@example.org",
+          "doc_id": "47"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "permissions": [
+            {
+              "permission_id": "140",
+              "content_id": "5",
+              "content_type": "page",
+              "user_id": "16",
+              "operation": "admin",
+              "granted_by": "18",
+              "granted_at": "2023-12-17T03:05:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "filter": {
+          "email": "hoffmanjennifer@example.net",
+          "doc_id": "4"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "permissions": [
+            {
+              "permission_id": "129",
+              "content_id": "4",
+              "content_type": "page",
+              "user_id": "3",
+              "operation": "admin",
+              "granted_by": "30",
+              "granted_at": "2023-06-03T01:53:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "filter": {
+          "email": "smithchristine@example.net",
+          "doc_id": "9"
+        }
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "permissions": [
+            {
+              "permission_id": "56",
+              "content_id": "13",
+              "content_type": "space",
+              "user_id": "45",
+              "operation": "restrict_other_users",
+              "granted_by": "32",
+              "granted_at": "2023-06-22T09:23:00"
+            }
+          ]
+        },
+        200
+      ]
+    }
+  ]
+}

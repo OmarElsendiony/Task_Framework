@@ -1,0 +1,79 @@
+{
+  "task_file": "tools_regression_tests/interface_2/add_page_test.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "title": "Database Migration Guide",
+        "site_id": "1",
+        "created_by": "1"
+      },
+      "output": [
+        {
+          "success": true,
+          "page_id": "101",
+          "title": "Database Migration Guide",
+          "site_id": "1",
+          "parent_page_id": null,
+          "body_storage": null,
+          "status": "current",
+          "created_by": "1",
+          "created_at": "2025-10-01T00:00:00",
+          "updated_by": "1",
+          "updated_at": "2025-10-01T00:00:00"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "title": "Performance Optimization",
+        "site_id": "4",
+        "created_by": "5",
+        "parent_page_id": "1"
+      },
+      "output": [
+        {
+          "success": true,
+          "page_id": "102",
+          "title": "Performance Optimization",
+          "site_id": "4",
+          "parent_page_id": "1",
+          "body_storage": null,
+          "status": "current",
+          "created_by": "5",
+          "created_at": "2025-10-01T00:00:00",
+          "updated_by": "5",
+          "updated_at": "2025-10-01T00:00:00"
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "title": "Security Best Practices",
+        "site_id": "2",
+        "created_by": "10",
+        "parent_page_id": "2",
+        "body_storage": "<h2>Security Guidelines</h2>\n<p>Follow these security best practices:</p>\n<ul><li>Always use HTTPS for data transmission</li><li>Implement OAuth 2.0 for authentication</li><li>Regularly update dependencies and patches</li><li>Conduct security audits quarterly</li><li>Use environment variables for sensitive data</li></ul>\n<p>For more details, consult the security team.</p>",
+        "status": "draft"
+      },
+      "output": [
+        {
+          "success": true,
+          "page_id": "103",
+          "title": "Security Best Practices",
+          "site_id": "2",
+          "parent_page_id": "2",
+          "body_storage": "<h2>Security Guidelines</h2>\n<p>Follow these security best practices:</p>\n<ul><li>Always use HTTPS for data transmission</li><li>Implement OAuth 2.0 for authentication</li><li>Regularly update dependencies and patches</li><li>Conduct security audits quarterly</li><li>Use environment variables for sensitive data</li></ul>\n<p>For more details, consult the security team.</p>",
+          "status": "draft",
+          "created_by": "10",
+          "created_at": "2025-10-01T00:00:00",
+          "updated_by": "10",
+          "updated_at": "2025-10-01T00:00:00"
+        },
+        200
+      ]
+    }
+  ]
+}

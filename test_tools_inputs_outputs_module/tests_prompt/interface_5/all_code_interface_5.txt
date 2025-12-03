@@ -1,0 +1,1369 @@
+Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide three tests for each function within the same file with the most number of parameters as possible (if applicable). However, you have to follow the format that I provide to you below.
+
+# Format:
+{
+    "env": "wiki_pages",
+    "interface_num": 5,
+    "task": {
+        "actions": [
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "email": "sarahcampos144@hotmail.com"
+                    }
+                }
+            },
+            {
+                "name": "discover_user_entities",
+                "arguments": {
+                    "entity_type": "users",
+                    "filters": {
+                        "email": "sarahcampos144@hotmail.com"
+                    }
+                }
+            }
+        ]
+    }
+}
+
+where the name of action is the function name and the arguments are the parameters of the function. You have to provide multiple actions for a single file in a single test if applicable. 
+
+# Functions:
+ALL_TOOLS_INTERFACE_5 = []
+
+
+# -----------------
+
+import json
+from typing import Any, Dict
+from tau_bench.envs.tool import Tool
+
+class CreatePageVersion(Tool):
+    @staticmethod
+    def invoke(
+        data: Dict[str, Any],
+        page_id: str,
+    ) -> str:
+        """
+        Create a new version snapshot of a page.
+        Maps to Confluence page_versions table.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+        
+        pages = data.get("pages", {})
+        page_versions = data.get("page_versions", {})
+        
+        # Verify page exists
+        if page_id not in pages:
+            return json.dumps({
+                "success": False,
+                "error": f"Page with ID '{page_id}' not found"
+            })
+        
+        page = pages[page_id]
+        
+        # Calculate next version number
+        existing_versions = [
+            v for v in page_versions.values() 
+            if v.get("page_id") == page_id
+        ]
+        version_number = len(existing_versions) + 1
+        
+        # Generate new version ID
+        new_version_id = generate_id(page_versions)
+        
+        timestamp = "2025-10-01T00:00:00"
+        
+        # Create version snapshot
+        new_version = {
+            "page_version_id": new_version_id,
+            "page_id": page_id,
+            "version_number": version_number,
+            "title": page.get("title"),
+            "body_storage": page.get("body_storage"),
+            "created_at": timestamp
+        }
+        
+        page_versions[new_version_id] = new_version
+        
+        return json.dumps({
+            "success": True,
+            "page_version_id": new_version_id,
+            "version": new_version
+        })
+
+    @staticmethod
+    def get_info() -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": "create_page_version",
+                "description": "Create a new version snapshot of a page. This captures the current state of the page including title and content. Version numbers are automatically incremented.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "page_id": {
+                            "type": "string",
+                            "description": "Unique identifier of the page to version"
+                        }
+                    },
+                    "required": ["page_id"]
+                }
+            }
+        }
+
+
+# -----------------
+
+import json
+from typing import Any, Dict, Optional
+from tau_bench.envs.tool import Tool
+
+class UpdatePage(Tool):
+    @staticmethod
+    def invoke(
+        data: Dict[str, Any],
+        page_id: str,
+        title: Optional[str] = None,
+        doc_id: Optional[str] = None,
+        parent_page_id: Optional[str] = None,
+        body_storage: Optional[str] = None,
+        status: Optional[str] = None,
+        updated_by: Optional[str] = None,
+    ) -> str:
+        """
+        Update an existing page.
+        Maps Coda page updates to Confluence pages.
+        """
+        pages = data.get("pages", {})
+        spaces = data.get("spaces", {})
+        users = data.get("users", {})
+        
+        # Verify page exists
+        if page_id not in pages:
+            return json.dumps({
+                "success": False,
+                "error": f"Page with ID '{page_id}' not found"
+            })
+        
+        page = pages[page_id]
+        
+        # Verify doc exists if changing
+        if doc_id and doc_id not in spaces:
+            return json.dumps({
+                "success": False,
+                "error": f"Doc with ID '{doc_id}' not found"
+            })
+        
+        # Verify parent page exists if changing
+        if parent_page_id and parent_page_id not in pages:
+            return json.dumps({
+                "success": False,
+                "error": f"Parent page with ID '{parent_page_id}' not found"
+            })
+        
+        # Verify user exists if specified
+        if updated_by and updated_by not in users:
+            return json.dumps({
+                "success": False,
+                "error": f"User with ID '{updated_by}' not found"
+            })
+        
+        timestamp = "2025-10-01T00:00:00"
+        
+        # Update page fields
+        if title:
+            page["title"] = title
+        if doc_id:
+            page["space_id"] = doc_id
+        if parent_page_id is not None:  # Allow setting to None
+            page["parent_page_id"] = parent_page_id
+        if body_storage is not None:
+            page["body_storage"] = body_storage
+        if status:
+            page["status"] = status
+        if updated_by:
+            page["updated_by"] = updated_by
+        
+        page["updated_at"] = timestamp
+        
+        return json.dumps({
+            "success": True,
+            "page_id": page_id,
+            "page": page
+        })
+
+    @staticmethod
+    def get_info() -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": "update_page",
+                "description": "Update an existing page. Can modify title, doc (move to different workspace), parent page, content, status (current, draft, locked, archived, deleted), and updated_by user.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "page_id": {
+                            "type": "string",
+                            "description": "Unique identifier of the page to update"
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "New title for the page (optional)"
+                        },
+                        "doc_id": {
+                            "type": "string",
+                            "description": "Move page to a different doc (optional)"
+                        },
+                        "parent_page_id": {
+                            "type": "string",
+                            "description": "Change parent page (optional)"
+                        },
+                        "body_storage": {
+                            "type": "string",
+                            "description": "Update page content (optional)"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "Update status: 'current', 'draft', 'locked', 'archived', 'deleted' (optional)",
+                            "enum": ["current", "draft", "locked", "archived", "deleted"]
+                        },
+                        "updated_by": {
+                            "type": "string",
+                            "description": "User ID making the update (optional)"
+                        }
+                    },
+                    "required": ["page_id"]
+                }
+            }
+        }
+
+
+# -----------------
+
+import json
+from typing import Any, Dict
+from tau_bench.envs.tool import Tool
+
+class ListDocPermissions(Tool):
+    @staticmethod
+    def invoke(
+        data: Dict[str, Any],
+        doc_id: str,
+        user_id: str,
+    ) -> str:
+        """
+        List permissions for a user on a doc.
+        Maps Coda doc permissions to Confluence space permissions.
+        """
+        spaces = data.get("spaces", {})
+        permissions = data.get("permissions", {})
+        users = data.get("users", {})
+        
+        # Verify doc exists
+        if doc_id not in spaces:
+            return json.dumps({
+                "success": False,
+                "error": f"Doc with ID '{doc_id}' not found"
+            })
+        
+        # Verify user exists
+        if user_id not in users:
+            return json.dumps({
+                "success": False,
+                "error": f"User with ID '{user_id}' not found"
+            })
+        
+        # Find all permissions for this user on this doc (space)
+        user_permissions = []
+        for perm_id, perm_data in permissions.items():
+            if (perm_data.get("content_id") == doc_id and 
+                perm_data.get("content_type") == "space" and
+                perm_data.get("user_id") == user_id):
+                user_permissions.append({
+                    "permission_id": perm_id,
+                    "operation": perm_data.get("operation"),
+                    "granted_by": perm_data.get("granted_by"),
+                    "granted_at": perm_data.get("granted_at")
+                })
+        
+        # Check if user has admin permission (which includes all others)
+        has_admin = any(p["operation"] == "admin" for p in user_permissions)
+        
+        return json.dumps({
+            "success": True,
+            "doc_id": doc_id,
+            "user_id": user_id,
+            "permissions": user_permissions,
+            "has_admin": has_admin,
+            "count": len(user_permissions)
+        })
+
+    @staticmethod
+    def get_info() -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": "list_doc_permissions",
+                "description": "List all permissions for a specific user on a doc. Returns the operations (view, edit, delete, create, admin, restrict_other_users) that the user is authorized to perform. Admin permission encompasses all other permissions.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "doc_id": {
+                            "type": "string",
+                            "description": "Unique identifier of the doc"
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Unique identifier of the user"
+                        }
+                    },
+                    "required": ["doc_id", "user_id"]
+                }
+            }
+        }
+
+
+# -----------------
+
+import json
+from typing import Any, Dict, Optional
+from tau_bench.envs.tool import Tool
+
+class GetUser(Tool):
+    @staticmethod
+    def invoke(
+        data: Dict[str, Any],
+        user_id: Optional[str] = None,
+        email: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> str:
+        """
+        Retrieve user information from the system.
+        Maps Coda user queries to Confluence users table.
+        """
+        users = data.get("users", {})
+        
+        # Build filter criteria
+        filters = {}
+        if user_id:
+            filters["user_id"] = user_id
+        if email:
+            filters["email"] = email
+        if status:
+            filters["status"] = status
+        
+        # If user_id is specified, do direct lookup
+        if user_id:
+            if user_id not in users:
+                return json.dumps({
+                    "success": False,
+                    "error": f"User with ID '{user_id}' not found"
+                })
+            user = users[user_id]
+            
+            # Check additional filters
+            if email and user.get("email") != email:
+                return json.dumps({
+                    "success": False,
+                    "error": "User found but email does not match"
+                })
+            if status and user.get("status") != status:
+                return json.dumps({
+                    "success": False,
+                    "error": "User found but status does not match"
+                })
+            
+            return json.dumps({
+                "success": True,
+                "user": {**user, "user_id": user_id}
+            })
+        
+        # Search by filters
+        results = []
+        for uid, user_data in users.items():
+            match = True
+            for key, value in filters.items():
+                if user_data.get(key) != value:
+                    match = False
+                    break
+            if match:
+                results.append({**user_data, "user_id": uid})
+        
+        if not results:
+            return json.dumps({
+                "success": False,
+                "error": "No users found matching the criteria"
+            })
+        
+        return json.dumps({
+            "success": True,
+            "users": results,
+            "count": len(results)
+        })
+
+    @staticmethod
+    def get_info() -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": "get_user",
+                "description": "Retrieve user information from the Coda workspace. Can search by user_id, email, or status (active, inactive, deactivated). Used to verify user existence and status before performing operations.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "type": "string",
+                            "description": "Unique identifier of the user"
+                        },
+                        "email": {
+                            "type": "string",
+                            "description": "Email address of the user"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "User status: 'active', 'inactive', 'deactivated'",
+                            "enum": ["active", "inactive", "deactivated"]
+                        }
+                    },
+                    "required": []
+                }
+            }
+        }
+
+
+# -----------------
+
+import json
+from typing import Any, Dict, Optional
+from tau_bench.envs.tool import Tool
+
+class GetDoc(Tool):
+    @staticmethod
+    def invoke(
+        data: Dict[str, Any],
+        doc_id: Optional[str] = None,
+        doc_key: Optional[str] = None,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        type: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> str:
+        """
+        Retrieve doc (space) information.
+        Maps Coda docs to Confluence spaces.
+        """
+        spaces = data.get("spaces", {})
+        
+        # If doc_id is specified, do direct lookup
+        if doc_id:
+            if doc_id not in spaces:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Doc with ID '{doc_id}' not found"
+                })
+            space = spaces[doc_id]
+            return json.dumps({
+                "success": True,
+                "doc": {
+                    "doc_id": doc_id,
+                    "doc_key": space.get("space_key"),
+                    "name": space.get("name"),
+                    "description": space.get("description"),
+                    "type": space.get("type"),
+                    "status": space.get("status"),
+                    "created_by": space.get("created_by"),
+                    "created_at": space.get("created_at"),
+                    "updated_at": space.get("updated_at")
+                }
+            })
+        
+        # Search by filters
+        filters = {}
+        if doc_key:
+            filters["space_key"] = doc_key
+        if name:
+            filters["name"] = name
+        if description:
+            filters["description"] = description
+        if type:
+            filters["type"] = type
+        if status:
+            filters["status"] = status
+        
+        results = []
+        for space_id, space_data in spaces.items():
+            match = True
+            for key, value in filters.items():
+                if space_data.get(key) != value:
+                    match = False
+                    break
+            if match:
+                results.append({
+                    "doc_id": space_id,
+                    "doc_key": space_data.get("space_key"),
+                    "name": space_data.get("name"),
+                    "description": space_data.get("description"),
+                    "type": space_data.get("type"),
+                    "status": space_data.get("status"),
+                    "created_by": space_data.get("created_by"),
+                    "created_at": space_data.get("created_at"),
+                    "updated_at": space_data.get("updated_at")
+                })
+        
+        if not results:
+            return json.dumps({
+                "success": False,
+                "error": "No docs found matching the criteria"
+            })
+        
+        return json.dumps({
+            "success": True,
+            "docs": results,
+            "count": len(results)
+        })
+
+    @staticmethod
+    def get_info() -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": "get_doc",
+                "description": "Retrieve doc (workspace document) information. Can search by doc_id, doc_key, name, description, type (global, personal), or status (current, archived). Docs are the top-level containers in Coda that hold pages and other content.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "doc_id": {
+                            "type": "string",
+                            "description": "Unique identifier of the doc"
+                        },
+                        "doc_key": {
+                            "type": "string",
+                            "description": "Unique key for the doc"
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Name of the doc"
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Description of the doc"
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Doc type: 'global', 'personal'",
+                            "enum": ["global", "personal"]
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "Doc status: 'current', 'archived'",
+                            "enum": ["current", "archived"]
+                        }
+                    },
+                    "required": []
+                }
+            }
+        }
+
+
+# -----------------
+
+import json
+from typing import Any, Dict, Optional
+from tau_bench.envs.tool import Tool
+
+class CreatePage(Tool):
+    @staticmethod
+    def invoke(
+        data: Dict[str, Any],
+        title: str,
+        doc_id: str,
+        created_by: str,
+        parent_page_id: Optional[str] = None,
+        body_storage: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> str:
+        """
+        Create a new page in a doc.
+        Maps Coda pages to Confluence pages.
+        """
+        def generate_id(table: Dict[str, Any]) -> str:
+            if not table:
+                return "1"
+            return str(max(int(k) for k in table.keys()) + 1)
+        
+        pages = data.get("pages", {})
+        spaces = data.get("spaces", {})
+        users = data.get("users", {})
+        
+        # Verify doc exists
+        if doc_id not in spaces:
+            return json.dumps({
+                "success": False,
+                "error": f"Doc with ID '{doc_id}' not found"
+            })
+        
+        # Verify user exists
+        if created_by not in users:
+            return json.dumps({
+                "success": False,
+                "error": f"User with ID '{created_by}' not found"
+            })
+        
+        # Verify parent page exists if specified
+        if parent_page_id and parent_page_id not in pages:
+            return json.dumps({
+                "success": False,
+                "error": f"Parent page with ID '{parent_page_id}' not found"
+            })
+        
+        # Generate new page ID
+        new_page_id = generate_id(pages)
+        
+        timestamp = "2025-10-01T00:00:00"
+        
+        # Create new page
+        new_page = {
+            "page_id": new_page_id,
+            "title": title,
+            "space_id": doc_id,
+            "parent_page_id": parent_page_id,
+            "body_storage": body_storage,
+            "status": status if status else "current",
+            "created_by": created_by,
+            "created_at": timestamp,
+            "updated_by": created_by,
+            "updated_at": timestamp
+        }
+        
+        pages[new_page_id] = new_page
+        
+        return json.dumps({
+            "success": True,
+            "page_id": new_page_id,
+            "page": new_page
+        })
+
+    @staticmethod
+    def get_info() -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": "create_page",
+                "description": "Create a new page in a doc. Pages can be top-level (within a doc) or sub-pages (children of other pages). Status options: 'current', 'draft', 'locked', 'archived', 'deleted'.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "title": {
+                            "type": "string",
+                            "description": "Title of the page"
+                        },
+                        "doc_id": {
+                            "type": "string",
+                            "description": "ID of the doc (workspace) containing this page"
+                        },
+                        "created_by": {
+                            "type": "string",
+                            "description": "User ID of the page creator"
+                        },
+                        "parent_page_id": {
+                            "type": "string",
+                            "description": "ID of the parent page if this is a sub-page (optional)"
+                        },
+                        "body_storage": {
+                            "type": "string",
+                            "description": "Page content in storage format (optional)"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "Page status: 'current', 'draft', 'locked', 'archived', 'deleted' (optional, defaults to 'current')",
+                            "enum": ["current", "draft", "locked", "archived", "deleted"]
+                        }
+                    },
+                    "required": ["title", "doc_id", "created_by"]
+                }
+            }
+        }
+
+
+# -----------------
+
+import json
+from typing import Any, Dict, Optional
+from tau_bench.envs.tool import Tool
+
+class GetPage(Tool):
+    @staticmethod
+    def invoke(
+        data: Dict[str, Any],
+        page_id: Optional[str] = None,
+        title: Optional[str] = None,
+        doc_id: Optional[str] = None,
+        parent_page_id: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> str:
+        """
+        Retrieve page information.
+        Maps Coda pages to Confluence pages.
+        """
+        pages = data.get("pages", {})
+        
+        # If page_id is specified, do direct lookup
+        if page_id:
+            if page_id not in pages:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Page with ID '{page_id}' not found"
+                })
+            page = pages[page_id]
+            return json.dumps({
+                "success": True,
+                "page": {**page, "page_id": page_id}
+            })
+        
+        # Search by filters
+        filters = {}
+        if title:
+            filters["title"] = title
+        if doc_id:
+            filters["space_id"] = doc_id
+        if parent_page_id:
+            filters["parent_page_id"] = parent_page_id
+        if status:
+            filters["status"] = status
+        
+        results = []
+        for pid, page_data in pages.items():
+            match = True
+            for key, value in filters.items():
+                if page_data.get(key) != value:
+                    match = False
+                    break
+            if match:
+                results.append({**page_data, "page_id": pid})
+        
+        if not results:
+            return json.dumps({
+                "success": False,
+                "error": "No pages found matching the criteria"
+            })
+        
+        return json.dumps({
+            "success": True,
+            "pages": results,
+            "count": len(results)
+        })
+
+    @staticmethod
+    def get_info() -> Dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": "get_page",
+                "description": "Retrieve page information. Can search by page_id, title, doc_id, parent_page_id, or status (current, draft, locked, archived, deleted). Returns page details including content, parent relationships, and metadata.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "page_id": {
+                            "type": "string",
+                            "description": "Unique identifier of the page"
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "Title of the page"
+                        },
+                        "doc_id": {
+                            "type": "string",
+                            "description": "ID of the doc containing the page"
+                        },
+                        "parent_page_id": {
+                            "type": "string",
+                            "description": "ID of the parent page (for sub-pages)"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "Page status: 'current', 'draft', 'locked', 'archived', 'deleted'",
+                            "enum": ["current", "draft", "locked", "archived", "deleted"]
+                        }
+                    },
+                    "required": []
+                }
+            }
+        }
+
+
+# Policy:
+Coda Technical Policy
+
+INTRODUCTION
+This policy defines the governance standards, responsibilities, and operational guidelines for managing content within the Coda platform, focusing on Docs, Pages, Whiteboards, Tables, and Pack Cards. It provides a unified framework for how information is created, structured, maintained, and connected across the workspace to ensure consistency, clarity, and reliability.
+
+General Operating Principles
+You must not provide any information, knowledge, procedures, subjective recommendations, or comments that are not supplied by the user or available through tools.
+You must deny user requests that violate this policy.
+All Standard Operating Procedures (SOPs) are designed for single-turn execution. Each procedure is self-contained and must be completed in one interaction. Each SOP provides clear steps for proceeding when conditions are met and explicit halt instructions with error reporting when conditions are not met.
+
+PERMISSION STRUCTURE
+Admin permissions encompass all other permissions. Users with "admin" permission level automatically have all permissions (create, edit, view, delete, restrict_other_users) for the given entity.
+All permissions are at Doc level, therefore all the entities inherit the permissions of the doc they are part of.
+Only direct permissions of the Doc can be modified.
+
+CRITICAL HALT CONDITIONS
+Procedures must stop and transfer to human using handoff_to_human when:
+User lacks permissions
+Credentials invalid
+Lookup fails (e.g., page not found)
+External API failure
+Any unexpected processing error
+
+STANDARD OPERATING PROCEDURES (SOPs)
+Authorization
+Before performing any SOP, Verify the acting user exists and is “active” using find_user.
+
+1. Create Page
+Retrieve the user details and verify the user exists and with status “active” using find_user
+Check if the page is going to be a sub-page (child of a page). If yes, then use locate_page to fetch the parent page details, else use obtain_doc to fetch details of the doc that the page will fall under directly (not as a sub-page of a page).
+Validate the “create” permission for the page in doc by fetching privileges from the document parent using list_doc_permissions.
+Create page using make_page
+Create a new version using make_page_version.
+
+2. Update Page
+Retrieve the user details and verify the user exists and with status “active” using find_user
+Retrieve page using locate_page and ensure user has "edit" permission for the doc using list_doc_permissions 
+Retrieve parent doc using obtain_doc
+If moving the page to another doc:
+Retrieve the new doc using obtain_doc.
+Ensure user has "edit" permission for the new doc using list_doc_permissions 
+Call locate_page with the current doc’s ID retrieved from step 3 to retrieve all pages that belong to that doc.
+From that list of pages, find all pages whose parent is the page you’re moving. For each of those pages, repeat the same check: find pages that list them as a parent. Keep doing this until you no longer find any more children.
+For every page in that collection, update it to belong to the new doc using edit_page
+Update the current page (page the user is modifying) using edit_page
+If changing parent:
+If parent is a page, retrieve new parents using locate_page.  
+Else If parent is a doc, retrieve doc details using obtain_doc
+If updating title:
+Retrieve the page details using locate_page and then change the title
+Save update using edit_page
+Create the new version of the page using make_page_version
+
+
+3. Remove Page
+Retrieve the user details and verify the user exists and with status “active” using find_user
+Retrieve the page using locate_page and confirm it is not locked.
+Validate "delete" permission for the doc using  list_doc_permissions
+Get all the pages that have the page to be removed as it’s parent page using locate_page
+If there are pages returned in step 4:
+Update parent for the child pages :
+ If parent is doc, get doc details using  obtain_doc
+ else if parent is page get page details using locate_page
+Reassign parent for all child pages using edit_page
+Delete page using eliminate_page.
+If Permanent delete (hard delete):
+Retrieve all page versions using retrieve_versions
+Delete all version using erase_page_version
+Versions should be updated for all child pages using make_page_version.
+
+4. Modify Doc Permissions
+Retrieve the user details and verify the user exists and with status “active” using find_user
+Retrieve the details of the Doc you want to change user permissions for using obtain_doc
+Retrieve “current user” (user changing the permissions) details using find_user  
+Retrieve target user details (user that his/her permissions on the doc is being changed) using find_user
+Validate admin/restrict permissions for current user 
+Retrieve existing permissions using list_doc_permissions
+Update doc permissions for user by:
+Removing old permissions using reset_doc_permission
+Adding new permissions by insert_doc_permission
+
+5. Create Whiteboard
+Retrieve the user details and verify the user exists and with status “active” using find_user
+Retrieve the hosting page details using locate_page 
+Validate that the hosting page status is not “locked”
+Validate "create" permission for the doc using list_doc_permissions
+Create a whiteboard using produce_whiteboard_view.
+Create new version using make_page_version
+
+6. Update Whiteboard
+Retrieve the user details and verify the user exists and with status “active” using find_user
+Retrieve whiteboard details using list_whiteboard_views
+Retrieve whiteboard hosting page details using  locate_page
+Validate if page parent or whiteboard is not locked 
+Validate "edit" permission for doc using list_doc_permissions
+Update the whiteboard using adjust_whiteboard_view.
+Create new version using make_page_version
+
+7. Remove Whiteboard
+Retrieve the user details and verify the user exists and with status “active” using find_user
+Retrieve whiteboard details using list_whiteboard_views
+Retrieve whiteboard hosting page details using locate_page
+Validate delete permission for doc using list_doc_permissions 
+Delete the whiteboard using cancel_whiteboard_view.
+Create new version using make_page_version
+
+8. Create Pack Card
+Retrieve the user details and verify the user exists and with status “active” using find_user
+Retrieve hosting page details using locate_page
+Validate create permission for doc using list_doc_permissions
+Retrieve pack card reference entity type using fetch_entity
+If entity is page retrieve page details using locate_page.
+If the entity is external, skip retrieval.
+Otherwise:
+retrieve the entity using fetch_entity.
+Then retrieve the hosting doc/page of the entity using obtain_doc or locate_page.
+Validate "create" permission for doc using list_doc_permissions.
+Create pack card  using add_pack_card
+Create new page version using make_page_version
+
+9. Remove Pack Card
+Retrieve the user details and verify the user exists and with status “active” using find_user
+Retrieve pack card using fetch_entity
+Retrieve hosting page details using locate_page if entity is is a page
+Validate "delete" permission using list_doc_permissions 
+Delete pack card using terminate_pack_card
+Create new version using make_page_version
+
+10. Update Pack Card
+Retrieve the user details and verify the user exists and with status “active” using find_user.
+Retrieve the pack card using fetch_entity
+Retrieve hosting page and confirm that the page exists using locate_page
+Validate “edit” permissions using list_doc_permissions 
+Update the pack card using edit_pack_card
+Create a new page version using make_page_version
+
+11. Create Table
+Retrieve the user details and verify the user exists and with status “active” using find_user.
+Retrieve hosting page and confirm that the page exists using locate_page
+Validate “create”  permission from list_doc_permissions
+Create the table using generate_table
+
+
+12. Remove Table
+Retrieve the user details and verify the user exists and with status “active” using find_user.
+Retrieve hosting page and confirm that the page exists using locate_page
+Validate “delete” permission using list_doc_permissions 
+Delete the table  using destroy_table.
+
+
+
+13. Update Table
+Retrieve the user details and verify the user exists and with status “active” using find_user.
+Retrieve hosting page and confirm that the page exists using locate_page
+Validate “edit” permission using list_doc_permissions 
+Update the table using revise_table.
+	
+
+14. Add Label or Attachment
+Retrieve the hosting page and confirm that the page exists using locate_page.
+Retrieve the user details and verify the user exists and with “active” status using find_user
+Verify the user has “create” permission on the page using list_doc_permissions .
+If authorized:
+To add an attachment, upload the file using add_attachment.
+To add a label, assign the label to the page using establish_label.
+
+15. Remove Label or Attachment
+Retrieve the hosting page and confirm that the page exists using locate_page.
+Retrieve the user details and verify the user exists and with “active” status using find_user
+Verify the user has “delete” permission on the page using list_doc_permissions .
+Retrieve the label or attachment details using fetch_entity.
+If the item exists:
+To remove an attachment, delete it using erase_attachment.
+To remove a label, detach it from the page using destroy_label.
+
+16. Update Label or Attachment
+Retrieve the hosting page and confirm that the page exists using locate_page.
+Retrieve the user details and verify the user exists and with “active” status using find_user
+Verify the user has “edit” permission on the page using list_doc_permissions .
+Retrieve the label or attachment details using fetch_entity.
+If the item exists:
+To update an attachment, apply the changes using edit_attachment.
+To update a label, apply the changes using revise_label.
+
+
+
+# Database Schema:
+// DBML Schema for Confluence Content Management System
+// Based on actual Confluence database table structure
+
+// ============================================================================
+// CORE CONTENT TYPES
+// ============================================================================
+
+Table pages {
+  page_id varchar(50) [primary key]
+  // page_number varchar(50) [not null, unique] // e.g., PAGE0000001
+  title varchar(500) [not null]
+  space_id varchar(50) [not null]
+  parent_page_id varchar(50) // nullable for root pages
+  body_storage text // 
+  // body_view text // rendered HTML
+  status enum('current','draft','locked', 'archived','deleted') [not null, default: 'current']
+  // version_number int [not null, default: 1]
+  created_by varchar(50) [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_by varchar(50) [not null]
+  updated_at timestamp [not null, default: `NOW()`]
+
+  indexes {
+    parent_page_id
+    space_id
+    // folder_id
+    (space_id, status)
+    // page_number [unique]
+  }
+}
+
+Table databases {
+  database_id varchar(50) [primary key]
+  title varchar(500) [not null]
+  host_space_id varchar(50)      // For space-level databases
+  host_page_id varchar(50)       // For page-level databases
+  // Either host_space_id OR host_page_id must be set (mutually exclusive)
+  description text
+  status enum('current','archived','deleted') [not null, default: 'current']
+  created_by varchar(50) [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_by varchar(50) [not null]
+  updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    host_space_id
+    host_page_id
+  }
+}
+
+Table whiteboards {
+  whiteboard_id varchar(50) [primary key]
+  title varchar(500) [not null]
+  host_space_id varchar(50)      // For space-level whiteboards
+  host_page_id varchar(50)       // For page-level whiteboards  
+  content text
+  status enum('current','archived','deleted', 'locked') [not null, default: 'current']
+  created_by varchar(50) [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_by varchar(50) [not null]
+  updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    host_space_id
+    host_page_id
+  }
+}
+
+Table smart_links {
+  smart_link_id varchar(50) [primary key]
+  title varchar(500) [not null]
+  url varchar(2000) [not null]
+  
+  // What this smart link POINTS TO (the reference/target)
+  target_id varchar(50)           // The entity this link references
+  target_type enum('page','database','whiteboard','external', 'attachment')
+  
+  // Where this smart link is DISPLAYED (the container)
+  host_page_id varchar(50) [not null]
+  // host_id varchar(50) [not null]
+  // host_type enum('page','database','whiteboard') [not null]
+  
+  // link_type varchar(100) // e.g., 'jira_issue', 'external_url', etc.
+  // link_type enum(
+  //   'internal_link',
+  //   'document_link',
+  //   'repository_link',
+  //   'communication_link',
+  //   'media_link',
+  //   'external_url'
+  // ) [not null, default: 'external_url']
+  // status enum('current','archived','deleted') [not null, default: 'current']
+  created_by varchar(50) [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_by varchar(50) [not null]
+  updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    // parent_id
+    // space_id
+    url
+  }
+}
+
+
+// ============================================================================
+// SPACES
+// ============================================================================
+
+Table spaces {
+  space_id varchar(50) [primary key]
+  space_key varchar(50) [not null, unique]
+  name varchar(255) [not null]
+  description text
+  type enum('global','personal') [not null]
+  status enum('current','archived') [not null, default: 'current']
+  // homepage_id varchar(50) // FK to pages
+  created_by varchar(50) [not null]
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    space_key [unique]
+  }
+}
+
+// ============================================================================
+// USERS AND AUTHENTICATION
+// ============================================================================
+
+Table users {
+  user_id varchar(50) [primary key]
+  // account_id varchar(100) [not null, unique] // Atlassian account ID
+  email varchar(320) [not null, unique]
+  display_name varchar(255) [not null]
+  // account_type enum('atlassian','app','anonymous') [not null]
+  status enum('active','inactive','deactivated') [not null, default: 'active']
+  created_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    // account_id [unique]
+    email [unique]
+  }
+}
+
+
+// ============================================================================
+// ATTACHMENTS
+// ============================================================================
+
+Table attachments {
+  attachment_id varchar(50) [primary key]
+  content_id varchar(50) [not null]
+  content_type enum('page','database','whiteboard','smart_link') [not null]
+  host_page_id varchar(50) 
+  file_name varchar(500) [not null]
+  file_url varchar(2000) [not null]
+  // file_size_bytes bigint [not null]
+  // media_type varchar(100) [not null] // MIME type
+  // download_url varchar(2000) [not null]
+  // comment text
+  // version_number int [not null, default: 1]
+  status enum('current','archived','deleted') [not null, default: 'current']
+  uploaded_by varchar(50) [not null]
+  uploaded_at timestamp [not null, default: `NOW()`]
+  updated_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    content_id
+    (content_id, content_type)
+    uploaded_by
+  }
+}
+
+
+// ============================================================================
+// VERSIONS
+// ============================================================================
+
+
+Table page_versions {
+  page_version_id varchar(50) [primary key]
+  page_id varchar(50) [not null]
+  version_number int [not null]
+  title varchar(500) [not null]
+  body_storage text
+  // is_minor_edit boolean [not null, default: false]
+  // created_by varchar(50)  
+  created_at timestamp [not null, default: `NOW()`]
+}
+
+Table page_version_components {
+  component_id varchar(50) [primary key]
+  page_version_id varchar(50) [not null]
+  component_type enum('whiteboard','smart_link') [not null]
+  component_data text [not null] // Complete snapshot of the component
+  
+  indexes {
+    page_version_id
+  }
+}
+
+Ref: page_version_components.page_version_id > page_versions.page_version_id
+
+
+// Table whiteboard_versions {
+//   whiteboard_version_id varchar(50) [primary key]
+//   whiteboard_id varchar(50) [not null]
+//   version_number int [not null]
+//   title varchar(500) [not null]
+//   content text
+//   version_message text
+//   created_by varchar(50) [not null]
+//   created_at timestamp [not null, default: `NOW()`]
+  
+//   indexes {
+//     whiteboard_id
+//     (whiteboard_id, version_number) [unique]
+//   }
+// }
+
+
+
+// ============================================================================
+// LABELS
+// ============================================================================
+
+Table page_labels {
+  page_label_id varchar(50) [primary key]
+  page_id varchar(50) [not null]
+  label_name varchar(255) [not null]  // stored directly
+  added_by varchar(50) [not null]
+  added_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    page_id
+    (page_id, label_name) [unique]
+  }
+}
+
+// Table labels {
+//   label_id varchar(50) [primary key]
+//   label_name varchar(255) [not null, unique]
+//   // prefix varchar(50) // e.g., 'global', 'my', 'team'
+//   created_at timestamp [not null, default: `NOW()`]
+  
+//   indexes {
+//     label_name
+//   }
+// }
+
+// Table page_labels {
+//   page_label_id varchar(50) [primary key]
+//   page_id varchar(50) [not null]
+//   label_id varchar(50) [not null]
+//   added_by varchar(50) [not null]
+//   added_at timestamp [not null, default: `NOW()`]
+  
+//   indexes {
+//     (page_id, label_id) [unique]
+//     label_id
+//   }
+// }
+
+// Table attachment_labels {
+//   attachment_label_id varchar(50) [primary key]
+//   attachment_id varchar(50) [not null]
+//   label_id varchar(50) [not null]
+//   added_by varchar(50) [not null]
+//   added_at timestamp [not null, default: `NOW()`]
+  
+//   indexes {
+//     (attachment_id, label_id) [unique]
+//     label_id
+//   }
+// }
+
+// ============================================================================
+// LIKES
+// ============================================================================
+
+// Table likes {
+//   like_id varchar(50) [primary key]
+//   page_id varchar(50) [not null]
+//   // content_id varchar(50) [not null]
+//   // content_type enum('page','database','whiteboard','smart_link') [not null]
+//   user_id varchar(50) [not null]
+//   // account_id varchar(100) [not null] // Atlassian account ID
+//   liked_at timestamp [not null, default: `NOW()`]
+  
+//   indexes {
+//     // (content_id, content_type, user_id) [unique]
+//     // content_id
+//     user_id
+//   }
+// }
+
+// ============================================================================
+// PERMISSIONS
+// ============================================================================
+
+Table permissions {
+  permission_id varchar(50) [primary key]
+  content_id varchar(50) [not null]
+  content_type enum('space','page') [not null]
+  user_id varchar(50)
+  operation enum('view','edit','delete','create','admin', 'restrict_other_users') [not null]
+  granted_by varchar(50)
+  granted_at timestamp [not null, default: `NOW()`]
+  
+  indexes {
+    (content_id, content_type)
+    user_id
+    operation
+  }
+}
+
+
+// ============================================================================
+// RELATIONSHIPS
+// ============================================================================
+
+// Content Pages
+Ref: pages.parent_page_id > pages.page_id
+Ref: pages.space_id > spaces.space_id
+Ref: pages.created_by > users.user_id
+Ref: pages.updated_by > users.user_id
+
+// Databases
+Ref: databases.host_space_id > spaces.space_id
+Ref: databases.host_page_id > pages.page_id
+Ref: databases.created_by > users.user_id
+Ref: databases.updated_by > users.user_id
+
+// Whiteboards
+Ref: whiteboards.host_space_id > spaces.space_id
+Ref: whiteboards.host_page_id > pages.page_id
+Ref: whiteboards.created_by > users.user_id
+Ref: whiteboards.updated_by > users.user_id
+
+// Smart Links
+// Ref: smart_links.space_id > spaces.space_id
+Ref: smart_links.created_by > users.user_id
+Ref: smart_links.updated_by > users.user_id
+
+// Spaces
+// Ref: spaces.homepage_id > pages.page_id
+Ref: spaces.created_by > users.user_id
+
+// Attachments
+Ref: attachments.uploaded_by > users.user_id
+// Ref: attachment_bodies.attachment_version_id > attachment_versions.attachment_version_id
+
+// Versions
+Ref: page_versions.page_id > pages.page_id
+// Ref: page_versions.created_by > users.user_id
+
+// Labels
+Ref: page_labels.page_id > pages.page_id
+// Ref: page_labels.label_id > labels.label_id
+Ref: page_labels.added_by > users.user_id
+
+// Ref: attachment_labels.attachment_id > attachments.attachment_id
+// Ref: attachment_labels.label_id > labels.label_id
+// Ref: attachment_labels.added_by > users.user_id
+
+
+// Likes
+// Ref: likes.user_id > users.user_id
+
+// Permissions
+Ref: permissions.user_id > users.user_id
+// Ref: permissions.group_id > groups.group_id
+Ref: permissions.granted_by > users.user_id
+
+Ref: smart_links.host_page_id > pages.page_id
+
+
+You have to provide the json file for each function separately including all the tests for that function in the actions part. You are going to provide the bash script that will create and populate those json files in a folder named tools_regression_tests/interface_5/.
+
+Note: ids are just numeric strings "1", "2", ...

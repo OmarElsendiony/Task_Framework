@@ -1,0 +1,33 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 3,
+  "task": {
+    "actions": [
+      {
+        "name": "discover_whiteboard_view",
+        "arguments": {
+          "whiteboard_view_id": "1"
+        }
+      },
+      {
+        "name": "discover_whiteboard_view",
+        "arguments": {
+          "title": "Brainstorming Session",
+          "host_document_id": "48",
+          "status": "current"
+        }
+      },
+      {
+        "name": "discover_whiteboard_view",
+        "arguments": {
+          "whiteboard_view_id": "5",
+          "title": "Team Goals",
+          "host_document_id": "82",
+          "status": "current",
+          "created_by": "19",
+          "updated_by": "28"
+        }
+      }
+    ]
+  }
+}

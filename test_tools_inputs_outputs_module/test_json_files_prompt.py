@@ -1,7 +1,7 @@
 import shutil
 import os
 
-prompt = """Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide two tests for each function with the most number of parameters as possible (if applicable). However, you have to follow the format that I provide to you below.
+prompt = """Assume you are an experienced tester. I am going to give you python functions and you are going to give me the inputs to test this function. The inputs are provided in the form of actions. You have to provide three tests for each function within the same file with the most number of parameters as possible (if applicable). However, you have to follow the format that I provide to you below.
 
 # Format:
 {{
@@ -47,8 +47,8 @@ You have to provide the json file for each function separately including all the
 Note: ids are just numeric strings "1", "2", ...
 """
 
-with open("../domain_context/policy.txt", "r") as f:
-    policy = f.read()
+# with open("../domain_context/policy.txt", "r") as f:
+#     policy = f.read()
 
 with open("../domain_context/schema.txt", "r") as f:
     schema = f.read()
@@ -82,6 +82,9 @@ def main():
         if not os.path.exists(f"tests_prompt/interface_{interface}/"):
             os.makedirs(f"tests_prompt/interface_{interface}/", exist_ok=True)
 
+        with open(f"../domain_context/policy_{interface}.txt", "r") as f:
+            policy = f.read()
+        
         files = os.listdir(path_interface)
         for file in files:
             if file.endswith(".py"):

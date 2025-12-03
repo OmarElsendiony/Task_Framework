@@ -1,0 +1,36 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 3,
+  "task": {
+    "actions": [
+      {
+        "name": "insert_document",
+        "arguments": {
+          "title": "New Engineering Standards",
+          "workspace_id": "1",
+          "created_by": "1"
+        }
+      },
+      {
+        "name": "insert_document",
+        "arguments": {
+          "title": "Implementation Checklist",
+          "workspace_id": "1",
+          "created_by": "4",
+          "parent_document_id": "4"
+        }
+      },
+      {
+        "name": "insert_document",
+        "arguments": {
+          "title": "Infrastructure Setup Guide",
+          "workspace_id": "4",
+          "created_by": "10",
+          "parent_document_id": "1",
+          "body_storage": "<h1>Infrastructure Setup</h1>\n<p>Follow these steps to set up the infrastructure:</p>\n<ol>\n<li>Provision servers and network resources</li>\n<li>Configure security groups and firewalls</li>\n<li>Set up monitoring and alerting</li>\n<li>Deploy application stack</li>\n<li>Run health checks and validation tests</li>\n</ol>\n<p>Ensure all systems are operational before proceeding.</p>",
+          "status": "draft"
+        }
+      }
+    ]
+  }
+}

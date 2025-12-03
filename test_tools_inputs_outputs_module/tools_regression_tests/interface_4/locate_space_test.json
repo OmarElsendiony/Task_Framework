@@ -1,0 +1,32 @@
+{
+  "env": "wiki_pages",
+  "interface_num": 4,
+  "task": {
+    "actions": [
+      {
+        "name": "locate_space",
+        "arguments": {
+          "space_id": "1"
+        }
+      },
+      {
+        "name": "locate_space",
+        "arguments": {
+          "type": "global",
+          "status": "current"
+        }
+      },
+      {
+        "name": "locate_space",
+        "arguments": {
+          "space_id": "4",
+          "space_key": "SPACE004",
+          "name": "Stewart, Fischer and Ramos",
+          "description": "Private collaborative space for team coordination.",
+          "type": "personal",
+          "status": "current"
+        }
+      }
+    ]
+  }
+}

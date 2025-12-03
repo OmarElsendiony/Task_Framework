@@ -1,23 +1,86 @@
 #!/bin/bash
 
-# Create the directory structure
-mkdir -p tools_regression_tests/interface_1
+# Create the test directory
+mkdir -p tools_regression_tests/interface_5
 
-# Test 1: discover_escalations - Test with multiple filters
-cat > tools_regression_tests/interface_1/discover_escalations_test1.json << 'EOF'
+# Test 1: search_assets - Test with all filters (maximum parameters)
+cat > tools_regression_tests/interface_5/test_search_assets_1.json << 'EOF'
 {
-    "env": "incident_management_experts",
-    "interface_num": 1,
+    "env": "hr_admin_management",
+    "interface_num": 5,
     "task": {
         "actions": [
             {
-                "name": "discover_escalations",
+                "name": "search_assets",
                 "arguments": {
-                    "entity_type": "escalations",
-                    "filters": {
-                        "incident_id": "1",
-                        "escalation_level": "technical",
-                        "status": "open"
+                    "search_criteria": {
+                        "employee_id": "1",
+                        "status": "assigned"
+                    },
+                    "email": "patrick.sanchez@example.com"
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 2: search_assets - Test with email only
+cat > tools_regression_tests/interface_5/test_search_assets_2.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 5,
+    "task": {
+        "actions": [
+            {
+                "name": "search_assets",
+                "arguments": {
+                    "email": "patrick.sanchez@example.com"
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 3: construct_payment - Test with all parameters (maximum)
+cat > tools_regression_tests/interface_5/test_construct_payment_1.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 5,
+    "task": {
+        "actions": [
+            {
+                "name": "construct_payment",
+                "arguments": {
+                    "payment_config": {
+                        "employee_id": "1",
+                        "payment_method": "bank_transfer",
+                        "amount": 4143.13
+                    },
+                    "cycle_id": "20",
+                    "source_payslip_id": "1"
+                }
+            }
+        ]
+    }
+}
+EOF
+
+# Test 4: construct_payment - Test with required parameters only
+cat > tools_regression_tests/interface_5/test_construct_payment_2.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 5,
+    "task": {
+        "actions": [
+            {
+                "name": "construct_payment",
+                "arguments": {
+                    "payment_config": {
+                        "employee_id": "1",
+                        "payment_method": "check",
+                        "amount": 5000.00
                     }
                 }
             }
@@ -26,19 +89,20 @@ cat > tools_regression_tests/interface_1/discover_escalations_test1.json << 'EOF
 }
 EOF
 
-# Test 2: discover_escalations - Test with single filter
-cat > tools_regression_tests/interface_1/discover_escalations_test2.json << 'EOF'
+# Test 5: change_payslip - Test with both fields in update_data (maximum)
+cat > tools_regression_tests/interface_5/test_change_payslip_1.json << 'EOF'
 {
-    "env": "incident_management_experts",
-    "interface_num": 1,
+    "env": "hr_admin_management",
+    "interface_num": 5,
     "task": {
         "actions": [
             {
-                "name": "discover_escalations",
+                "name": "change_payslip",
                 "arguments": {
-                    "entity_type": "escalations",
-                    "filters": {
-                        "escalated_by_id": "5"
+                    "payslip_id": "1",
+                    "update_data": {
+                        "status": "updated",
+                        "net_pay_value": 4500.00
                     }
                 }
             }
@@ -47,21 +111,19 @@ cat > tools_regression_tests/interface_1/discover_escalations_test2.json << 'EOF
 }
 EOF
 
-# Test 3: discover_incident_entities - Test incidents with multiple filters
-cat > tools_regression_tests/interface_1/discover_incident_entities_test1.json << 'EOF'
+# Test 6: change_payslip - Test with status only
+cat > tools_regression_tests/interface_5/test_change_payslip_2.json << 'EOF'
 {
-    "env": "incident_management_experts",
-    "interface_num": 1,
+    "env": "hr_admin_management",
+    "interface_num": 5,
     "task": {
         "actions": [
             {
-                "name": "discover_incident_entities",
+                "name": "change_payslip",
                 "arguments": {
-                    "entity_type": "incidents",
-                    "filters": {
-                        "severity": "P1",
-                        "status": "open",
-                        "category": "system_outage"
+                    "payslip_id": "1",
+                    "update_data": {
+                        "status": "released"
                     }
                 }
             }
@@ -70,20 +132,23 @@ cat > tools_regression_tests/interface_1/discover_incident_entities_test1.json <
 }
 EOF
 
-# Test 4: discover_incident_entities - Test post_incident_reviews
-cat > tools_regression_tests/interface_1/discover_incident_entities_test2.json << 'EOF'
+# Test 7: change_benefit_plan - Test with all fields in plan_updates (maximum)
+cat > tools_regression_tests/interface_5/test_change_benefit_plan_1.json << 'EOF'
 {
-    "env": "incident_management_experts",
-    "interface_num": 1,
+    "env": "hr_admin_management",
+    "interface_num": 5,
     "task": {
         "actions": [
             {
-                "name": "discover_incident_entities",
+                "name": "change_benefit_plan",
                 "arguments": {
-                    "entity_type": "post_incident_reviews",
-                    "filters": {
-                        "facilitator_id": "2",
-                        "status": "completed"
+                    "plan_id": "1",
+                    "plan_updates": {
+                        "name": "Platinum Health PPO Plus",
+                        "status": "active",
+                        "current_cost": 18500.00,
+                        "previous_year_cost": 16000.00,
+                        "enrollment_window": "open"
                     }
                 }
             }
@@ -92,21 +157,20 @@ cat > tools_regression_tests/interface_1/discover_incident_entities_test2.json <
 }
 EOF
 
-# Test 5: discover_subscription_agreements - Test client_subscriptions with multiple filters
-cat > tools_regression_tests/interface_1/discover_subscription_agreements_test1.json << 'EOF'
+# Test 8: change_benefit_plan - Test with partial fields
+cat > tools_regression_tests/interface_5/test_change_benefit_plan_2.json << 'EOF'
 {
-    "env": "incident_management_experts",
-    "interface_num": 1,
+    "env": "hr_admin_management",
+    "interface_num": 5,
     "task": {
         "actions": [
             {
-                "name": "discover_subscription_agreements",
+                "name": "change_benefit_plan",
                 "arguments": {
-                    "entity_type": "client_subscriptions",
-                    "filters": {
-                        "client_id": "1",
-                        "sla_tier": "premium",
-                        "status": "active"
+                    "plan_id": "1",
+                    "plan_updates": {
+                        "status": "inactive",
+                        "enrollment_window": "closed"
                     }
                 }
             }
@@ -115,20 +179,21 @@ cat > tools_regression_tests/interface_1/discover_subscription_agreements_test1.
 }
 EOF
 
-# Test 6: discover_subscription_agreements - Test sla_agreements
-cat > tools_regression_tests/interface_1/discover_subscription_agreements_test2.json << 'EOF'
+# Test 9: change_payment - Test with all fields in update_fields (maximum)
+cat > tools_regression_tests/interface_5/test_change_payment_1.json << 'EOF'
 {
-    "env": "incident_management_experts",
-    "interface_num": 1,
+    "env": "hr_admin_management",
+    "interface_num": 5,
     "task": {
         "actions": [
             {
-                "name": "discover_subscription_agreements",
+                "name": "change_payment",
                 "arguments": {
-                    "entity_type": "sla_agreements",
-                    "filters": {
-                        "subscription_id": "1",
-                        "severity_level": "P1"
+                    "payment_id": "1",
+                    "update_fields": {
+                        "status": "completed",
+                        "payment_date": "2025-11-25",
+                        "amount": 4500.00
                     }
                 }
             }
@@ -137,25 +202,19 @@ cat > tools_regression_tests/interface_1/discover_subscription_agreements_test2.
 }
 EOF
 
-# Test 7: manage_clients - Create client with all parameters
-cat > tools_regression_tests/interface_1/manage_clients_test1.json << 'EOF'
+# Test 10: change_payment - Test with status only
+cat > tools_regression_tests/interface_5/test_change_payment_2.json << 'EOF'
 {
-    "env": "incident_management_experts",
-    "interface_num": 1,
+    "env": "hr_admin_management",
+    "interface_num": 5,
     "task": {
         "actions": [
             {
-                "name": "manage_clients",
+                "name": "change_payment",
                 "arguments": {
-                    "action": "create",
-                    "client_data": {
-                        "client_name": "Global Tech Solutions Inc",
-                        "client_type": "enterprise",
-                        "country": "United States",
-                        "registration_number": "REG-2025-9876",
-                        "contact_email": "contact@globaltechsolutions.com",
-                        "industry": "Technology",
-                        "status": "active"
+                    "payment_id": "1",
+                    "update_fields": {
+                        "status": "failed"
                     }
                 }
             }
@@ -164,23 +223,19 @@ cat > tools_regression_tests/interface_1/manage_clients_test1.json << 'EOF'
 }
 EOF
 
-# Test 8: manage_clients - Update client with multiple fields
-cat > tools_regression_tests/interface_1/manage_clients_test2.json << 'EOF'
+# Test 11: estimate_settlement - Test with both employee_id and email (maximum)
+cat > tools_regression_tests/interface_5/test_estimate_settlement_1.json << 'EOF'
 {
-    "env": "incident_management_experts",
-    "interface_num": 1,
+    "env": "hr_admin_management",
+    "interface_num": 5,
     "task": {
         "actions": [
             {
-                "name": "manage_clients",
+                "name": "estimate_settlement",
                 "arguments": {
-                    "action": "update",
-                    "client_id": "1",
-                    "client_data": {
-                        "client_type": "mid_market",
-                        "contact_email": "newemail@client.com",
-                        "industry": "Financial Services",
-                        "status": "active"
+                    "employee_data": {
+                        "employee_id": "1",
+                        "email": "patrick.sanchez@example.com"
                     }
                 }
             }
@@ -189,23 +244,18 @@ cat > tools_regression_tests/interface_1/manage_clients_test2.json << 'EOF'
 }
 EOF
 
-# Test 9: manage_vendors - Create vendor with all parameters
-cat > tools_regression_tests/interface_1/manage_vendors_test1.json << 'EOF'
+# Test 12: estimate_settlement - Test with email only
+cat > tools_regression_tests/interface_5/test_estimate_settlement_2.json << 'EOF'
 {
-    "env": "incident_management_experts",
-    "interface_num": 1,
+    "env": "hr_admin_management",
+    "interface_num": 5,
     "task": {
         "actions": [
             {
-                "name": "manage_vendors",
+                "name": "estimate_settlement",
                 "arguments": {
-                    "action": "create",
-                    "vendor_data": {
-                        "vendor_name": "CloudStream Technologies",
-                        "vendor_type": "cloud_provider",
-                        "contact_email": "support@cloudstream.com",
-                        "contact_phone": "+1-555-0199",
-                        "status": "active"
+                    "employee_data": {
+                        "email": "patrick.sanchez@example.com"
                     }
                 }
             }
@@ -214,23 +264,19 @@ cat > tools_regression_tests/interface_1/manage_vendors_test1.json << 'EOF'
 }
 EOF
 
-# Test 10: manage_vendors - Update vendor with multiple fields
-cat > tools_regression_tests/interface_1/manage_vendors_test2.json << 'EOF'
+# Test 13: construct_payslip - Test with employee 1 and cycle 1
+cat > tools_regression_tests/interface_5/test_construct_payslip_1.json << 'EOF'
 {
-    "env": "incident_management_experts",
-    "interface_num": 1,
+    "env": "hr_admin_management",
+    "interface_num": 5,
     "task": {
         "actions": [
             {
-                "name": "manage_vendors",
+                "name": "construct_payslip",
                 "arguments": {
-                    "action": "update",
-                    "vendor_id": "1",
-                    "vendor_data": {
-                        "vendor_type": "software_vendor",
-                        "contact_email": "newsupport@vendor.com",
-                        "contact_phone": "+1-555-0200",
-                        "status": "active"
+                    "payroll_data": {
+                        "employee_id": "1",
+                        "cycle_id": "1"
                     }
                 }
             }
@@ -239,16 +285,26 @@ cat > tools_regression_tests/interface_1/manage_vendors_test2.json << 'EOF'
 }
 EOF
 
-echo "All test files have been created successfully in tools_regression_tests/interface_1/"
-echo ""
-echo "Generated files:"
-echo "  - discover_escalations_test1.json"
-echo "  - discover_escalations_test2.json"
-echo "  - discover_incident_entities_test1.json"
-echo "  - discover_incident_entities_test2.json"
-echo "  - discover_subscription_agreements_test1.json"
-echo "  - discover_subscription_agreements_test2.json"
-echo "  - manage_clients_test1.json"
-echo "  - manage_clients_test2.json"
-echo "  - manage_vendors_test1.json"
-echo "  - manage_vendors_test2.json"
+# Test 14: construct_payslip - Test with different employee and cycle
+cat > tools_regression_tests/interface_5/test_construct_payslip_2.json << 'EOF'
+{
+    "env": "hr_admin_management",
+    "interface_num": 5,
+    "task": {
+        "actions": [
+            {
+                "name": "construct_payslip",
+                "arguments": {
+                    "payroll_data": {
+                        "employee_id": "4",
+                        "cycle_id": "1"
+                    }
+                }
+            }
+        ]
+    }
+}
+EOF
+
+echo "All test JSON files have been created in tools_regression_tests/interface_5/"
+echo "Total test files created: 14"

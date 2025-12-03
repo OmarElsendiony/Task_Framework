@@ -1,0 +1,94 @@
+{
+  "task_file": "tools_regression_tests/interface_2/discover_page_test.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "page_id": "1"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "pages": [
+            {
+              "page_id": "1",
+              "title": "Team Guidelines",
+              "site_id": "4",
+              "parent_page_id": null,
+              "body_storage": "<h2>Getting Started</h2>\n<p>Follow these steps to set up your development environment:</p>\n<ol><li>Clone the repository from GitHub</li><li>Install dependencies using npm</li><li>Configure environment variables</li><li>Run the test suite to verify setup</li></ol>\n<p>For detailed instructions, refer to the setup guide in the documentation.</p>",
+              "status": "current",
+              "created_by": "10",
+              "created_at": "2023-02-05T04:21:00",
+              "updated_by": "28",
+              "updated_at": "2023-03-15T21:23:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "title": "Technical Architecture",
+        "site_id": "5",
+        "status": "current"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "pages": [
+            {
+              "page_id": "2",
+              "title": "Technical Architecture",
+              "site_id": "5",
+              "parent_page_id": null,
+              "body_storage": "<h2>System Components</h2>\n<p>Our architecture consists of three main layers:</p>\n<ul><li><strong>Frontend:</strong> React-based user interface with responsive design</li><li><strong>Backend:</strong> Node.js REST API with database integration</li><li><strong>Database:</strong> PostgreSQL with Redis caching layer</li></ul>",
+              "status": "current",
+              "created_by": "7",
+              "created_at": "2023-04-30T08:09:00",
+              "updated_by": "23",
+              "updated_at": "2023-05-10T19:22:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "page_id": "4",
+        "title": "Release Notes",
+        "site_id": "1",
+        "parent_page_id": null,
+        "status": "current",
+        "created_by": "16",
+        "created_at": "2023-04-05T17:27:00",
+        "updated_by": "18",
+        "updated_at": "2023-06-30T07:18:00"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "pages": [
+            {
+              "page_id": "4",
+              "title": "Release Notes",
+              "site_id": "1",
+              "parent_page_id": null,
+              "body_storage": "<h2>Release Information</h2>\n<p><strong>Version 2.1.0</strong> - Released on 2024-01-15</p>\n<p>Major improvements include: performance optimization, security patches, and new features. See changelog for complete details.</p>\n<p>All users are encouraged to update to the latest version.</p>",
+              "status": "current",
+              "created_by": "16",
+              "created_at": "2023-04-05T17:27:00",
+              "updated_by": "18",
+              "updated_at": "2023-06-30T07:18:00"
+            }
+          ]
+        },
+        200
+      ]
+    }
+  ]
+}

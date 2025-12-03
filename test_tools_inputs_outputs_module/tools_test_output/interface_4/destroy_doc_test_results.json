@@ -1,0 +1,78 @@
+{
+  "task_file": "tools_regression_tests/interface_4/destroy_doc_test.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "doc_id": "6"
+      },
+      "output": [
+        {
+          "success": true,
+          "message": "Doc with ID '6' has been destroyed",
+          "deleted_doc": {
+            "page_id": "6",
+            "title": "Code Review Standards",
+            "space_id": "10",
+            "parent_page_id": null,
+            "body_storage": "<h2>Code Review Checklist</h2>\n<p>Before approving pull requests, verify:</p>\n<ul><li>Code follows style guidelines</li><li>Tests have adequate coverage</li><li>No hardcoded secrets or credentials</li><li>Documentation is up to date</li><li>Performance implications considered</li></ul>",
+            "status": "current",
+            "created_by": "18",
+            "created_at": "2023-03-20T20:43:00",
+            "updated_by": "23",
+            "updated_at": "2023-05-09T09:04:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "doc_id": "7"
+      },
+      "output": [
+        {
+          "success": true,
+          "message": "Doc with ID '7' has been destroyed",
+          "deleted_doc": {
+            "page_id": "7",
+            "title": "Meeting Minutes",
+            "space_id": "17",
+            "parent_page_id": null,
+            "body_storage": "<h2>Meeting Summary</h2>\n<p><strong>Date:</strong> 2024-01-15</p>\n<p><strong>Attendees:</strong> Engineering team leads and product managers</p>\n<p><strong>Agenda:</strong> Q1 planning, roadmap review, technical debt discussion</p>\n<p><strong>Action Items:</strong> Update documentation, schedule architecture review, allocate resources for optimization</p>",
+            "status": "current",
+            "created_by": "17",
+            "created_at": "2023-10-21T15:02:00",
+            "updated_by": "12",
+            "updated_at": "2024-03-07T01:03:00"
+          }
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "doc_id": "8"
+      },
+      "output": [
+        {
+          "success": true,
+          "message": "Doc with ID '8' has been destroyed",
+          "deleted_doc": {
+            "page_id": "8",
+            "title": "Quarterly Roadmap",
+            "space_id": "9",
+            "parent_page_id": null,
+            "body_storage": "<h2>Q1 2024 Roadmap</h2>\n<ul><li>Implement caching layer - Expected completion: Week 4</li><li>API v2 release - Expected completion: Week 6</li><li>Mobile app launch - Expected completion: Week 8</li><li>Performance tuning - Ongoing throughout quarter</li></ul>",
+            "status": "current",
+            "created_by": "33",
+            "created_at": "2023-03-11T15:45:00",
+            "updated_by": "8",
+            "updated_at": "2023-07-01T03:31:00"
+          }
+        },
+        200
+      ]
+    }
+  ]
+}

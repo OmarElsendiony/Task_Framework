@@ -1,0 +1,208 @@
+{
+  "task_file": "tools_regression_tests/interface_4/locate_space_test.json",
+  "success": true,
+  "results": [
+    {
+      "arguments": {
+        "space_id": "1"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "spaces": [
+            {
+              "space_id": "1",
+              "space_key": "SPACE001",
+              "name": "Davis Group",
+              "description": "Private space for tracking personal goals and ideas.",
+              "type": "personal",
+              "status": "current",
+              "created_by": "30",
+              "created_at": "2023-02-18T17:28:00",
+              "updated_at": "2023-03-26T06:39:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "type": "global",
+        "status": "current"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 12,
+          "spaces": [
+            {
+              "space_id": "2",
+              "space_key": "SPACE002",
+              "name": "Rasmussen LLC",
+              "description": "Central hub for team collaboration and project management.",
+              "type": "global",
+              "status": "current",
+              "created_by": "6",
+              "created_at": "2023-03-05T02:28:00",
+              "updated_at": "2023-07-23T05:31:00"
+            },
+            {
+              "space_id": "3",
+              "space_key": "SPACE003",
+              "name": "Pena, Marshall and Ramos",
+              "description": "Shared workspace for department coordination and initiatives.",
+              "type": "global",
+              "status": "current",
+              "created_by": "26",
+              "created_at": "2023-07-12T07:10:00",
+              "updated_at": "2023-10-24T22:40:00"
+            },
+            {
+              "space_id": "6",
+              "space_key": "SPACE006",
+              "name": "Jefferson-Burke",
+              "description": "Global knowledge base for company-wide documentation and policies.",
+              "type": "global",
+              "status": "current",
+              "created_by": "48",
+              "created_at": "2023-02-18T09:13:00",
+              "updated_at": "2023-03-05T04:00:00"
+            },
+            {
+              "space_id": "7",
+              "space_key": "SPACE007",
+              "name": "Wood, Tran and Cooper",
+              "description": "Central hub for team collaboration and project management.",
+              "type": "global",
+              "status": "current",
+              "created_by": "4",
+              "created_at": "2023-03-22T01:03:00",
+              "updated_at": "2023-08-18T16:35:00"
+            },
+            {
+              "space_id": "8",
+              "space_key": "SPACE008",
+              "name": "James, Kerr and Evans",
+              "description": "Shared workspace for department coordination and initiatives.",
+              "type": "global",
+              "status": "current",
+              "created_by": "44",
+              "created_at": "2023-05-11T02:54:00",
+              "updated_at": "2023-06-27T05:32:00"
+            },
+            {
+              "space_id": "9",
+              "space_key": "SPACE009",
+              "name": "Miller-Williams",
+              "description": "Organization-wide communication and documentation center.",
+              "type": "global",
+              "status": "current",
+              "created_by": "40",
+              "created_at": "2023-03-02T12:07:00",
+              "updated_at": "2023-07-25T19:44:00"
+            },
+            {
+              "space_id": "12",
+              "space_key": "SPACE012",
+              "name": "Pitts, Harvey and Allen",
+              "description": "Central hub for team collaboration and project management.",
+              "type": "global",
+              "status": "current",
+              "created_by": "1",
+              "created_at": "2023-06-21T20:19:00",
+              "updated_at": "2023-10-17T07:18:00"
+            },
+            {
+              "space_id": "13",
+              "space_key": "SPACE013",
+              "name": "Johnson-Diaz",
+              "description": "Shared workspace for department coordination and initiatives.",
+              "type": "global",
+              "status": "current",
+              "created_by": "33",
+              "created_at": "2023-04-28T19:36:00",
+              "updated_at": "2023-05-23T22:10:00"
+            },
+            {
+              "space_id": "14",
+              "space_key": "SPACE014",
+              "name": "Taylor Inc",
+              "description": "Organization-wide communication and documentation center.",
+              "type": "global",
+              "status": "current",
+              "created_by": "24",
+              "created_at": "2023-03-09T04:59:00",
+              "updated_at": "2023-06-06T07:55:00"
+            },
+            {
+              "space_id": "15",
+              "space_key": "SPACE015",
+              "name": "Smith, Garrison and Thomas",
+              "description": "Enterprise-wide collaborative space for cross-functional teams.",
+              "type": "global",
+              "status": "current",
+              "created_by": "43",
+              "created_at": "2023-03-14T05:28:00",
+              "updated_at": "2023-08-01T03:47:00"
+            },
+            {
+              "space_id": "16",
+              "space_key": "SPACE016",
+              "name": "Joseph, James and Harper",
+              "description": "Global knowledge base for company-wide documentation and policies.",
+              "type": "global",
+              "status": "current",
+              "created_by": "7",
+              "created_at": "2023-05-22T09:59:00",
+              "updated_at": "2023-06-17T14:15:00"
+            },
+            {
+              "space_id": "17",
+              "space_key": "SPACE017",
+              "name": "Bell PLC",
+              "description": "Central hub for team collaboration and project management.",
+              "type": "global",
+              "status": "current",
+              "created_by": "46",
+              "created_at": "2023-07-10T17:09:00",
+              "updated_at": "2023-09-18T02:47:00"
+            }
+          ]
+        },
+        200
+      ]
+    },
+    {
+      "arguments": {
+        "space_id": "4",
+        "space_key": "SPACE004",
+        "name": "Stewart, Fischer and Ramos",
+        "description": "Private collaborative space for team coordination.",
+        "type": "personal",
+        "status": "current"
+      },
+      "output": [
+        {
+          "success": true,
+          "count": 1,
+          "spaces": [
+            {
+              "space_id": "4",
+              "space_key": "SPACE004",
+              "name": "Stewart, Fischer and Ramos",
+              "description": "Private collaborative space for team coordination.",
+              "type": "personal",
+              "status": "current",
+              "created_by": "19",
+              "created_at": "2023-01-16T05:24:00",
+              "updated_at": "2023-01-16T17:40:00"
+            }
+          ]
+        },
+        200
+      ]
+    }
+  ]
+}
