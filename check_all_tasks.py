@@ -70,7 +70,10 @@ def run_single_task(task_file_path):
                 return False, error_msg
             # print("-----")
             # Check for errors
-            if res and len(res) > 0 and isinstance(res[0], dict) and ("error" in res[0].keys() or "status" in res[0].keys() and res[0]["status"] == "error"):
+            # print(action.get("output", None), res[0])
+            # print(action)
+            # print("==============")
+            if not sameoutput and res and len(res) > 0 and isinstance(res[0], dict) and ("error" in res[0].keys() or "status" in res[0].keys() and res[0]["status"] == "error"):
                 error_msg = f"Error in action '{action_name}': {res[0].get('error', res[0].get('message'))}"
                 # print(f"  ERROR: {error_msg}")
                 return False, error_msg
@@ -177,4 +180,4 @@ def run_all_tasks(base_path="week_11_new"):
 
 
 if __name__ == "__main__":
-    run_all_tasks("week_11_new")
+    run_all_tasks("batch_Batch_version_control_system_20260108_195536_adjusted")

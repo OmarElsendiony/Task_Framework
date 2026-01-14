@@ -1,5 +1,0 @@
-Flask
-Flask-Cors
-python-dateutil
-python-dotenv
-pytz
