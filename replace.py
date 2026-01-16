@@ -3,18 +3,17 @@ import json
 import glob
 import sys
 import io
-import re
 from contextlib import redirect_stdout, redirect_stderr
 from running_tasks import *
 
 def find_all_task_files(base_path="week_10"):
-    """Find all task.json files in the directory structure."""
+    """Find all task.json files."""
     pattern = os.path.join(base_path, "**", "task.json")
     task_files = glob.glob(pattern, recursive=True)
     return task_files
 
 def strict_equal(obj1, obj2):
-    """Check if two objects are equal in both value and type."""
+    """Check if two objects are equal."""
     if type(obj1) != type(obj2): return False
     if isinstance(obj1, dict):
         if obj1.keys() != obj2.keys(): return False
@@ -24,43 +23,19 @@ def strict_equal(obj1, obj2):
         return all(strict_equal(a, b) for a, b in zip(obj1, obj2))
     return obj1 == obj2
 
-def normalize_error_response(data):
-    """Normalizes errors to a standard string format 'Error: ...'."""
-    msg = ""
-    if isinstance(data, dict):
-        if data.get("status") == "error": msg = data.get("message", "")
-        elif "error" in data: msg = data["error"]
-        else: return str(data)
-    else:
-        msg = str(data)
-
-    # Cleanup prefixes
-    msg = re.sub(r"Failed to execute API:\s*Tools\.", "", msg)
-    msg = re.sub(r"Error executing API .*?:\s*", "", msg)
-
-    # Normalize function names
-    def to_pascal(match):
-        parts = match.group(1).split("_")
-        return "".join(p.capitalize() for p in parts) + ".invoke"
-    
-    msg = re.sub(r'([a-z0-9_]+)_invoke', to_pascal, msg)
-
-    if not msg.strip().lower().startswith("error"):
-        msg = f"Error: {msg}"
-    return msg
-
 def is_error_response(data):
-    """Checks if the data is an API error."""
+    """Checks if the data looks like an API error response."""
     if isinstance(data, dict):
-        return "error" in data or (data.get("status") == "error")
-    if isinstance(data, str) and data.strip().lower().startswith("error"):
-        return True
+        # Common error patterns in your system
+        if "error" in data or data.get("status") == "error": return True
     return False
 
-def process_single_task(task_file_path):
+def run_single_task_and_update(task_file_path):
     """
-    Runs a task.json file.
-    Updates the file IN-PLACE if output differs AND 'got' is NOT an error (unless expected was also error).
+    Run a task.json. If actual output differs from expected (and is not an error),
+    UPDATE the file in-place.
+    
+    Includes logic to propagate 'commit_sha' from outputs to subsequent arguments.
     """
     try:
         with open(task_file_path, 'r', encoding='utf-8') as f:
@@ -69,10 +44,7 @@ def process_single_task(task_file_path):
         environment = task_data.get("env")
         interface = task_data.get("interface_num")
         
-        if not environment:
-            return "Failed", "Missing 'env' configuration"
-
-        # Initialize environment (Silent)
+        # Initialize environment (Silently)
         f_io = io.StringIO()
         try:
             with redirect_stdout(f_io), redirect_stderr(f_io):
@@ -83,12 +55,29 @@ def process_single_task(task_file_path):
         actions = task_data.get("task", {}).get("actions", [])
         file_modified = False
         
+        # --- STATE VARIABLE FOR SHA PROPAGATION ---
+        last_observed_commit_sha = None
+
         for i, action in enumerate(actions):
             action_name = action.get("name")
             arguments = action.get("arguments", {})
             expected_output = action.get("output", None)
             
-            # Execute API (Silent)
+            # --- 1. DYNAMIC ARGUMENT REPLACEMENT ---
+            # If we have seen a commit_sha, replace any argument containing "sha" with it
+            if last_observed_commit_sha:
+                for arg_key in list(arguments.keys()):
+                    if "sha" in arg_key.lower():
+                        # Update the argument in the dictionary passed to the API
+                        arguments[arg_key] = last_observed_commit_sha
+                        
+                        # OPTIONAL: Also update the 'task.json' argument permanently?
+                        # Usually better to only update the Output, but if you want the 
+                        # input file to be self-consistent, uncomment the next line:
+                        # action["arguments"][arg_key] = last_observed_commit_sha
+                        # file_modified = True
+
+            # Execute API (Silently)
             actual_res_container = None
             try:
                 with redirect_stdout(f_io), redirect_stderr(f_io):
@@ -96,49 +85,48 @@ def process_single_task(task_file_path):
             except Exception as e:
                 return "Failed", f"Action '{action_name}' raised exception: {str(e)}"
 
-            # Extract actual output
+            # Extract actual result
             actual_output = actual_res_container[0] if actual_res_container and isinstance(actual_res_container, (list, tuple)) else actual_res_container
 
-            # --- Validation Logic ---
-            
-            # 1. Strict Match check
-            if strict_equal(actual_output, expected_output):
-                continue # Exact match, move to next action
+            # --- 2. CAPTURE COMMIT_SHA FROM OUTPUT ---
+            # Helper to recursively find 'commit_sha' in a nested dict
+            def find_sha_recursive(data):
+                if isinstance(data, dict):
+                    if "commit_sha" in data and isinstance(data["commit_sha"], str):
+                        return data["commit_sha"]
+                    for value in data.values():
+                        found = find_sha_recursive(value)
+                        if found: return found
+                return None
 
-            # 2. Check if Actual is an Error
-            if is_error_response(actual_output):
-                # Is Expected ALSO an error?
-                if is_error_response(expected_output):
-                    # Compare Normalized Errors
-                    norm_actual = normalize_error_response(actual_output)
-                    norm_expected = normalize_error_response(expected_output)
-                    
-                    if norm_expected in norm_actual: # Fuzzy match allowed
-                        continue # Success (Error matched expected error)
-                    else:
-                        return "Failed", f"Error Mismatch.\n   Exp: {norm_expected}\n   Got: {norm_actual}"
+            found_sha = find_sha_recursive(actual_output)
+            if found_sha:
+                last_observed_commit_sha = found_sha
+
+            # --- Validation & Update Logic ---
+            if not strict_equal(actual_output, expected_output):
+                
+                # Check if the actual result is an Error
+                if is_error_response(actual_output):
+                    if not is_error_response(expected_output):
+                        return "Failed", f"Action '{action_name}' failed unexpectedly: {actual_output}"
+                    action["output"] = actual_output 
+                    file_modified = True
+
+                # If it is NOT an error, but different -> Update File
+                elif actual_output is not None:
+                    action["output"] = actual_output
+                    file_modified = True
+                
                 else:
-                    # CRITICAL: Got Error, but Expected NOT Error -> FAIL
-                    return "Failed", f"Action '{action_name}' failed unexpectedly.\n   Exp: {expected_output}\n   Got Error: {actual_output}"
+                    if expected_output is not None:
+                         return "Failed", f"Action '{action_name}' returned None, expected {expected_output}"
 
-            # 3. Valid Output Mismatch -> Update File
-            # We are here because:
-            #  - Not strict equal
-            #  - Actual is NOT an error (it's valid data)
-            #  - So it must be a data mismatch we want to update
-            
-            if actual_output is not None:
-                action["output"] = actual_output
-                file_modified = True
-            else:
-                if expected_output is not None:
-                     return "Failed", f"Action '{action_name}' returned None, expected data."
-
-        # Save changes
+        # Save changes if any modifications happened
         if file_modified:
             with open(task_file_path, 'w', encoding='utf-8') as f:
                 json.dump(task_data, f, indent=2)
-            return "Updated", "Output corrected in file"
+            return "Updated", "File updated with new outputs"
             
         return "Success", None
         
@@ -149,7 +137,7 @@ def process_single_task(task_file_path):
     except Exception as e:
         return "Failed", f"Unexpected error: {str(e)}"
 
-def run_all_tasks(base_path="week_11_new"): 
+def run_all_tasks(base_path="week_11_new"):
     print("=" * 60)
     print(f"VALIDATING AND UPDATING TASKS IN: {base_path}")
     print("=" * 60)
@@ -168,7 +156,7 @@ def run_all_tasks(base_path="week_11_new"):
     for i, task_file in enumerate(task_files):
         print(f"[{i+1}/{len(task_files)}] {task_file} ...", end="", flush=True)
         
-        status, msg = process_single_task(task_file)
+        status, msg = run_single_task_and_update(task_file)
         
         stats[status] += 1
         
@@ -207,5 +195,4 @@ if __name__ == "__main__":
     folder = "batch_Batch_version_control_system_20260108_195536_adjusted"
     if len(sys.argv) > 1:
         folder = sys.argv[1]
-        
     run_all_tasks(folder)

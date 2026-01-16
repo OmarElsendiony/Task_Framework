@@ -55,7 +55,10 @@ ID_FIELD_TO_TABLE_MAPPING = {
     # Branches
     'branch_id': 'branches.json',
     'source_branch': 'branches.json',
+    'source_branch_id': 'branches.json',
+    'base_branch_id': 'branches.json',
     'target_branch': 'branches.json',
+    'target_branch_id': 'branches.json',
     
     # Commits
     'commit_id': 'commits.json',
@@ -81,12 +84,10 @@ ID_FIELD_TO_TABLE_MAPPING = {
     # Pull requests
     'pull_request_id': 'pull_requests.json',
     'pr_id': 'pull_requests.json',  # Common alias
-    # 'pull_request_number': 'pull_requests.json',
-    # 'pr_number': 'pull_requests.json',  # Common alias
     
     # Issues
     'issue_id': 'issues.json',
-    # 'issue_number': 'issues.json',
+    'work_item_id': 'issues.json',  # Alias for issues as work items
     
     # Comments
     'comment_id': 'comments.json',
@@ -107,6 +108,9 @@ ID_FIELD_TO_TABLE_MAPPING = {
     
     # Stars
     'star_id': 'stars.json',
+
+    # Polymorphic Entity ID (NEW)
+    'entity_id': None, 
 }
 
 # CSV data for offsets
@@ -177,14 +181,19 @@ def adjust_id_value(value: Any, offset: int) -> Any:
         return value + offset
     return value
 
-def adjust_single_field(value: Any, field_name: str, all_offsets: Dict, modifications: List[str], context: Dict = None) -> Any:
+def adjust_single_field(value: Any, field_name: str, all_offsets: Dict, modifications: List[str], 
+                        id_mapping: Dict[str, str], context: Dict = None) -> Any:
     """
     Adjust a single field value based on which table it references.
     Uses ID_FIELD_TO_TABLE_MAPPING to determine the correct table.
-    For polymorphic fields like owner_id, uses context to determine the target table.
+    For polymorphic fields like owner_id or entity_id, uses context to determine the target table.
+    Records all ID changes in id_mapping for later use with outputs array.
     """
     if value is None:
         return value
+    
+    # Convert to string for consistent mapping
+    original_str_value = str(value)
     
     # Check if this field has a known table mapping
     if field_name not in ID_FIELD_TO_TABLE_MAPPING:
@@ -205,7 +214,6 @@ def adjust_single_field(value: Any, field_name: str, all_offsets: Dict, modifica
             elif owner_type == 'organization':
                 table_file = 'organizations.json'
             else:
-                # return value  # Unknown owner_type, skip
                 table_file = 'users.json'
         
         # Resolve commentable_id based on commentable_type
@@ -231,6 +239,51 @@ def adjust_single_field(value: Any, field_name: str, all_offsets: Dict, modifica
                 table_file = 'releases.json'
             else:
                 return value  # Unknown reference_type, skip
+
+        # ------------------------------------------------------------------
+        # NEW LOGIC: Resolve entity_id based on entity_type
+        # ------------------------------------------------------------------
+        elif field_name == 'entity_id' and 'entity_type' in context:
+            entity_type = context['entity_type']
+            # Map the entity_type string to the correct JSON file
+            if entity_type == 'label':
+                table_file = 'labels.json'
+            elif entity_type == 'issue':
+                table_file = 'issues.json'
+            elif entity_type == 'pull_request':
+                table_file = 'pull_requests.json'
+            elif entity_type == 'repository':
+                table_file = 'repositories.json'
+            elif entity_type == 'user':
+                table_file = 'users.json'
+            elif entity_type == 'commit':
+                table_file = 'commits.json'
+            elif entity_type == 'organization':
+                table_file = 'organizations.json'
+            elif entity_type == 'project':
+                table_file = 'projects.json'
+            elif entity_type == 'workspace':
+                table_file = 'workspaces.json'
+            elif entity_type == 'file':
+                table_file = 'files.json'
+            elif entity_type == 'branch':
+                table_file = 'branches.json'
+            elif entity_type == 'code_review':
+                table_file = 'code_reviews.json'
+            elif entity_type == 'comment':
+                table_file = 'comments.json'
+            elif entity_type == 'release':
+                table_file = 'releases.json'
+            elif entity_type == 'star':
+                table_file = 'stars.json'
+            elif entity_type == 'access_token':
+                table_file = 'access_tokens.json'
+                
+            else:
+                # If we encounter an unknown entity_type, we skip adjustment 
+                # to avoid corrupting data we don't understand.
+                return value
+        # ------------------------------------------------------------------
         
         else:
             return value  # Polymorphic field without resolvable context
@@ -250,32 +303,58 @@ def adjust_single_field(value: Any, field_name: str, all_offsets: Dict, modifica
         old_value = value
         new_value = adjust_id_value(value, offset)
         modifications.append(f"  Adjusted {field_name}: {old_value} -> {new_value} (using {table_file})")
+        
+        # Record the mapping for outputs array adjustment
+        id_mapping[original_str_value] = str(new_value)
+        
         return new_value
     
     return value
 
-def adjust_ids_in_dict(data: Dict[str, Any], all_offsets: Dict, modifications: List[str]) -> Dict[str, Any]:
+def adjust_ids_in_dict(data: Dict[str, Any], all_offsets: Dict, modifications: List[str], 
+                      id_mapping: Dict[str, str]) -> Dict[str, Any]:
     """
     Recursively adjust IDs in a dictionary based on ALL table offsets.
     Each field is only adjusted once based on its primary table.
     Handles context-dependent polymorphic fields like owner_id.
+    Records all ID changes in id_mapping.
     """
     adjusted_data = {}
     
     for key, value in data.items():
         if isinstance(value, dict):
-            adjusted_data[key] = adjust_ids_in_dict(value, all_offsets, modifications)
+            adjusted_data[key] = adjust_ids_in_dict(value, all_offsets, modifications, id_mapping)
         elif isinstance(value, list):
             adjusted_data[key] = [
-                adjust_ids_in_dict(item, all_offsets, modifications)
+                adjust_ids_in_dict(item, all_offsets, modifications, id_mapping)
                 if isinstance(item, dict) else item
                 for item in value
             ]
         else:
             # Try to adjust this field, passing the current dict as context
-            adjusted_data[key] = adjust_single_field(value, key, all_offsets, modifications, context=data)
+            adjusted_data[key] = adjust_single_field(value, key, all_offsets, modifications, 
+                                                     id_mapping, context=data)
     
     return adjusted_data
+
+def adjust_outputs_array(outputs: List[str], id_mapping: Dict[str, str], modifications: List[str]) -> List[str]:
+    """
+    Adjust IDs in the outputs array based on the id_mapping from action processing.
+    If an output ID was changed during action processing, apply the same change here.
+    """
+    adjusted_outputs = []
+    
+    for idx, value in enumerate(outputs):
+        str_value = str(value)
+        
+        if str_value in id_mapping:
+            new_value = id_mapping[str_value]
+            modifications.append(f"  Adjusted outputs[{idx}]: {value} -> {new_value} (matched from actions)")
+            adjusted_outputs.append(new_value)
+        else:
+            adjusted_outputs.append(value)
+    
+    return adjusted_outputs
 
 def find_all_task_files(base_path: str) -> List[str]:
     """Find all task.json files in the directory structure."""
@@ -283,7 +362,7 @@ def find_all_task_files(base_path: str) -> List[str]:
     return glob.glob(pattern, recursive=True)
 
 def process_task_file(task_file_path: str, offsets: Dict[str, Dict[str, int]], 
-                     output_base_path: str, input_base_path: str) -> tuple:
+                      output_base_path: str, input_base_path: str) -> tuple:
     """
     Process a single task.json file and adjust IDs based on offsets.
     Returns (success: bool, modifications_count: int, error_message: str or None, modifications: list)
@@ -294,9 +373,11 @@ def process_task_file(task_file_path: str, offsets: Dict[str, Dict[str, int]],
             task_data = json.load(f)
         
         all_modifications = []
-        actions = task_data.get("task", {}).get("actions", [])
+        # Track all ID mappings from old to new values
+        id_mapping = {}
         
-        # Process each action
+        # Process actions
+        actions = task_data.get("task", {}).get("actions", [])
         for action_idx, action in enumerate(actions):
             action_name = action.get("name", "")
             action_modifications = []
@@ -306,7 +387,8 @@ def process_task_file(task_file_path: str, offsets: Dict[str, Dict[str, int]],
                 action['arguments'] = adjust_ids_in_dict(
                     action['arguments'], 
                     offsets,
-                    action_modifications
+                    action_modifications,
+                    id_mapping
                 )
             
             # Adjust IDs in output
@@ -314,12 +396,26 @@ def process_task_file(task_file_path: str, offsets: Dict[str, Dict[str, int]],
                 action['output'] = adjust_ids_in_dict(
                     action['output'], 
                     offsets,
-                    action_modifications
+                    action_modifications,
+                    id_mapping
                 )
             
             if action_modifications:
                 all_modifications.append(f"Action {action_idx} ({action_name}):")
                 all_modifications.extend(action_modifications)
+        
+        # Process outputs array using the id_mapping built from actions
+        if 'task' in task_data and 'outputs' in task_data['task']:
+            outputs_modifications = []
+            task_data['task']['outputs'] = adjust_outputs_array(
+                task_data['task']['outputs'],
+                id_mapping,
+                outputs_modifications
+            )
+            
+            if outputs_modifications:
+                all_modifications.append("Outputs array:")
+                all_modifications.extend(outputs_modifications)
         
         # Create output file path with same hierarchy
         relative_path = os.path.relpath(task_file_path, input_base_path)
@@ -452,7 +548,6 @@ def adjust_all_tasks(input_base_path: str, output_base_path: str):
             print(f"  - {task['file']} ({task['modifications']} changes)")
         if len(tasks_with_mods) > 5:
             print(f"  ... and {len(tasks_with_mods) - 5} more")
-
 
 if __name__ == "__main__":
     # Example usage
